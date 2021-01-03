@@ -2,6 +2,7 @@
 
 namespace Dachcom\Codeception\Helper;
 
+use Codeception\Exception\ModuleException;
 use Codeception\Lib\ModuleContainer;
 use Codeception\Module;
 
@@ -22,7 +23,7 @@ class PimcoreBundleCore extends Module
     /**
      * @param array $settings
      *
-     * @throws \Codeception\Exception\ModuleException
+     * @throws ModuleException
      */
     public function _beforeSuite($settings = [])
     {
@@ -36,15 +37,15 @@ class PimcoreBundleCore extends Module
     /**
      * @param $settings
      *
-     * @throws \Codeception\Exception\ModuleException
+     * @throws ModuleException
      */
     private function installBundle($settings)
     {
         /** @var PimcoreCore $pimcoreModule */
         $pimcoreModule = $this->getModule('\\' . PimcoreCore::class);
 
-        $bundleName = getenv('DACHCOM_BUNDLE_NAME');
-        $installerClass = getenv('DACHCOM_BUNDLE_INSTALLER_CLASS');
+        $bundleName = getenv('TEST_BUNDLE_NAME');
+        $installerClass = getenv('TEST_BUNDLE_INSTALLER_CLASS');
 
         if ($installerClass === false) {
             return;

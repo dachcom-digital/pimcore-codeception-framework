@@ -23,8 +23,8 @@ class TestAppKernel extends Kernel
     {
         $collection->addBundle(new WebProfilerBundle());
 
-        $bundleClass = getenv('DACHCOM_BUNDLE_CLASS');
-        $collection->addBundle(new $bundleClass());
+        $bundleNamespace = getenv('TEST_BUNDLE_NAMESPACE');
+        $collection->addBundle(new $bundleNamespace());
 
         if (class_exists('\\AppBundle\\AppBundle')) {
             $collection->addBundle(new \AppBundle\AppBundle());
