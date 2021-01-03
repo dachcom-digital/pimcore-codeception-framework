@@ -14,7 +14,6 @@ $bundleTestPath = getenv('TEST_BUNDLE_TEST_DIR');
 define('PIMCORE_KERNEL_CLASS', '\Dachcom\Codeception\App\TestAppKernel');
 define('PIMCORE_TEST', true);
 
-
 Bootstrap::setProjectRoot();
 Bootstrap::bootstrap();
 

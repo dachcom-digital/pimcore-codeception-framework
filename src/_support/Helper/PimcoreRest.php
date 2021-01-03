@@ -1,6 +1,6 @@
 <?php
 
-namespace DachcomBundle\Test\Helper;
+namespace Dachcom\Codeception\Helper;
 
 use Pimcore\Tests\Helper\PimcoreRest as PimcoreCoreRest;
 
