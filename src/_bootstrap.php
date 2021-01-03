@@ -14,6 +14,9 @@ $bundleTestPath = getenv('TEST_BUNDLE_TEST_DIR');
 define('PIMCORE_KERNEL_CLASS', '\Dachcom\Codeception\App\TestAppKernel');
 define('PIMCORE_TEST', true);
 
+# we need the real asset directory to also test asset protection via acceptance tests!
+define('PIMCORE_ASSET_DIRECTORY', PIMCORE_PROJECT_ROOT . '/web/var/assets');
+
 Bootstrap::setProjectRoot();
 Bootstrap::bootstrap();
 

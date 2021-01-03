@@ -39,7 +39,7 @@ class PimcoreBundleCore extends Module
      *
      * @throws ModuleException
      */
-    private function installBundle($settings)
+    protected function installBundle($settings)
     {
         /** @var PimcoreCore $pimcoreModule */
         $pimcoreModule = $this->getModule('\\' . PimcoreCore::class);

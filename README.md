@@ -1,7 +1,7 @@
 # Pimcore Codeception Framework
 
 This Packages allows you to create fast and simple testing environments. 
-It's also used by all pimcore Bundles created by [DACHCOM.DIGITAL](https://github.com/dachcom-digital).
+It's also used by all pimcore Bundles created by [DACHCOM.DIGITAL](https://github.com/dachcom-digital?q=pimcore-).
 
 ## Configuration
 All test files needs to be stored in `/tests`.
