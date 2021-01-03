@@ -409,14 +409,14 @@ class PimcoreBackend extends Module
      * @param string $name
      *
      * @return ClassDefinition
-     * @throws \Codeception\Exception\ModuleException
+     * @throws ModuleException
      */
     public function haveAPimcoreClass(string $name = 'TestClass')
     {
         $cm = $this->getClassManager();
 
-        $bundleClass = getenv('DACHCOM_BUNDLE_HOME');
-        $path = $bundleClass . '/_etc/config/bundle/pimcore';
+        $bundleClass = getenv('TEST_BUNDLE_TEST_DIR');
+        $path = sprintf('%s/_etc/classes', $bundleClass);
 
         $class = $cm->setupClass($name, sprintf('%s/%s.json', $path, $name));
         $this->assertInstanceOf(ClassDefinition::class, $class);

@@ -53,7 +53,7 @@ class PimcoreBundleCore extends Module
 
         $this->debug(sprintf('[%s] Running installer...', strtoupper($bundleName)));
 
-        // install dachcom bundle
+        // install bundle
         $installer = $pimcoreModule->getContainer()->get($installerClass);
         $installer->install();
     }
