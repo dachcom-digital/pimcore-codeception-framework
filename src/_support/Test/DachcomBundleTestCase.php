@@ -2,14 +2,16 @@
 
 namespace Dachcom\Codeception\Test;
 
+use Codeception\Exception\ModuleException;
 use Dachcom\Codeception\Helper\PimcoreCore;
 use Pimcore\Tests\Test\TestCase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 abstract class DachcomBundleTestCase extends TestCase
 {
     /**
-     * @return \Symfony\Component\DependencyInjection\ContainerInterface
-     * @throws \Codeception\Exception\ModuleException
+     * @return ContainerInterface
+     * @throws ModuleException
      */
     protected function getContainer()
     {
@@ -18,7 +20,7 @@ abstract class DachcomBundleTestCase extends TestCase
 
     /**
      * @return PimcoreCore
-     * @throws \Codeception\Exception\ModuleException
+     * @throws ModuleException
      */
     protected function getPimcoreBundle()
     {
