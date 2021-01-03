@@ -201,7 +201,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         /** @var Session $session */
         $session = $this->pimcoreCore->getContainer()->get('session');
 
-        $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
+        $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
         $this->pimcoreCore->getContainer()->get('security.token_storage')->setToken($token);
 
         $session->set('_security_' . $firewallName, serialize($token));
