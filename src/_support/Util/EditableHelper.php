@@ -106,21 +106,33 @@ class EditableHelper
      */
     public static function generateEditableConfiguration(string $name, string $type, array $options, $data = null)
     {
-        $dotSuffix = VersionHelper::pimcoreVersionIsGreaterOrEqualThan('5.5.0') ? '_' : '.';
-        $colonSuffix = VersionHelper::pimcoreVersionIsGreaterOrEqualThan('5.5.0') ? '_' : ':';
-        $prettyJson = VersionHelper::pimcoreVersionIsGreaterOrEqualThan('5.5.4');
-
         $editableConfig = [
-            'id'        => sprintf('pimcore_editable_%s%s1%s%s', self::AREA_TEST_NAMESPACE, $colonSuffix, $dotSuffix, $name),
-            'name'      => sprintf('%s:1.%s', self::AREA_TEST_NAMESPACE, $name),
-            'realName'  => $name,
-            'options'   => $options,
-            'data'      => $data,
-            'type'      => $type,
-            'inherited' => false,
+            'id'       => sprintf('pimcore_editable_%s%s1%s%s', self::AREA_TEST_NAMESPACE, '_', '_', $name),
+            'name'     => sprintf('%s:1.%s', self::AREA_TEST_NAMESPACE, $name),
+            'realName' => $name
         ];
 
-        $data = sprintf('editableConfigurations.push(%s);', json_encode($editableConfig, ($prettyJson ? JSON_PRETTY_PRINT : JSON_ERROR_NONE)));
+        if (VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0')) {
+            $configName = 'editableDefinitions';
+            $editableConfig = array_merge($editableConfig, [
+                'config'      => $options,
+                'data'        => is_int($data) ? (string) $data : $data,
+                'type'        => $type,
+                'inherited'   => false,
+                'inDialogBox' => null
+            ]);
+
+        } else {
+            $configName = 'editableConfigurations';
+            $editableConfig = array_merge($editableConfig, [
+                'options'   => $options,
+                'data'      => is_int($data) ? (string) $data : $data,
+                'type'      => $type,
+                'inherited' => false
+            ]);
+        }
+
+        $data = sprintf('%s.push(%s);', $configName, json_encode($editableConfig, JSON_PRETTY_PRINT));
 
         return $data;
     }

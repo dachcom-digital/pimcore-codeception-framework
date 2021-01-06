@@ -18,6 +18,7 @@ use Pimcore\Model\Redirect;
 use Pimcore\Model\Site;
 use Pimcore\Model\Staticroute;
 use Pimcore\Model\Tool\Email\Log;
+use Pimcore\Model\Translation\Website;
 use Pimcore\Tests\Helper\ClassManager;
 use Pimcore\Tests\Util\TestHelper;
 use Pimcore\Model\Document;
@@ -145,6 +146,9 @@ class PimcoreBackend extends Module
             Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating email. message was: ' . $e->getMessage()));
             return null;
         }
+
+        // needed?
+        //\Pimcore\Cache\Runtime::set(sprintf('document_%s', $document->getId()), null);
 
         $this->assertInstanceOf(Document\Email::class, Document\Email::getById($document->getId()));
 
@@ -434,13 +438,18 @@ class PimcoreBackend extends Module
             $document->setElements($editables);
         }
 
+        if (method_exists($document, 'setMissingRequiredEditable')) {
+            $document->setMissingRequiredEditable(false);
+        }
+
         try {
             $document->save();
         } catch (\Exception $e) {
             Debug::debug(sprintf('[TEST BUNDLE ERROR] error while adding editables to document. message was: ' . $e->getMessage()));
         }
 
-        \Pimcore::collectGarbage();
+        //\Pimcore::collectGarbage();
+        \Pimcore\Cache\Runtime::set(sprintf('document_%s', $document->getId()), null);
 
         $this->assertCount(count($editables), VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0') ? $document->getEditables() : $document->getElements());
     }
@@ -472,13 +481,18 @@ class PimcoreBackend extends Module
             $document->setElements($editables);
         }
 
+        if (method_exists($document, 'setMissingRequiredEditable')) {
+            $document->setMissingRequiredEditable(false);
+        }
+
         try {
             $document->save();
         } catch (\Exception $e) {
             Debug::debug(sprintf('[TEST BUNDLE ERROR] error while adding area element to document. message was: ' . $e->getMessage()));
         }
 
-        \Pimcore::collectGarbage();
+        //\Pimcore::collectGarbage();
+        \Pimcore\Cache\Runtime::set(sprintf('document_%s', $document->getId()), null);
 
         $this->assertCount(count($editables), VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0') ? $document->getEditables() : $document->getElements());
     }
@@ -666,6 +680,33 @@ class PimcoreBackend extends Module
     }
 
     /**
+     * Actor Function to generate a translation for website catalog
+     *
+     * @param string $key
+     * @param string $translation
+     * @param string $language
+     *
+     * @return Website|null
+     */
+    public function haveAFrontendTranslatedKey(string $key, string $translation, string $language)
+    {
+        $t = null;
+
+        try {
+            /** @var Translator $translator */
+            $t = Website::getByKey($key, true);
+            $t->addTranslation($language, $translation);
+            $t->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[FORMBUILDER ERROR] error while creating translation. message was: ' . $e->getMessage()));
+        }
+
+        $this->assertInstanceOf(Website::class, $t);
+
+        return $t;
+    }
+
+    /**
      * Actor Function to generate a single static route.
      *
      * @param string $name
@@ -813,7 +854,7 @@ class PimcoreBackend extends Module
      * @return Document\Page
      * @throws \Exception
      */
-    public function generatePageDocument($key = 'test-page', $params = [], $locale = 'en')
+    public function generatePageDocument($key = 'test-page', $params = [], $locale = null)
     {
         if (!isset($params['controller'])) {
             $params['controller'] = '@AppBundle\Controller\DefaultController';
@@ -853,7 +894,7 @@ class PimcoreBackend extends Module
      * @return null|Document\Snippet
      * @throws \Exception
      */
-    public function generateSnippet($key = 'test-snippet', $params = [], $locale = 'en')
+    public function generateSnippet($key = 'test-snippet', $params = [], $locale = null)
     {
         $document = new Document\Snippet();
 
@@ -884,7 +925,7 @@ class PimcoreBackend extends Module
      *
      * @return Document\Email
      */
-    public function generateEmailDocument($key = 'test-email', array $params = [], $locale = 'en')
+    public function generateEmailDocument($key = 'test-email', array $params = [], $locale = null)
     {
         $documentKey = uniqid(sprintf('%s-', $key));
 
@@ -897,6 +938,7 @@ class PimcoreBackend extends Module
         $document->setPublished(true);
 
         $document->setKey($documentKey);
+        $document->setProperty('test_identifier', 'text', $documentKey, false, false);
 
         if ($locale !== null) {
             $document->setProperty('language', 'text', $locale, false, 1);

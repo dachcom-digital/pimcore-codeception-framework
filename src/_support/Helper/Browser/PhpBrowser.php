@@ -8,6 +8,8 @@ use Codeception\Exception\ModuleException;
 use Dachcom\Codeception\Helper\PimcoreCore;
 use Dachcom\Codeception\Helper\PimcoreUser;
 use Dachcom\Codeception\Util\EditableHelper;
+use Dachcom\Codeception\Util\VersionHelper;
+use Pimcore\Mail;
 use Pimcore\Model\AbstractModel;
 use Pimcore\Model\Document\Email;
 use Pimcore\Model\User;
@@ -260,6 +262,137 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     }
 
     /**
+     * Actor Function to see if given email has been with specified address
+     * Only works with PhpBrowser (Symfony Client)
+     *
+     * @param string $submissionType
+     * @param Email  $email
+     *
+     * @throws \ReflectionException
+     */
+    public function seeEmailSubmissionType(string $submissionType, Email $email)
+    {
+        $collectedMessages = $this->getCollectedEmails($email);
+
+        /** @var Mail $message */
+        foreach ($collectedMessages as $message) {
+            if (method_exists($message, 'getBodyContentType')) {
+                $contentType = $message->getBodyContentType();
+            } else {
+                // swift mailer < 6.0
+                $reflectionClass = new \ReflectionClass($message);
+                $contentTypeProperty = $reflectionClass->getProperty('_userContentType');
+                $contentTypeProperty->setAccessible(true);
+                $contentType = $contentTypeProperty->getValue($message);
+            }
+            $this->assertEquals($submissionType, $contentType);
+        }
+    }
+
+    /**
+     * Actor Function to see if given string is in real submitted mail body
+     *
+     * @param string $string
+     * @param Email  $email
+     */
+    public function seeInSubmittedEmailBody(string $string, Email $email)
+    {
+        $collectedMessages = $this->getCollectedEmails($email);
+
+        /** @var Mail $message */
+        foreach ($collectedMessages as $message) {
+            $this->assertContains($string, is_null($message->getBody()) ? '' : $message->getBody());
+        }
+    }
+
+    /**
+     * Actor Function to see if given string is in real submitted mail body
+     *
+     * @param string $string
+     * @param Email  $email
+     */
+    public function dontSeeInSubmittedEmailBody(string $string, Email $email)
+    {
+        $collectedMessages = $this->getCollectedEmails($email);
+
+        /** @var Mail $message */
+        foreach ($collectedMessages as $message) {
+            $this->assertNotContains($string, is_null($message->getBody()) ? '' : $message->getBody());
+        }
+    }
+
+    /**
+     * Actor Function to see if message has children
+     *
+     * @param Email $email
+     */
+    public function haveSubmittedEmailChildren(Email $email)
+    {
+        $collectedMessages = $this->getCollectedEmails($email);
+
+        /** @var Mail $message */
+        foreach ($collectedMessages as $message) {
+            $this->assertGreaterThan(0, count($message->getChildren()));
+        }
+    }
+
+    /**
+     * Actor Function to see if message has no children
+     *
+     * @param Email $email
+     */
+    public function dontHaveSubmittedEmailChildren(Email $email)
+    {
+        $collectedMessages = $this->getCollectedEmails($email);
+
+        /** @var Mail $message */
+        foreach ($collectedMessages as $message) {
+            $this->assertEquals(0, count($message->getChildren()));
+        }
+    }
+
+    /**
+     * Actor Function to see if given string is in real submitted child body
+     *
+     * @param string $string
+     * @param Email  $email
+     */
+    public function seeInSubmittedEmailChildrenBody(string $string, Email $email)
+    {
+        $collectedMessages = $this->getCollectedEmails($email);
+
+        /** @var Mail $message */
+        foreach ($collectedMessages as $message) {
+
+            $this->assertGreaterThan(0, count($message->getChildren()));
+
+            /** @var \Swift_Mime_SimpleMimeEntity $child */
+            foreach ($message->getChildren() as $child) {
+                $this->assertContains($string, is_null($child->getBody()) ? '' : $child->getBody());
+            }
+        }
+    }
+
+    /**
+     * Actor Function to see if given string is not in real submitted child body
+     *
+     * @param string $string
+     * @param Email  $email
+     */
+    public function dontSeeInSubmittedEmailChildrenBody(string $string, Email $email)
+    {
+        $collectedMessages = $this->getCollectedEmails($email);
+
+        /** @var Mail $message */
+        foreach ($collectedMessages as $message) {
+            /** @var \Swift_Mime_SimpleMimeEntity $child */
+            foreach ($message->getChildren() as $child) {
+                $this->assertNotContains($string, is_null($child->getBody()) ? '' : $child->getBody());
+            }
+        }
+    }
+
+    /**
      * Actor Function to login in FrontEnd
      *
      * @param UserInterface $user
@@ -319,6 +452,12 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         $token = new UsernamePasswordToken($user, null, $firewallName, $pimcoreUser->getRoles());
         $this->pimcoreCore->getContainer()->get('security.token_storage')->setToken($token);
 
+        if (VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.5.0')) {
+            if ($session->isStarted()) {
+                $session->save();
+            }
+        }
+
         \Pimcore\Tool\Session::useSession(function (AttributeBagInterface $adminSession) use ($pimcoreUser, $session) {
             $session->setId(\Pimcore\Tool\Session::getSessionId());
             $adminSession->set('user', $pimcoreUser);
@@ -348,51 +487,6 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     {
         $params['csrfToken'] = self::PIMCORE_ADMIN_CSRF_TOKEN_NAME;
         $this->pimcoreCore->sendAjaxPostRequest($url, $params);
-    }
-
-    /**
-     * @param Email $email
-     *
-     * @return array
-     */
-    protected function getCollectedEmails(Email $email)
-    {
-        $this->assertInstanceOf(Email::class, $email);
-
-        /** @var Profiler $profiler */
-        $profiler = $this->pimcoreCore->_getContainer()->get('profiler');
-
-        $tokens = $profiler->find('', '', 1, 'POST', '', '');
-        if (count($tokens) === 0) {
-            throw new \RuntimeException('No profile found. Is the profiler data collector enabled?');
-        }
-
-        $token = $tokens[0]['token'];
-        /** @var Profile $profile */
-        $profile = $profiler->loadProfile($token);
-
-        if (!$profile instanceof Profile) {
-            throw new \RuntimeException(sprintf('Profile with token "%s" not found.', $token));
-        }
-
-        /** @var MessageDataCollector $mailCollector */
-        $mailCollector = $profile->getCollector('swiftmailer');
-
-        $this->assertGreaterThan(0, $mailCollector->getMessageCount());
-
-        $collectedMessages = $mailCollector->getMessages();
-
-        $emails = [];
-        /** @var \Pimcore\Mail $message */
-        foreach ($collectedMessages as $message) {
-            if ($email->getProperty('test_identifier') !== $message->getDocument()->getProperty('test_identifier')) {
-                continue;
-            }
-            $emails[] = $message;
-        }
-
-        return $emails;
-
     }
 
     /**
@@ -505,5 +599,49 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         foreach ($properties as $property) {
             $this->assertTrue($requestCollector->getRequestAttributes()->has($property), sprintf('"%s" not found in request collector.', $property));
         }
+    }
+
+    /**
+     * @param Email $email
+     *
+     * @return array
+     */
+    protected function getCollectedEmails(Email $email)
+    {
+        $this->assertInstanceOf(Email::class, $email);
+
+        /** @var Profiler $profiler */
+        $profiler = $this->pimcoreCore->_getContainer()->get('profiler');
+
+        $tokens = $profiler->find('', '', 1, 'POST', '', '');
+        if (count($tokens) === 0) {
+            throw new \RuntimeException('No profile found. Is the profiler data collector enabled?');
+        }
+
+        $token = $tokens[0]['token'];
+        /** @var Profile $profile */
+        $profile = $profiler->loadProfile($token);
+
+        if (!$profile instanceof Profile) {
+            throw new \RuntimeException(sprintf('Profile with token "%s" not found.', $token));
+        }
+
+        /** @var MessageDataCollector $mailCollector */
+        $mailCollector = $profile->getCollector('swiftmailer');
+
+        $this->assertGreaterThan(0, $mailCollector->getMessageCount());
+
+        $collectedMessages = $mailCollector->getMessages();
+
+        $emails = [];
+        /** @var Mail $message */
+        foreach ($collectedMessages as $message) {
+            if ($email->getProperty('test_identifier') !== $message->getDocument()->getProperty('test_identifier')) {
+                continue;
+            }
+            $emails[] = $message;
+        }
+
+        return $emails;
     }
 }
