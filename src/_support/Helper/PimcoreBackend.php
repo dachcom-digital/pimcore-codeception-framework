@@ -6,6 +6,7 @@ use Codeception\Exception\ModuleException;
 use Codeception\Module;
 use Codeception\TestInterface;
 use Codeception\Util\Debug;
+use Dachcom\Codeception\Util\EditableHelper;
 use Dachcom\Codeception\Util\FileGeneratorHelper;
 use Dachcom\Codeception\Util\SystemHelper;
 use Dachcom\Codeception\Util\VersionHelper;
@@ -74,15 +75,14 @@ class PimcoreBackend extends Module
      *
      * @param string $key
      * @param array  $params
-     * @param array  $elements
+     * @param string $locale
      *
      * @return Document\Snippet
      * @throws \Exception
-     *
      */
-    public function haveASnippet($key = 'bundle-snippet-test', $params = [], $elements = [])
+    public function haveASnippet($key = 'bundle-snippet-test', $params = [], $locale = 'en')
     {
-        $document = $this->generateSnippet($key, $params, $elements);
+        $document = $this->generateSnippet($key, $params, $locale);
 
         try {
             $document->save();
@@ -100,14 +100,14 @@ class PimcoreBackend extends Module
      * Actor Function to create a mail document
      *
      * @param string $key
-     * @param array  $mailParams
+     * @param array  $params
      * @param string $locale
      *
      * @return Document\Email
      */
-    public function haveAEmail($key = 'bundle-email-test', array $mailParams = [], $locale = 'en')
+    public function haveAEmail($key = 'bundle-email-test', array $params = [], $locale = 'en')
     {
-        $document = $mailTemplate = $this->generateEmailDocument($key, $mailParams, $locale);
+        $document = $mailTemplate = $this->generateEmailDocument($key, $params, $locale);
 
         try {
             $document->save();
@@ -126,19 +126,14 @@ class PimcoreBackend extends Module
      *
      * @param string $objectType
      * @param string $key
-     * @param null   $parent
+     * @param array  $params
      *
      * @return DataObject\Concrete
      * @throws \Exception
      */
-    public function haveAPimcoreObject(string $objectType, $key = 'bundle-object-test', $parent = null)
+    public function haveAPimcoreObject(string $objectType, $key = 'bundle-object-test', array $params = [])
     {
-        $type = sprintf('\\Pimcore\\Model\\DataObject\\%s', $objectType);
-        $object = TestHelper::createEmptyObject($key, true, false, $type);
-
-        if ($parent !== null) {
-            $object->setParent($parent);
-        }
+        $object = $this->generateObject($objectType, $key, $params);
 
         try {
             $object->save();
@@ -147,7 +142,7 @@ class PimcoreBackend extends Module
             return null;
         }
 
-        $this->assertInstanceOf($type, DataObject::getById($object->getId()));
+        $this->assertInstanceOf(get_class($object), DataObject::getById($object->getId()));
 
         return $object;
     }
@@ -202,13 +197,23 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to place a area on a document
+     * @param Document $document
+     * @param array    $editables
      *
-     * @param Document\Page $document
-     * @param array         $editables
+     * @throws \Exception
      */
-    public function seeAnAreaElementPlacedOnDocument(Document\Page $document, array $editables = [])
+    public function seeEditablesPlacedOnDocument(Document $document, array $editables)
     {
+        if (!$document instanceof Document\Snippet || !$document instanceof Document\Page) {
+            throw new ModuleException($this, sprintf('%s must be instance of %s or %s.', $document->getFullPath(), Document\Snippet::class, Document\Page::class));
+        }
+
+        try {
+            $editables = EditableHelper::generateEditables($editables);
+        } catch (\Throwable $e) {
+            throw new ModuleException($this, sprintf('editable generator error: %s', $e->getMessage()));
+        }
+
         if (VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0')) {
             $document->setEditables($editables);
         } else {
@@ -218,7 +223,44 @@ class PimcoreBackend extends Module
         try {
             $document->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving document. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while adding editables to document. message was: ' . $e->getMessage()));
+        }
+
+        $this->assertCount(count($editables), VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0') ? $document->getEditables() : $document->getElements());
+    }
+
+    /**
+     * Actor Function to place a area on a document
+     *
+     * @param Document $document
+     * @param string   $areaName
+     * @param array    $editables
+     *
+     * @throws ModuleException
+     * @deprecated
+     */
+    public function seeAnAreaElementPlacedOnDocument(Document $document, string $areaName, array $editables = [])
+    {
+        if (!$document instanceof Document\Snippet && !$document instanceof Document\Page) {
+            throw new ModuleException($this, sprintf('%s must be instance of %s or %s.', $document->getFullPath(), Document\Snippet::class, Document\Page::class));
+        }
+
+         try {
+            $editables = EditableHelper::generateEditablesForArea($areaName, $editables);
+        } catch (\Throwable $e) {
+            throw new ModuleException($this, sprintf('area generator error: %s', $e->getMessage()));
+        }
+
+        if (VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0')) {
+            $document->setEditables($editables);
+        } else {
+            $document->setElements($editables);
+        }
+
+        try {
+            $document->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while adding area element to document. message was: ' . $e->getMessage()));
         }
 
         $this->assertCount(count($editables), VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0') ? $document->getEditables() : $document->getElements());
@@ -473,7 +515,7 @@ class PimcoreBackend extends Module
      * @return Document\Page
      * @throws \Exception
      */
-    protected function generatePageDocument($key = 'bundle-test', $params = [], $locale = 'en')
+    protected function generatePageDocument($key = 'test-page', $params = [], $locale = 'en')
     {
         if (!isset($params['action'])) {
             $params['action'] = 'default';
@@ -498,13 +540,12 @@ class PimcoreBackend extends Module
      *
      * @param string $key
      * @param array  $params
-     * @param array  $editables
      * @param string $locale
      *
      * @return null|Document\Snippet
      * @throws \Exception
      */
-    protected function generateSnippet($key, $params = [], $editables = [], $locale = 'en')
+    protected function generateSnippet($key = 'test-snippet', $params = [], $locale = 'en')
     {
         $document = new Document\Snippet();
 
@@ -513,19 +554,12 @@ class PimcoreBackend extends Module
         $document->setUserOwner(1);
         $document->setUserModification(1);
         $document->setCreationDate(time());
-        $document->setKey($key);
         $document->setPublished(true);
+
+        $document->setKey($key);
         $document->setProperty('language', 'text', $locale, false, 1);
 
         $this->assignMethods($document, $params);
-
-        if (count($editables) > 0) {
-            if (VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0')) {
-                $document->setEditables($editables);
-            } else {
-                $document->setElements($editables);
-            }
-        }
 
         return $document;
     }
@@ -549,6 +583,7 @@ class PimcoreBackend extends Module
         $document->setUserOwner(1);
         $document->setUserModification(1);
         $document->setCreationDate(time());
+        $document->setPublished(true);
 
         $document->setKey($documentKey);
         $document->setProperty('language', 'text', $locale, false, 1);
@@ -595,6 +630,32 @@ class PimcoreBackend extends Module
     }
 
     /**
+     * API Function to create a object
+     *
+     * @param string $objectType
+     * @param string $key
+     * @param array  $params
+     *
+     * @return DataObject\Concrete
+     */
+    protected function generateObject(string $objectType, $key = 'test-object', array $params = [])
+    {
+        $type = sprintf('\\Pimcore\\Model\\DataObject\\%s', $objectType);
+        $object = TestHelper::createEmptyObject($key, true, false, $type);
+
+        $object->setKey($key);
+
+        if (isset($params['properties'])) {
+            $object->setProperties($params['properties']);
+            unset($params['properties']);
+        }
+
+        $this->assignMethods($object, $params);
+
+        return $object;
+    }
+
+    /**
      * @return Container
      * @throws ModuleException
      */
@@ -625,7 +686,7 @@ class PimcoreBackend extends Module
         foreach ($params as $varKey => $varValue) {
             $setter = sprintf('set%s', ucfirst($varKey));
 
-            $this->assertTrue(method_exists($entity, $setter), sprintf('%s method does not exist in entity %s', $setter, get_class($entity)));
+            $this->assertTrue(method_exists($entity, $setter), sprintf('method %s does not exist in entity %s', $setter, get_class($entity)));
 
             $entity->$setter($varValue);
         }

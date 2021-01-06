@@ -7,7 +7,7 @@ use Codeception\Lib;
 use Codeception\Exception\ModuleException;
 use Dachcom\Codeception\Helper\PimcoreCore;
 use Dachcom\Codeception\Helper\PimcoreUser;
-use Dachcom\Codeception\Util\SystemHelper;
+use Dachcom\Codeception\Util\EditableHelper;
 use Pimcore\Model\AbstractModel;
 use Pimcore\Model\Document\Email;
 use Pimcore\Model\User;
@@ -137,7 +137,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
      */
     public function seeAEditableConfiguration(string $name, string $type, array $options, $data = null, $selector = null)
     {
-        $this->pimcoreCore->see(SystemHelper::generateEditableConfiguration($name, $type, $options, $data), $selector);
+        $this->pimcoreCore->see(EditableHelper::generateEditableConfiguration($name, $type, $options, $data), $selector);
     }
 
     /**

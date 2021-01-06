@@ -3,8 +3,8 @@
 namespace Dachcom\Codeception\Helper\Browser;
 
 use Codeception\Module;
+use Dachcom\Codeception\Util\EditableHelper;
 use Dachcom\Codeception\Util\FileGeneratorHelper;
-use Dachcom\Codeception\Util\SystemHelper;
 
 class WebDriver extends Module\WebDriver
 {
@@ -56,6 +56,6 @@ class WebDriver extends Module\WebDriver
      */
     public function seeAEditableConfiguration(string $name, string $type, array $options, $data = null, $selector = null)
     {
-        $this->see(SystemHelper::generateEditableConfiguration($name, $type, $options, $data), $selector);
+        $this->see(EditableHelper::generateEditableConfiguration($name, $type, $options, $data), $selector);
     }
 }

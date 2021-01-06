@@ -69,7 +69,6 @@ class PimcoreCore extends PimcoreCoreModule
 
         $this->kernelHasCustomSuiteConfig = true;
         $this->rebootKernelWithConfiguration($configuration);
-
     }
 
     /**
