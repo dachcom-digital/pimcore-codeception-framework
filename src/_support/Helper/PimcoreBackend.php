@@ -440,6 +440,8 @@ class PimcoreBackend extends Module
             Debug::debug(sprintf('[TEST BUNDLE ERROR] error while adding editables to document. message was: ' . $e->getMessage()));
         }
 
+        \Pimcore::collectGarbage();
+
         $this->assertCount(count($editables), VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0') ? $document->getEditables() : $document->getElements());
     }
 
@@ -451,7 +453,6 @@ class PimcoreBackend extends Module
      * @param array    $editables
      *
      * @throws ModuleException
-     * @deprecated
      */
     public function seeAnAreaElementPlacedOnDocument(Document $document, string $areaName, array $editables = [])
     {
@@ -476,6 +477,8 @@ class PimcoreBackend extends Module
         } catch (\Exception $e) {
             Debug::debug(sprintf('[TEST BUNDLE ERROR] error while adding area element to document. message was: ' . $e->getMessage()));
         }
+
+        \Pimcore::collectGarbage();
 
         $this->assertCount(count($editables), VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0') ? $document->getEditables() : $document->getElements());
     }
@@ -823,6 +826,7 @@ class PimcoreBackend extends Module
         $document = TestHelper::createEmptyDocumentPage('', false);
 
         $document->setKey($key);
+        $document->setPublished(true);
         $document->setProperty('navigation_title', 'text', $key);
         $document->setProperty('navigation_name', 'text', $key);
 
@@ -930,6 +934,7 @@ class PimcoreBackend extends Module
     {
         $link = new Document\Link();
         $link->setKey($key);
+        $link->setPublished(true);
         $link->setParentId(1);
         $link->setLinktype('internal');
         $link->setInternalType('document');
@@ -966,6 +971,7 @@ class PimcoreBackend extends Module
     {
         $hardlink = new Document\Hardlink();
         $hardlink->setKey($key);
+        $hardlink->setPublished(true);
         $hardlink->setParentId(1);
         $hardlink->setSourceId($source->getId());
         $hardlink->setPropertiesFromSource(true);
@@ -1001,6 +1007,7 @@ class PimcoreBackend extends Module
         $document = TestHelper::createEmptyDocumentPage($domain, false);
         $document->setProperty('navigation_title', 'text', $domain);
         $document->setProperty('navigation_name', 'text', $domain);
+        $document->setPublished(true);
 
         $document->setKey(str_replace('.', '-', $domain));
 
@@ -1074,6 +1081,7 @@ class PimcoreBackend extends Module
         $object = TestHelper::createEmptyObject($key, true, false, $type);
 
         $object->setKey($key);
+        $object->setPublished(true);
 
         if (isset($params['properties'])) {
             $object->setProperties($params['properties']);
