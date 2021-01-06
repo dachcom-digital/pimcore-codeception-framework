@@ -10,8 +10,8 @@ use Dachcom\Codeception\Util\FileGeneratorHelper;
 use Dachcom\Codeception\Util\SystemHelper;
 use Dachcom\Codeception\Util\VersionHelper;
 use Pimcore\Model\Asset;
-use Pimcore\Model\DataObject\ClassDefinition;
-use Pimcore\Model\DataObject\Concrete;
+use Pimcore\Model\DataObject;
+use Pimcore\Model\Element\ElementInterface;
 use Pimcore\Model\Staticroute;
 use Pimcore\Model\Tool\Email\Log;
 use Pimcore\Tests\Helper\ClassManager;
@@ -128,7 +128,7 @@ class PimcoreBackend extends Module
      * @param string $key
      * @param null   $parent
      *
-     * @return Concrete
+     * @return DataObject\Concrete
      * @throws \Exception
      */
     public function haveAPimcoreObject(string $objectType, $key = 'bundle-object-test', $parent = null)
@@ -147,7 +147,7 @@ class PimcoreBackend extends Module
             return null;
         }
 
-        $this->assertInstanceOf($type, $object);
+        $this->assertInstanceOf($type, DataObject::getById($object->getId()));
 
         return $object;
     }
@@ -172,7 +172,7 @@ class PimcoreBackend extends Module
             return null;
         }
 
-        $this->assertInstanceOf(Asset::class, $asset);
+        $this->assertInstanceOf(Asset::class, Asset::getById($asset->getId()));
 
         return $asset;
     }
@@ -408,7 +408,7 @@ class PimcoreBackend extends Module
      *
      * @param string $name
      *
-     * @return ClassDefinition
+     * @return DataObject\ClassDefinition
      * @throws ModuleException
      */
     public function haveAPimcoreClass(string $name = 'TestClass')
@@ -419,7 +419,7 @@ class PimcoreBackend extends Module
         $path = sprintf('%s/_etc/classes', $bundleClass);
 
         $class = $cm->setupClass($name, sprintf('%s/%s.json', $path, $name));
-        $this->assertInstanceOf(ClassDefinition::class, $class);
+        $this->assertInstanceOf(DataObject\ClassDefinition::class, $class);
 
         return $class;
     }
@@ -488,11 +488,7 @@ class PimcoreBackend extends Module
         $document->setKey($key);
         $document->setProperty('language', 'text', $locale, false, 1);
 
-        if (count($params) > 0) {
-            foreach ($params as $varKey => $varValue) {
-                $document->setObjectVar($varKey, $varValue);
-            }
-        }
+        $this->assignMethods($document, $params);
 
         return $document;
     }
@@ -521,11 +517,7 @@ class PimcoreBackend extends Module
         $document->setPublished(true);
         $document->setProperty('language', 'text', $locale, false, 1);
 
-        if (count($params) > 0) {
-            foreach ($params as $varKey => $varValue) {
-                $document->setObjectVar($varKey, $varValue);
-            }
-        }
+        $this->assignMethods($document, $params);
 
         if (count($editables) > 0) {
             if (VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0')) {
@@ -574,11 +566,7 @@ class PimcoreBackend extends Module
             unset($params['properties']);
         }
 
-        if (count($params) > 0) {
-            foreach ($params as $varKey => $varValue) {
-                $document->setObjectVar($varKey, $varValue);
-            }
-        }
+        $this->assignMethods($document, $params);
 
         return $document;
     }
@@ -601,11 +589,7 @@ class PimcoreBackend extends Module
             unset($params['properties']);
         }
 
-        if (count($params) > 0) {
-            foreach ($params as $varKey => $varValue) {
-                $asset->setObjectVar($varKey, $varValue);
-            }
-        }
+        $this->assignMethods($asset, $params);
 
         return $asset;
     }
@@ -626,5 +610,24 @@ class PimcoreBackend extends Module
     protected function getClassManager()
     {
         return $this->getModule('\\' . ClassManager::class);
+    }
+
+    /**
+     * @param ElementInterface $entity
+     * @param array            $params
+     */
+    protected function assignMethods($entity, array $params)
+    {
+        if (count($params) === 0) {
+            return;
+        }
+
+        foreach ($params as $varKey => $varValue) {
+            $setter = sprintf('set%s', ucfirst($varKey));
+
+            $this->assertTrue(method_exists($entity, $setter), sprintf('%s method does not exist in entity %s', $setter, get_class($entity)));
+
+            $entity->$setter($varValue);
+        }
     }
 }
