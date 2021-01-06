@@ -13,6 +13,7 @@ use Pimcore\Model\Document\Email;
 use Pimcore\Model\User;
 use Symfony\Bundle\SwiftmailerBundle\DataCollector\MessageDataCollector;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
+use Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\DataCollector\RequestDataCollector;
 use Symfony\Component\HttpKernel\Kernel;
@@ -75,6 +76,68 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     }
 
     /**
+     *  Actor Function to see a page with given locale
+     *
+     * @param string       $url
+     * @param string|array $locale
+     */
+    public function amOnPageWithLocale($url, $locale)
+    {
+        $parsedLocale = [];
+        if (is_string($locale)) {
+            $parsedLocale[] = $locale;
+            if (strpos($locale, '_') !== false) {
+                // add language ISO as fallback
+                $parsedLocale[] = substr($locale, 0, 2);
+            }
+        } else {
+            $parsedLocale = $locale;
+        }
+
+        $this->pimcoreCore->_loadPage('GET', $url, [], [], ['HTTP_ACCEPT_LANGUAGE' => join(',', $parsedLocale)]);
+    }
+
+    /**
+     *  Actor Function to see a page with given locale and country
+     *
+     * @param string       $url
+     * @param string|array $locale
+     * @param string       $country
+     *
+     * @throws \Exception
+     */
+    public function amOnPageWithLocaleAndCountry($url, $locale, $country)
+    {
+        $countryIps = [
+            'hongKong'    => '21 59.148.0.0',
+            'belgium'     => '31.5.255.255',
+            'austria'     => '194.166.128.22',
+            'germany'     => '2.175.255.255',
+            'hungary'     => '188.142.192.35',
+            'switzerland' => '5.148.191.255',
+            'france'      => '46.162.191.255',
+            'us'          => '52.33.249.128',
+        ];
+
+        if (!key_exists($country, $countryIps)) {
+            throw new \Exception(sprintf('%s is not a valid test country', $country));
+        }
+
+        $parsedLocale = [];
+        if (is_string($locale)) {
+            $parsedLocale[] = $locale;
+            if (strpos($locale, '_') !== false) {
+                // add language ISO as fallback
+                $parsedLocale[] = substr($locale, 0, 2);
+            }
+        } else {
+            $parsedLocale = $locale;
+        }
+
+        $this->pimcoreCore->_loadPage('POST', $url, [], [], ['HTTP_ACCEPT_LANGUAGE' => join(',', $parsedLocale), 'HTTP_CLIENT_IP' => $countryIps[$country]]);
+    }
+
+    /**
      * Actor Function to see if Link is a download file
      *
      * @param AbstractModel $element
@@ -124,6 +187,17 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     {
         $path = $this->pimcoreCore->getContainer()->get('router')->generate($routeName, $args, false);
         $this->pimcoreCore->amOnPage($path);
+    }
+
+    /**
+     * Actor Function to see current uri matches given host
+     *
+     * @param $host
+     */
+    public function seeCurrentHostEquals($host)
+    {
+        $server = $this->pimcoreCore->client->getHistory()->current()->getServer();
+        $this->assertEquals($host, $server['HTTP_HOST']);
     }
 
     /**
@@ -334,6 +408,72 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         $expectedUri = sprintf('http://%s%s', $requestServer['HTTP_HOST'], $expectedPath);
 
         $this->assertEquals($expectedUri, $requestUri);
+    }
+
+    /**
+     * Actor Function to see canonical rel in link header
+     */
+    public function seeCanonicalLinkInResponse()
+    {
+        $link = $this->pimcoreCore->client->getInternalResponse()->getHeader('Link');
+
+        $this->assertInternalType('string', $link);
+        $this->assertContains('rel="canonical"', $link);
+    }
+
+    /**
+     * Actor Function to not see canonical rel in link header
+     */
+    public function dontSeeCanonicalLinkInResponse()
+    {
+        $link = $this->pimcoreCore->client->getInternalResponse()->getHeader('Link');
+
+        $this->assertNull($link);
+    }
+
+    /**
+     * Actor Function to see pimcore output cached disabled header
+     *
+     * @param $disabledReasonMessage
+     */
+    public function seePimcoreOutputCacheDisabledHeader($disabledReasonMessage)
+    {
+        $disabledReason = $this->pimcoreCore->client->getInternalResponse()->getHeader('X-Pimcore-Output-Cache-Disable-Reason');
+
+        $this->assertEquals($disabledReasonMessage, $disabledReason);
+    }
+
+    /**
+     * Actor Function to not to see pimcore output cached disabled header
+     */
+    public function dontSeePimcoreOutputCacheDisabledHeader()
+    {
+        $disabledReason = $this->pimcoreCore->client->getInternalResponse()->getHeader('X-Pimcore-Output-Cache-Disable-Reason');
+
+        $this->assertNull($disabledReason);
+    }
+
+    /**
+     * Actor Function to not to see pimcore output cached disabled header
+     */
+    public function seePimcoreOutputCacheDate()
+    {
+        $cacheDateHeader = $this->pimcoreCore->client->getInternalResponse()->getHeader('x-pimcore-cache-date');
+
+        $this->assertNotNull($cacheDateHeader);
+    }
+
+    /**
+     * Actor Function to assert empty session bag
+     *
+     * @param string $bagName
+     */
+    public function seeEmptySessionBag(string $bagName)
+    {
+        /** @var NamespacedAttributeBag $sessionBag */
+        $sessionBag = $this->pimcoreCore->client->getRequest()->getSession()->getBag($bagName);
+
+        $this->assertCount(0, $sessionBag->all());
     }
 
     /**

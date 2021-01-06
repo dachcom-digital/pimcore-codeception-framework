@@ -107,6 +107,37 @@ class PimcoreCore extends PimcoreCoreModule
     }
 
     /**
+     * @param string   $exception
+     * @param string   $message
+     * @param \Closure $callback
+     */
+    public function seeException($exception, $message, \Closure $callback)
+    {
+        $function = function () use ($callback, $exception, $message) {
+            try {
+
+                $callback();
+                return false;
+
+            } catch (\Exception $e) {
+
+                if (get_class($e) === $exception or get_parent_class($e) === $exception) {
+
+                    if (empty($message)) {
+                        return true;
+                    }
+
+                    return $message === $e->getMessage();
+                }
+
+                return false;
+            }
+        };
+
+        $this->assertTrue($function());
+    }
+
+    /**
      * Actor Function to boot symfony with a specific bundle configuration
      *
      * @param string $configuration

@@ -6,6 +6,7 @@ use Codeception\Exception\ModuleException;
 use Codeception\Module;
 use Codeception\TestInterface;
 use Codeception\Util\Debug;
+use Dachcom\Codeception\Helper\Browser\PhpBrowser;
 use Dachcom\Codeception\Util\EditableHelper;
 use Dachcom\Codeception\Util\FileGeneratorHelper;
 use Dachcom\Codeception\Util\SystemHelper;
@@ -13,6 +14,8 @@ use Dachcom\Codeception\Util\VersionHelper;
 use Pimcore\Model\Asset;
 use Pimcore\Model\DataObject;
 use Pimcore\Model\Element\ElementInterface;
+use Pimcore\Model\Redirect;
+use Pimcore\Model\Site;
 use Pimcore\Model\Staticroute;
 use Pimcore\Model\Tool\Email\Log;
 use Pimcore\Tests\Helper\ClassManager;
@@ -55,7 +58,7 @@ class PimcoreBackend extends Module
      * @return Document\Page
      * @throws \Exception
      */
-    public function haveAPageDocument($key = 'bundle-page-test', $params = [], $locale = 'en')
+    public function haveAPageDocument($key = 'bundle-page-test', array $params = [], $locale = null)
     {
         $document = $this->generatePageDocument($key, $params, $locale);
 
@@ -71,16 +74,43 @@ class PimcoreBackend extends Module
     }
 
     /**
+     * Actor Function to create a Child Page Document
+     *
+     * @param Document    $parent
+     * @param string      $key
+     * @param array       $params
+     * @param null|string $locale
+     *
+     * @return Document\Page
+     * @throws \Exception
+     */
+    public function haveASubPageDocument(Document $parent, $key = 'bundle-sub-page-test', array $params = [], $locale = null)
+    {
+        $document = $this->generatePageDocument($key, $params, $locale);
+        $document->setParentId($parent->getId());
+
+        try {
+            $document->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving child document page. message was: ' . $e->getMessage()));
+        }
+
+        $this->assertInstanceOf(Document\Page::class, Document\Page::getById($document->getId()));
+
+        return $document;
+    }
+
+    /**
      * Actor Function to create a Snippet
      *
-     * @param string $key
-     * @param array  $params
-     * @param string $locale
+     * @param string      $key
+     * @param array       $params
+     * @param null|string $locale
      *
      * @return Document\Snippet
      * @throws \Exception
      */
-    public function haveASnippet($key = 'bundle-snippet-test', $params = [], $locale = 'en')
+    public function haveASnippet($key = 'bundle-snippet-test', $params = [], $locale = null)
     {
         $document = $this->generateSnippet($key, $params, $locale);
 
@@ -99,15 +129,15 @@ class PimcoreBackend extends Module
     /**
      * Actor Function to create a mail document
      *
-     * @param string $key
-     * @param array  $params
-     * @param string $locale
+     * @param string      $key
+     * @param array       $params
+     * @param null|string $locale
      *
      * @return Document\Email
      */
-    public function haveAEmail($key = 'bundle-email-test', array $params = [], $locale = 'en')
+    public function haveAEmail($key = 'bundle-email-test', array $params = [], $locale = null)
     {
-        $document = $mailTemplate = $this->generateEmailDocument($key, $params, $locale);
+        $document = $this->generateEmailDocument($key, $params, $locale);
 
         try {
             $document->save();
@@ -119,6 +149,110 @@ class PimcoreBackend extends Module
         $this->assertInstanceOf(Document\Email::class, Document\Email::getById($document->getId()));
 
         return $document;
+    }
+
+    /**
+     * Actor Function to create a link
+     *
+     * @param Document\Page $source
+     * @param string        $key
+     * @param array         $params
+     * @param string        $locale
+     *
+     * @return Document\Link
+     */
+    public function haveALink(Document\Page $source, $key = 'bundle-link-test', array $params = [], $locale = null)
+    {
+        $link = $this->generateLink($source, $key, $params, $locale);
+
+        try {
+            $link->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving link. message was: ' . $e->getMessage()));
+        }
+
+        $this->assertInstanceOf(Document\Link::class, Document\Link::getById($link->getId()));
+
+        return $link;
+    }
+
+    /**
+     * Actor Function to create a link
+     *
+     * @param Document      $parent
+     * @param Document\Page $source
+     * @param string        $key
+     * @param array         $params
+     * @param string        $locale
+     *
+     * @return Document\Link
+     */
+    public function haveASubLink(Document $parent, Document\Page $source, $key = 'bundle-sub-link-test', array $params = [], $locale = null)
+    {
+        $link = $this->generateLink($source, $key, $params, $locale);
+        $link->setParent($parent);
+
+        try {
+            $link->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving sub link. message was: ' . $e->getMessage()));
+        }
+
+        $this->assertInstanceOf(Document\Link::class, Document\Link::getById($link->getId()));
+
+        return $link;
+    }
+
+    /**
+     * Actor Function to create a Hardlink
+     *
+     * @param Document\Page $source
+     * @param string        $key
+     * @param array         $params
+     * @param string        $locale
+     *
+     * @return Document\Hardlink
+     */
+    public function haveAHardLink(Document\Page $source, $key = 'bundle-hardlink-test', array $params = [], $locale = null)
+    {
+        $hardlink = $this->generateHardlink($source, $key, $params, $locale);
+
+        try {
+            $hardlink->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving hardlink. message was: ' . $e->getMessage()));
+        }
+
+        $this->assertInstanceOf(Document\Hardlink::class, Document\Hardlink::getById($hardlink->getId()));
+
+        return $hardlink;
+    }
+
+    /**
+     * Actor Function to create a child Hardlink
+     *
+     * @param Document      $parent
+     * @param Document\Page $source
+     * @param string        $key
+     * @param array         $params
+     * @param string        $locale
+     *
+     * @return Document\Hardlink
+     */
+    public function haveASubHardLink(Document $parent, Document\Page $source, $key = 'bundle-sub-hardlink-test', array $params = [], $locale = null)
+    {
+        $hardlink = $this->generateHardlink($source, $key, $params, $locale);
+        $hardlink->setParent($parent);
+
+        try {
+            $hardlink->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving sub hardlink. message was: ' . $e->getMessage()));
+        }
+
+        $this->assertInstanceOf(Document\Hardlink::class, Document\Hardlink::getById($hardlink->getId()));
+
+        return $hardlink;
     }
 
     /**
@@ -184,6 +318,86 @@ class PimcoreBackend extends Module
     }
 
     /**
+     * Actor Function to create a Site Document
+     *
+     * @param string $siteKey
+     * @param array  $params
+     * @param null   $locale
+     * @param bool   $add3w
+     * @param array  $additionalDomains
+     *
+     * @return Site
+     */
+    public function haveASite($siteKey, array $params = [], $locale = null, $add3w = false, $additionalDomains = [])
+    {
+        $site = $this->generateSiteDocument($siteKey, $params, $locale, $add3w, $additionalDomains);
+
+        try {
+            $site->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving site. message was: ' . $e->getMessage()));
+        }
+
+        $this->assertInstanceOf(Site::class, Site::getById($site->getId()));
+
+        return $site;
+    }
+
+    /**
+     * Actor Function to create a Document for a Site
+     *
+     * @param Site        $site
+     * @param string      $key
+     * @param array       $params
+     * @param null|string $locale
+     *
+     * @return Document\Page
+     * @throws \Exception
+     */
+    public function haveAPageDocumentForSite(Site $site, $key = 'document-test', array $params = [], $locale = null)
+    {
+        $document = $this->generatePageDocument($key, $params, $locale);
+        $document->setParentId($site->getRootDocument()->getId());
+
+        try {
+            $document->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while document page for site. message was: ' . $e->getMessage()));
+        }
+
+        $this->assertInstanceOf(Document\Page::class, Document\Page::getById($document->getId()));
+
+        return $document;
+    }
+
+    /**
+     * Actor Function to create a Hard Link for a Site
+     *
+     * @param Site          $site
+     * @param Document\Page $document
+     * @param string        $key
+     * @param array         $params
+     * @param string        $locale
+     *
+     * @return Document\Hardlink
+     */
+    public function haveAHardlinkForSite(Site $site, Document\Page $document, $key = 'hardlink-test', array $params = [], $locale = null)
+    {
+        $hardLink = $this->generateHardlink($document, $key, $params, $locale);
+        $hardLink->setParentId($site->getRootDocument()->getId());
+
+        try {
+            $hardLink->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while document page for site. message was: ' . $e->getMessage()));
+        }
+
+        $this->assertInstanceOf(Document\Hardlink::class, Document\Hardlink::getById($hardLink->getId()));
+
+        return $hardLink;
+    }
+
+    /**
      * Actor function to see a generated dummy file in download directory.
      *
      * @param $fileName
@@ -245,7 +459,7 @@ class PimcoreBackend extends Module
             throw new ModuleException($this, sprintf('%s must be instance of %s or %s.', $document->getFullPath(), Document\Snippet::class, Document\Page::class));
         }
 
-         try {
+        try {
             $editables = EditableHelper::generateEditablesForArea($areaName, $editables);
         } catch (\Throwable $e) {
             throw new ModuleException($this, sprintf('area generator error: %s', $e->getMessage()));
@@ -264,6 +478,43 @@ class PimcoreBackend extends Module
         }
 
         $this->assertCount(count($editables), VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0') ? $document->getEditables() : $document->getElements());
+    }
+
+    /**
+     * Actor Function to create a language connection
+     *
+     * @param Document\Page $sourceDocument
+     * @param Document\Page $targetDocument
+     *
+     */
+    public function haveTwoConnectedDocuments(Document\Page $sourceDocument, Document\Page $targetDocument)
+    {
+        $service = new Document\Service();
+        $service->addTranslation($sourceDocument, $targetDocument);
+    }
+
+    /**
+     * Actor Function to disable a document
+     *
+     * @param Document $document
+     *
+     * @return Document
+     */
+    public function haveAUnPublishedDocument(Document $document)
+    {
+        if (method_exists($document, 'setMissingRequiredEditable')) {
+            $document->setMissingRequiredEditable(false);
+        }
+
+        $document->setPublished(false);
+
+        try {
+            $document->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while un-publishing document. message was: ' . $e->getMessage()));
+        }
+
+        return $document;
     }
 
     /**
@@ -446,6 +697,22 @@ class PimcoreBackend extends Module
     }
 
     /**
+     * Actor Function to generate a single pimcore redirect.
+     *
+     * @param array $data
+     *
+     * @return Redirect
+     */
+    public function haveAPimcoreRedirect(array $data)
+    {
+        $redirect = new Redirect();
+        $redirect->setValues($data);
+        $redirect->save();
+
+        return $redirect;
+    }
+
+    /**
      * Actor Function to generate a pimcore class from json definition file.
      *
      * @param string $name
@@ -464,6 +731,34 @@ class PimcoreBackend extends Module
         $this->assertInstanceOf(DataObject\ClassDefinition::class, $class);
 
         return $class;
+    }
+
+    /**
+     * @param Document $document
+     *
+     * @throws ModuleException
+     */
+    public function submitDocumentToXliffExporter(Document $document)
+    {
+        /** @var PimcoreCore $pimcoreCore */
+        $pimcoreCore = $this->getModule('\\' . PimcoreCore::class);
+
+        $pimcoreCore->_loadPage('POST', '/admin/translation/xliff-export', [
+            'csrfToken' => PhpBrowser::PIMCORE_ADMIN_CSRF_TOKEN_NAME,
+            'source'    => 'en',
+            'target'    => 'de',
+            'data'      => json_encode([
+                [
+                    'id'       => $document->getId(),
+                    'path'     => $document->getFullPath(),
+                    'type'     => 'document',
+                    'children' => true
+                ]
+            ]),
+            'type'      => 'xliff'
+        ]);
+
+        $this->assertContains(['success' => true], json_decode($pimcoreCore->_getResponseContent(), true));
     }
 
     /**
@@ -508,27 +803,36 @@ class PimcoreBackend extends Module
     /**
      * API Function to create a page document
      *
-     * @param string $key
-     * @param array  $params
-     * @param string $locale
+     * @param string      $key
+     * @param array       $params
+     * @param null|string $locale
      *
      * @return Document\Page
      * @throws \Exception
      */
-    protected function generatePageDocument($key = 'test-page', $params = [], $locale = 'en')
+    public function generatePageDocument($key = 'test-page', $params = [], $locale = 'en')
     {
-        if (!isset($params['action'])) {
-            $params['action'] = 'default';
-        }
-
         if (!isset($params['controller'])) {
             $params['controller'] = '@AppBundle\Controller\DefaultController';
+        }
+
+        if (!isset($params['action'])) {
+            $params['action'] = 'default';
         }
 
         $document = TestHelper::createEmptyDocumentPage('', false);
 
         $document->setKey($key);
-        $document->setProperty('language', 'text', $locale, false, 1);
+        $document->setProperty('navigation_title', 'text', $key);
+        $document->setProperty('navigation_name', 'text', $key);
+
+        if ($locale !== null) {
+            $document->setProperty('language', 'text', $locale, false, true);
+        }
+
+        if (method_exists($document, 'setMissingRequiredEditable')) {
+            $document->setMissingRequiredEditable(false);
+        }
 
         $this->assignMethods($document, $params);
 
@@ -538,14 +842,14 @@ class PimcoreBackend extends Module
     /**
      * API Function to create a Snippet
      *
-     * @param string $key
-     * @param array  $params
-     * @param string $locale
+     * @param string      $key
+     * @param array       $params
+     * @param null|string $locale
      *
      * @return null|Document\Snippet
      * @throws \Exception
      */
-    protected function generateSnippet($key = 'test-snippet', $params = [], $locale = 'en')
+    public function generateSnippet($key = 'test-snippet', $params = [], $locale = 'en')
     {
         $document = new Document\Snippet();
 
@@ -557,7 +861,10 @@ class PimcoreBackend extends Module
         $document->setPublished(true);
 
         $document->setKey($key);
-        $document->setProperty('language', 'text', $locale, false, 1);
+
+        if ($locale !== null) {
+            $document->setProperty('language', 'text', $locale, false, 1);
+        }
 
         $this->assignMethods($document, $params);
 
@@ -567,13 +874,13 @@ class PimcoreBackend extends Module
     /**
      * API Function to create a email document
      *
-     * @param string $key
-     * @param array  $params
-     * @param string $locale
+     * @param string      $key
+     * @param array       $params
+     * @param null|string $locale
      *
      * @return Document\Email
      */
-    protected function generateEmailDocument($key = 'test-email', array $params = [], $locale = 'en')
+    public function generateEmailDocument($key = 'test-email', array $params = [], $locale = 'en')
     {
         $documentKey = uniqid(sprintf('%s-', $key));
 
@@ -586,7 +893,10 @@ class PimcoreBackend extends Module
         $document->setPublished(true);
 
         $document->setKey($documentKey);
-        $document->setProperty('language', 'text', $locale, false, 1);
+
+        if ($locale !== null) {
+            $document->setProperty('language', 'text', $locale, false, 1);
+        }
 
         if (!isset($params['to'])) {
             $params['to'] = 'recpient@test.org';
@@ -607,6 +917,126 @@ class PimcoreBackend extends Module
     }
 
     /**
+     * API Function to create a link document
+     *
+     * @param Document\Page $source
+     * @param string        $key
+     * @param array         $params
+     * @param string        $locale
+     *
+     * @return Document\Link
+     */
+    public function generateLink(Document\Page $source, $key = 'test-link', array $params = [], $locale = null)
+    {
+        $link = new Document\Link();
+        $link->setKey($key);
+        $link->setParentId(1);
+        $link->setLinktype('internal');
+        $link->setInternalType('document');
+        $link->setInternal($source->getId());
+
+        $link->setProperty('navigation_title', 'text', $key);
+        $link->setProperty('navigation_name', 'text', $key);
+
+        if ($locale !== null) {
+            $link->setProperty('language', 'text', $locale, false, true);
+        }
+
+        if (isset($params['properties'])) {
+            $link->setProperties($params['properties']);
+            unset($params['properties']);
+        }
+
+        $this->assignMethods($link, $params);
+
+        return $link;
+    }
+
+    /**
+     * API Function to create a hardlink document
+     *
+     * @param Document\Page $source
+     * @param string        $key
+     * @param array         $params
+     * @param string        $locale
+     *
+     * @return Document\Hardlink
+     */
+    public function generateHardlink(Document\Page $source, $key = 'test-hardlink', array $params = [], $locale = null)
+    {
+        $hardlink = new Document\Hardlink();
+        $hardlink->setKey($key);
+        $hardlink->setParentId(1);
+        $hardlink->setSourceId($source->getId());
+        $hardlink->setPropertiesFromSource(true);
+        $hardlink->setChildrenFromSource(true);
+
+        if ($locale !== null) {
+            $hardlink->setProperty('language', 'text', $locale, false, true);
+        }
+
+        if (isset($params['properties'])) {
+            $hardlink->setProperties($params['properties']);
+            unset($params['properties']);
+        }
+
+        $this->assignMethods($hardlink, $params);
+
+        return $hardlink;
+    }
+
+    /**
+     * API Function to create a site document
+     *
+     * @param string      $domain
+     * @param array       $params
+     * @param null|string $locale
+     * @param bool        $add3w
+     * @param array       $additionalDomains
+     *
+     * @return Site
+     */
+    public function generateSiteDocument(string $domain, array $params = [], $locale = null, $add3w = false, $additionalDomains = [])
+    {
+        $document = TestHelper::createEmptyDocumentPage($domain, false);
+        $document->setProperty('navigation_title', 'text', $domain);
+        $document->setProperty('navigation_name', 'text', $domain);
+
+        $document->setKey(str_replace('.', '-', $domain));
+
+        if ($locale !== null) {
+            $document->setProperty('language', 'text', $locale, false, true);
+        }
+
+        if (method_exists($document, 'setMissingRequiredEditable')) {
+            $document->setMissingRequiredEditable(false);
+        }
+
+        if (isset($params['properties'])) {
+            $document->setProperties($params['properties']);
+            unset($params['properties']);
+        }
+
+        $this->assignMethods($document, $params);
+
+        try {
+            $document->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving document for site. message was: ' . $e->getMessage()));
+        }
+
+        $site = new Site();
+        $site->setRootId((int) $document->getId());
+        $site->setMainDomain(($add3w ? 'www.' : '') . $domain);
+
+        if (count($additionalDomains) > 0) {
+            $site->setDomains($additionalDomains);
+        }
+
+        return $site;
+    }
+
+    /**
      * API Function to create a asset element
      *
      * @param string $key
@@ -614,7 +1044,7 @@ class PimcoreBackend extends Module
      *
      * @return Asset
      */
-    protected function generateAsset($key = 'test-asset', array $params = [])
+    public function generateAsset($key = 'test-asset', array $params = [])
     {
         $asset = TestHelper::createImageAsset($key, false, false);
         $asset->setKey($key);
@@ -638,7 +1068,7 @@ class PimcoreBackend extends Module
      *
      * @return DataObject\Concrete
      */
-    protected function generateObject(string $objectType, $key = 'test-object', array $params = [])
+    public function generateObject(string $objectType, $key = 'test-object', array $params = [])
     {
         $type = sprintf('\\Pimcore\\Model\\DataObject\\%s', $objectType);
         $object = TestHelper::createEmptyObject($key, true, false, $type);
