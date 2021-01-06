@@ -5,6 +5,7 @@ namespace Dachcom\Codeception\Helper\Browser;
 use Codeception\Module;
 use Dachcom\Codeception\Util\EditableHelper;
 use Dachcom\Codeception\Util\FileGeneratorHelper;
+use GuzzleHttp\Client;
 
 class WebDriver extends Module\WebDriver
 {
@@ -24,17 +25,18 @@ class WebDriver extends Module\WebDriver
     public function setDownloadPathForWebDriver($path = null)
     {
         if (is_null($path)) {
-            $path = FileGeneratorHelper::getDownloadPath();
+            $path = FileGeneratorHelper::getWebdriverDownloadPath();
         }
 
         $url = $this->webDriver->getCommandExecutor()->getAddressOfRemoteServer();
-        $uri = '/session/' . $this->webDriver->getSessionID() . '/chromium/send_command';
+        $uri = sprintf('/session/%s/chromium/send_command', $this->webDriver->getSessionID());
+
         $body = [
             'cmd'    => 'Page.setDownloadBehavior',
             'params' => ['behavior' => 'allow', 'downloadPath' => $path]
         ];
 
-        $client = new \GuzzleHttp\Client();
+        $client = new Client();
         $response = $client->post($url . $uri, ['body' => json_encode($body)]);
 
         try {

@@ -56,6 +56,16 @@ class FileGeneratorHelper
         return codecept_data_dir() . 'downloads' . DIRECTORY_SEPARATOR;
     }
 
+    /**
+     * @return string
+     */
+    public static function getWebdriverDownloadPath()
+    {
+        return getenv('WEBDRIVER_DOWNLOAD_PATH') !== false
+            ? getenv('WEBDRIVER_DOWNLOAD_PATH')
+            : codecept_data_dir() . 'downloads' . DIRECTORY_SEPARATOR;
+    }
+
     public static function cleanUp()
     {
         $finder = new Finder();
