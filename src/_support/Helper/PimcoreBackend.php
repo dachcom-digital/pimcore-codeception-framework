@@ -204,7 +204,7 @@ class PimcoreBackend extends Module
      */
     public function seeEditablesPlacedOnDocument(Document $document, array $editables)
     {
-        if (!$document instanceof Document\Snippet || !$document instanceof Document\Page) {
+        if (!$document instanceof Document\Snippet && !$document instanceof Document\Page) {
             throw new ModuleException($this, sprintf('%s must be instance of %s or %s.', $document->getFullPath(), Document\Snippet::class, Document\Page::class));
         }
 
