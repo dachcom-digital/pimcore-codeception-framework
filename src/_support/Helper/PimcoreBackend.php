@@ -448,8 +448,7 @@ class PimcoreBackend extends Module
             Debug::debug(sprintf('[TEST BUNDLE ERROR] error while adding editables to document. message was: ' . $e->getMessage()));
         }
 
-        //\Pimcore::collectGarbage();
-        \Pimcore\Cache\Runtime::set(sprintf('document_%s', $document->getId()), null);
+        \Pimcore::collectGarbage();
 
         $this->assertCount(count($editables), VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0') ? $document->getEditables() : $document->getElements());
     }
@@ -491,8 +490,7 @@ class PimcoreBackend extends Module
             Debug::debug(sprintf('[TEST BUNDLE ERROR] error while adding area element to document. message was: ' . $e->getMessage()));
         }
 
-        //\Pimcore::collectGarbage();
-        \Pimcore\Cache\Runtime::set(sprintf('document_%s', $document->getId()), null);
+        \Pimcore::collectGarbage();
 
         $this->assertCount(count($editables), VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0') ? $document->getEditables() : $document->getElements());
     }
@@ -698,7 +696,7 @@ class PimcoreBackend extends Module
             $t->addTranslation($language, $translation);
             $t->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[FORMBUILDER ERROR] error while creating translation. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating translation. message was: ' . $e->getMessage()));
         }
 
         $this->assertInstanceOf(Website::class, $t);
