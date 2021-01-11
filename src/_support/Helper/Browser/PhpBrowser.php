@@ -366,7 +366,6 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 
             $this->assertGreaterThan(0, count($message->getChildren()));
 
-            /** @var \Swift_Mime_SimpleMimeEntity $child */
             foreach ($message->getChildren() as $child) {
                 $this->assertContains($string, is_null($child->getBody()) ? '' : $child->getBody());
             }
@@ -385,7 +384,6 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 
         /** @var Mail $message */
         foreach ($collectedMessages as $message) {
-            /** @var \Swift_Mime_SimpleMimeEntity $child */
             foreach ($message->getChildren() as $child) {
                 $this->assertNotContains($string, is_null($child->getBody()) ? '' : $child->getBody());
             }
@@ -418,7 +416,6 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 
         $this->pimcoreCore->client->getCookieJar()->clear();
         $this->pimcoreCore->client->getCookieJar()->set($cookie);
-
     }
 
     /**
@@ -443,16 +440,18 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
             return;
         }
 
-        \Pimcore\Tool\Session::invalidate();
         \Pimcore\Tool\Session::useSession(function (AttributeBagInterface $adminSession) use ($pimcoreUser) {
+
+            \Pimcore\Tool\Session::invalidate();
+
             $adminSession->set('user', $pimcoreUser);
+            $adminSession->set('csrfToken', self::PIMCORE_ADMIN_CSRF_TOKEN_NAME);
         });
 
         $cookie = new Cookie(\Pimcore\Tool\Session::getSessionName(), \Pimcore\Tool\Session::getSessionId());
 
         $this->pimcoreCore->client->getCookieJar()->clear();
         $this->pimcoreCore->client->getCookieJar()->set($cookie);
-
     }
 
     /**
