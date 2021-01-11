@@ -428,8 +428,6 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
      */
     public function amLoggedInAs($username)
     {
-        $firewallName = 'admin';
-
         try {
             /** @var PimcoreUser $userModule */
             $userModule = $this->getModule('\\' . PimcoreUser::class);
@@ -445,32 +443,12 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
             return;
         }
 
-        /** @var Session $session */
-        $session = $this->pimcoreCore->getContainer()->get('session');
-
-        $user = new \Pimcore\Bundle\AdminBundle\Security\User\User($pimcoreUser);
-        $token = new UsernamePasswordToken($user, null, $firewallName, $pimcoreUser->getRoles());
-        $this->pimcoreCore->getContainer()->get('security.token_storage')->setToken($token);
-
-        if (VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.5.0')) {
-            if ($session->isStarted()) {
-                $session->save();
-            }
-        }
-
-        \Pimcore\Tool\Session::useSession(function (AttributeBagInterface $adminSession) use ($pimcoreUser, $session) {
-            $session->setId(\Pimcore\Tool\Session::getSessionId());
+        \Pimcore\Tool\Session::invalidate();
+        \Pimcore\Tool\Session::useSession(function (AttributeBagInterface $adminSession) use ($pimcoreUser) {
             $adminSession->set('user', $pimcoreUser);
-            $adminSession->set('csrfToken', self::PIMCORE_ADMIN_CSRF_TOKEN_NAME);
         });
 
-        // allow re-usage of session in same cest.
-        if (!empty($this->sessionSnapShot)) {
-            $cookie = $this->sessionSnapShot;
-        } else {
-            $cookie = new Cookie($session->getName(), $session->getId());
-            $this->sessionSnapShot = $cookie;
-        }
+        $cookie = new Cookie(\Pimcore\Tool\Session::getSessionName(), \Pimcore\Tool\Session::getSessionId());
 
         $this->pimcoreCore->client->getCookieJar()->clear();
         $this->pimcoreCore->client->getCookieJar()->set($cookie);
