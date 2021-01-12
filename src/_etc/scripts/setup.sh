@@ -7,14 +7,19 @@ source $PIMCORE_CODECEPTION_FRAMEWORK/src/_etc/scripts/yaml_reader.sh
 ## create download dir
 mkdir -p $TEST_BUNDLE_TEST_DIR/_data/downloads
 
+## release empty bundle config
+touch $TEST_BUNDLE_TEST_DIR/_data/config/config.yml
+
 ## release parameters.yml
 cp $TEST_PROJECT_ROOT_DIR/app/config/parameters.example.yml $TEST_PROJECT_ROOT_DIR/app/config/parameters.yml
 
 ## move TestKernel
 cp $PIMCORE_CODECEPTION_FRAMEWORK/src/_support/App/TestKernel.php $TEST_PROJECT_ROOT_DIR/app/TestKernel.php
 
-## Register TestKernel in .env
+## Register test variables in .env
 echo "PIMCORE_KERNEL_CLASS=TestKernel" >> $TEST_PROJECT_ROOT_DIR/.env
+echo "PIMCORE_CODECEPTION_FRAMEWORK=$PIMCORE_CODECEPTION_FRAMEWORK" >> $TEST_PROJECT_ROOT_DIR/.env
+echo "TEST_BUNDLE_TEST_DIR=$TEST_BUNDLE_TEST_DIR" >> $TEST_PROJECT_ROOT_DIR/.env
 
 eval "$(parse_yaml $TEST_BUNDLE_TEST_DIR/_etc/config.yml)"
 

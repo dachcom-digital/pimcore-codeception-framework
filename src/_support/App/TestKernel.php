@@ -1,9 +1,6 @@
 <?php
 
 use Pimcore\Kernel;
-use Dachcom\Codeception\DependencyInjection\ServiceChangePass;
-use Dachcom\Codeception\DependencyInjection\MakeServicesPublicPass;
-use Dachcom\Codeception\DependencyInjection\MonologChannelLoggerPass;
 use Pimcore\HttpKernel\BundleCollection\BundleCollection;
 use Symfony\Bundle\WebProfilerBundle\WebProfilerBundle;
 use Symfony\Component\Config\FileLocator;
@@ -14,6 +11,14 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 class TestKernel extends Kernel
 {
+    const PRELOAD_FILES = [
+        'App/Pimcore/TestConfig.php',
+        'App/Session/MockFileSessionStorage.php',
+        'DependencyInjection/MakeServicesPublicPass.php',
+        'DependencyInjection/MonologChannelLoggerPass.php',
+        'DependencyInjection/ServiceChangePass.php',
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -33,14 +38,14 @@ class TestKernel extends Kernel
     {
         parent::registerContainerConfiguration($loader);
 
-        if (!function_exists('codecept_data_dir')) {
-            return;
-        }
-
         $loader->load(function (ContainerBuilder $container) {
-            $runtimeConfigDir = codecept_data_dir() . 'config' . DIRECTORY_SEPARATOR;
+
+            $dataDir = sprintf('%s/_data', $_SERVER['TEST_BUNDLE_TEST_DIR']);
+            $runtimeConfigDir = sprintf('%s/config/', $dataDir);
+
             $loader = new YamlFileLoader($container, new FileLocator([$runtimeConfigDir]));
             $loader->load('config.yml');
+
         });
     }
 
@@ -51,13 +56,21 @@ class TestKernel extends Kernel
      */
     protected function build(ContainerBuilder $container)
     {
-        if (!class_exists('\Dachcom\Codeception\DependencyInjection\ServiceChangePass')) {
-            return;
-        }
+        $this->preloadClasses();
 
-        $container->addCompilerPass(new ServiceChangePass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, -100000);
-        $container->addCompilerPass(new MakeServicesPublicPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, -100000);
-        $container->addCompilerPass(new MonologChannelLoggerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
+        $container->addCompilerPass(new \Dachcom\Codeception\DependencyInjection\ServiceChangePass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, -100000);
+        $container->addCompilerPass(new \Dachcom\Codeception\DependencyInjection\MakeServicesPublicPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, -100000);
+        $container->addCompilerPass(new \Dachcom\Codeception\DependencyInjection\MonologChannelLoggerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
+    }
+
+    protected function preloadClasses()
+    {
+        $fwDir = sprintf('%s/src', $_SERVER['PIMCORE_CODECEPTION_FRAMEWORK']);
+
+        foreach (self::PRELOAD_FILES as $class) {
+            $classPath = sprintf('%s/_support/%s', $fwDir, $class);
+            include_once $classPath;
+        }
     }
 
     /**
