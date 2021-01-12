@@ -34,8 +34,6 @@ include_once $bootstrap;
 ## Setup File
 Create a file called `config.yml` in `tests/_etc/config.yml`.
 
-> ! Files in `setup_files` node needs to stored in `/tests/_etc/config`.
-
 ```yaml
 setup_files:
     - { path: app/config.yml, dest: ./app/config/config.yml }
@@ -43,7 +41,12 @@ setup_files:
     - { path: app/controller/DefaultController.php, dest: ./src/AppBundle/Controller/DefaultController.php }
     - { path: app/views/default.html.twig, dest: ./app/Resources/views/Default/default.html.twig }
     - { path: app/views/snippet.html.twig, dest: ./app/Resources/views/Default/snippet.html.twig }
+preload_files:
+    - { path: Services/MySpecialTestService.php }
 ```
+### Configuration
+- **setup_files**: All your template files which should to be available during test cycles. These files need to be stored under `/tests/_etc/config`
+- **preload_files** _(optional)_: These files will be included at kernel setup. Since these files are not included via composer autoload, we need to define them here.
 
 ## Bundle Configuration Files
 This Framework allows you to use multiple (bundle) configuration setups.

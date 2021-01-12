@@ -8,6 +8,7 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\Yaml\Yaml;
 
 class TestKernel extends Kernel
 {
@@ -66,10 +67,22 @@ class TestKernel extends Kernel
     protected function preloadClasses()
     {
         $fwDir = sprintf('%s/src', $_SERVER['PIMCORE_CODECEPTION_FRAMEWORK']);
+        $bDir = sprintf('%s', $_SERVER['TEST_BUNDLE_TEST_DIR']);
 
-        foreach (self::PRELOAD_FILES as $class) {
-            $classPath = sprintf('%s/_support/%s', $fwDir, $class);
-            include_once $classPath;
+        $bundlesFiles = [];
+        $data = Yaml::parse(file_get_contents(sprintf('%s/_etc/config.yml', $_SERVER['TEST_BUNDLE_TEST_DIR'])));
+
+        if (isset($data['preload_files']) && is_array($data['preload_files'])) {
+            foreach ($data['preload_files'] as $bpFile) {
+                $bundlesFiles[] = $bpFile['path'];
+            }
+        }
+
+        foreach ([$bDir => $bundlesFiles, $fwDir => self::PRELOAD_FILES] as $dir => $files) {
+            foreach ($files as $class) {
+                $classPath = sprintf('%s/_support/%s', $dir, $class);
+                include_once $classPath;
+            }
         }
     }
 
