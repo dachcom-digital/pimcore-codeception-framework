@@ -11,7 +11,6 @@ All test files needs to be stored in `/tests`.
 | Name | Example    | Required   | Description |
 |------|------------|------------|-------------|
 | `TEST_BUNDLE_NAME` | `ToolboxBundle` | yes | -- |
-| `TEST_BUNDLE_NAMESPACE` | `ToolboxBundle\\ToolboxBundle` | yes | -- |
 | `TEST_BUNDLE_INSTALLER_CLASS` | `ToolboxBundle\\Tool\\Install` | yes | Set to `false` if you don't have any installer class |
 | `TEST_BUNDLE_TEST_DIR` | `${{ github.workspace }}/tests` | yes | -- |
 | `TEST_PROJECT_ROOT_DIR` | `${{ github.workspace }}` | yes | This variable is required to setup test structure before any system is running |

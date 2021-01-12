@@ -1,7 +1,5 @@
 <?php
 
-namespace Dachcom\Codeception\App;
-
 use Pimcore\Kernel;
 use Dachcom\Codeception\DependencyInjection\ServiceChangePass;
 use Dachcom\Codeception\DependencyInjection\MakeServicesPublicPass;
@@ -14,7 +12,7 @@ use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
-class TestAppKernel extends Kernel
+class TestKernel extends Kernel
 {
     /**
      * {@inheritdoc}
@@ -23,10 +21,7 @@ class TestAppKernel extends Kernel
     {
         $collection->addBundle(new WebProfilerBundle());
 
-        $bundleNamespace = getenv('TEST_BUNDLE_NAMESPACE');
-        $collection->addBundle(new $bundleNamespace());
-
-        if (class_exists('\\AppBundle\\AppBundle')) {
+        if (class_exists('\AppBundle\AppBundle')) {
             $collection->addBundle(new \AppBundle\AppBundle());
         }
     }
@@ -37,6 +32,10 @@ class TestAppKernel extends Kernel
     public function registerContainerConfiguration(LoaderInterface $loader)
     {
         parent::registerContainerConfiguration($loader);
+
+        if (!function_exists('codecept_data_dir')) {
+            return;
+        }
 
         $loader->load(function (ContainerBuilder $container) {
             $runtimeConfigDir = codecept_data_dir() . 'config' . DIRECTORY_SEPARATOR;
@@ -52,6 +51,10 @@ class TestAppKernel extends Kernel
      */
     protected function build(ContainerBuilder $container)
     {
+        if (!class_exists('\Dachcom\Codeception\DependencyInjection\ServiceChangePass')) {
+            return;
+        }
+
         $container->addCompilerPass(new ServiceChangePass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, -100000);
         $container->addCompilerPass(new MakeServicesPublicPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, -100000);
         $container->addCompilerPass(new MonologChannelLoggerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);

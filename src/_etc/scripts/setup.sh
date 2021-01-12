@@ -10,6 +10,12 @@ mkdir -p $TEST_BUNDLE_TEST_DIR/_data/downloads
 ## release parameters.yml
 cp $TEST_PROJECT_ROOT_DIR/app/config/parameters.example.yml $TEST_PROJECT_ROOT_DIR/app/config/parameters.yml
 
+## move TestKernel
+cp $PIMCORE_CODECEPTION_FRAMEWORK/src/_support/App/TestKernel.php $TEST_PROJECT_ROOT_DIR/app/TestKernel.php
+
+## Register TestKernel in .env
+echo "PIMCORE_KERNEL_CLASS=TestKernel" >> $TEST_PROJECT_ROOT_DIR/.env
+
 eval "$(parse_yaml $TEST_BUNDLE_TEST_DIR/_etc/config.yml)"
 
 NODE='setup_files'
