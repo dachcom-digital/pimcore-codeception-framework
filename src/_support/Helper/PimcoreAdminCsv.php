@@ -2,6 +2,7 @@
 
 namespace Dachcom\Codeception\Helper;
 
+use Codeception\Exception\ModuleException;
 use Codeception\Lib\InnerBrowser;
 use Codeception\Lib\Interfaces\DependsOnModule;
 use Codeception\Module;
@@ -30,9 +31,11 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
     }
 
     /**
+     * Actor Function to see values in csv response
+     *
      * @param array $headerValues
      *
-     * @throws \Codeception\Exception\ModuleException
+     * @throws ModuleException
      */
     public function seeResponseCsvHeaderHasValues(array $headerValues)
     {
@@ -49,10 +52,12 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
     }
 
     /**
+     * Actor Function to see values in specific csv row of csv response
+     *
      * @param int   $index
      * @param array $values
      *
-     * @throws \Codeception\Exception\ModuleException
+     * @throws ModuleException
      */
     public function seeResponseCsvRowValues(int $index, array $values)
     {
@@ -79,9 +84,11 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
     }
 
     /**
+     * Actor Function to see response csv length
+     *
      * @param int $length
      *
-     * @throws \Codeception\Exception\ModuleException
+     * @throws ModuleException
      */
     public function seeResponseCsvLength(int $length)
     {
@@ -95,8 +102,10 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
         \PHPUnit_Framework_Assert::assertCount($length, $rows);
     }
 
-    /***
-     * @throws \Codeception\Exception\ModuleException
+    /**
+     * Actor Function to see response is csv
+     *
+     * @throws ModuleException
      */
     public function seeResponseIsCsv()
     {

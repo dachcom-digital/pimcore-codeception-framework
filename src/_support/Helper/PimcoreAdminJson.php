@@ -2,6 +2,7 @@
 
 namespace Dachcom\Codeception\Helper;
 
+use Codeception\Exception\ModuleException;
 use Codeception\Lib\InnerBrowser;
 use Codeception\Lib\Interfaces\DependsOnModule;
 use Codeception\Module;
@@ -30,6 +31,13 @@ class PimcoreAdminJson extends Module implements DependsOnModule
         $this->connectionModule = $connection;
     }
 
+    /**
+     * Actor Function to see response contains csv
+     *
+     * @param array $json
+     *
+     * @throws ModuleException
+     */
     public function seeResponseContainsJson($json = [])
     {
         \PHPUnit_Framework_Assert::assertThat(
@@ -38,6 +46,11 @@ class PimcoreAdminJson extends Module implements DependsOnModule
         );
     }
 
+    /**
+     * Actor Function to see response is json
+     *
+     * @throws ModuleException
+     */
     public function seeResponseIsJson()
     {
         $responseContent = $this->connectionModule->_getResponseContent();

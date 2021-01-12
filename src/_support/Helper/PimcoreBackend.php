@@ -776,6 +776,8 @@ class PimcoreBackend extends Module
     }
 
     /**
+     * Actor Function to submit document to xliff exporter
+     *
      * @param Document $document
      *
      * @throws ModuleException
