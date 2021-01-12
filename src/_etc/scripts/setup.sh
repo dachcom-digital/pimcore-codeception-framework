@@ -4,8 +4,9 @@ set -e
 
 source $PIMCORE_CODECEPTION_FRAMEWORK/src/_etc/scripts/yaml_reader.sh
 
-## create download dir
+## create _data dirs
 mkdir -p $TEST_BUNDLE_TEST_DIR/_data/downloads
+mkdir -p $TEST_BUNDLE_TEST_DIR/_data/config
 
 ## release empty bundle config
 touch $TEST_BUNDLE_TEST_DIR/_data/config/config.yml
