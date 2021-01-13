@@ -4,7 +4,7 @@ This Packages allows you to create fast and simple testing environments.
 It's also used by all pimcore Bundles created by [DACHCOM.DIGITAL](https://github.com/dachcom-digital?q=pimcore-).
 
 ## Configuration
-All test files needs to be stored in `/tests`.
+All test files need to be stored in `/tests`.
 
 ### Environment Variables
 
@@ -35,6 +35,8 @@ include_once $bootstrap;
 Create a file called `config.yml` in `tests/_etc/config.yml`.
 
 ```yaml
+bundles:
+    - { namespace: \MyTestBundle\MyTestBundle }
 setup_files:
     - { path: app/config.yml, dest: ./app/config/config.yml }
     - { path: app/system.yml, dest: ./var/config/system.yml }
@@ -44,17 +46,20 @@ setup_files:
 preload_files:
     - { path: Services/MySpecialTestService.php }
 ```
-### Configuration
-- **setup_files**: All your template files which should to be available during test cycles. These files need to be stored under `/tests/_etc/config`
-- **preload_files** _(optional)_: These files will be included at kernel setup. Since these files are not included via composer autoload, we need to define them here.
+### Setup File Parameters
+- **bundles** _(required)_: At least your test bundle should be registered here. Add more, if needed
+- **setup_files** _(optional)_: All your template files which should to be available during test cycles. These files need to be stored under `/tests/_etc/config`
+- **preload_files** _(optional)_: These files will be included at kernel setup. Since these files are not included via composer autoload, we need to define them here
 
 ## Bundle Configuration Files
 This Framework allows you to use multiple (bundle) configuration setups.
+You need to add at least one default config file called `default_config.yml` and store it in `/tests/_etc/config/bundle`.
 
+### Using Bundle Configuration Files
 TBD
 
 ## Classes
-If you want to provide some classes to install, all the definitions needs to stored at `/tests/_etc/classes`.
+If you want to provide some classes to install, all the definitions need to stored at `/tests/_etc/classes`.
 
 ***
 

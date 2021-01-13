@@ -30,6 +30,14 @@ class TestKernel extends Kernel
         if (class_exists('\AppBundle\AppBundle')) {
             $collection->addBundle(new \AppBundle\AppBundle());
         }
+
+        $testBundles = $this->getTestBundleConfig('bundles');
+
+        if (is_array($testBundles)) {
+            foreach ($testBundles as $testBundle) {
+                $collection->addBundle(new $testBundle['namespace'], -1000);
+            }
+        }
     }
 
     /**
@@ -70,9 +78,9 @@ class TestKernel extends Kernel
         $bDir = sprintf('%s', $_SERVER['TEST_BUNDLE_TEST_DIR']);
 
         $bundlesFiles = [];
-        $data = Yaml::parse(file_get_contents(sprintf('%s/_etc/config.yml', $_SERVER['TEST_BUNDLE_TEST_DIR'])));
+        $data = $this->getTestBundleConfig('preload_files');
 
-        if (isset($data['preload_files']) && is_array($data['preload_files'])) {
+        if (is_array($data['preload_files'])) {
             foreach ($data['preload_files'] as $bpFile) {
                 $bundlesFiles[] = $bpFile['path'];
             }
@@ -84,6 +92,18 @@ class TestKernel extends Kernel
                 include_once $classPath;
             }
         }
+    }
+
+    /**
+     * @param string $section
+     *
+     * @return mixed|null
+     */
+    protected function getTestBundleConfig(string $section)
+    {
+        $data = Yaml::parse(file_get_contents(sprintf('%s/_etc/config.yml', $_SERVER['TEST_BUNDLE_TEST_DIR'])));
+
+        return isset($data[$section]) ? $data[$section] : null;
     }
 
     /**
