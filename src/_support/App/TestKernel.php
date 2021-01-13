@@ -78,11 +78,11 @@ class TestKernel extends Kernel
         $bDir = sprintf('%s', $_SERVER['TEST_BUNDLE_TEST_DIR']);
 
         $bundlesFiles = [];
-        $data = $this->getTestBundleConfig('preload_files');
+        $preloadFiles = $this->getTestBundleConfig('preload_files');
 
-        if (is_array($data['preload_files'])) {
-            foreach ($data['preload_files'] as $bpFile) {
-                $bundlesFiles[] = $bpFile['path'];
+        if (is_array($preloadFiles)) {
+            foreach ($preloadFiles as $preloadFile) {
+                $bundlesFiles[] = $preloadFile['path'];
             }
         }
 
