@@ -45,11 +45,15 @@ setup_files:
     - { path: app/views/snippet.html.twig, dest: ./app/Resources/views/Default/snippet.html.twig }
 preload_files:
     - { path: Services/MySpecialTestService.php }
+additional_composer_packages:
+    - { package: vendor/foo-bar:^1.0 }
 ```
+
 ### Setup File Parameters
 - **bundles** _(required)_: At least your test bundle should be registered here. Add more, if needed
 - **setup_files** _(optional)_: All your template files which should to be available during test cycles. These files need to be stored under `/tests/_etc/config`
 - **preload_files** _(optional)_: These files will be included at kernel setup. Since these files are not included via composer autoload, we need to define them here
+- **additional_composer_packages** _(optional)_: Install additional composer packages which are not available in root composer.json
 
 ## Bundle Configuration Files
 This Framework allows you to use multiple (bundle) configuration setups.
