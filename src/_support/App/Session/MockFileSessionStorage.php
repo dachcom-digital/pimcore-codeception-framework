@@ -2,7 +2,6 @@
 
 namespace Dachcom\Codeception\App\Session;
 
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Session\Storage\MetadataBag;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
@@ -12,11 +11,6 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 class MockFileSessionStorage extends MockArraySessionStorage
 {
     private $savePath;
-
-    /**
-     * @var Filesystem
-     */
-    private $fileSystem;
 
     /**
      * @param string|null      $savePath Path of directory to save session files
@@ -34,7 +28,6 @@ class MockFileSessionStorage extends MockArraySessionStorage
         }
 
         $this->savePath = $savePath;
-        $this->fileSystem = new Filesystem();
 
         parent::__construct($name, $metaBag);
     }
@@ -97,7 +90,10 @@ class MockFileSessionStorage extends MockArraySessionStorage
 
         try {
             if ($data) {
-                $this->fileSystem->dumpFile($this->getFilePath(), serialize($data));
+                $path = $this->getFilePath();
+                $tmp = $path.bin2hex(random_bytes(6));
+                file_put_contents($tmp, serialize($data));
+                rename($tmp, $path);
             } else {
                 $this->destroy();
             }
@@ -117,8 +113,11 @@ class MockFileSessionStorage extends MockArraySessionStorage
      */
     private function destroy(): void
     {
-        if (is_file($this->getFilePath())) {
+        set_error_handler(static function () {});
+        try {
             unlink($this->getFilePath());
+        } finally {
+            restore_error_handler();
         }
     }
 
