@@ -47,7 +47,7 @@ class PimcoreBundleCore extends Module
         $bundleName = getenv('TEST_BUNDLE_NAME');
         $installerClass = getenv('TEST_BUNDLE_INSTALLER_CLASS');
 
-        if ($installerClass === false) {
+        if ($installerClass === false || $installerClass === 'false') {
             return;
         }
 
