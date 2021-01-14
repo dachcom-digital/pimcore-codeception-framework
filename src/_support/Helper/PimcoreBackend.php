@@ -102,6 +102,66 @@ class PimcoreBackend extends Module
     }
 
     /**
+     * Actor Function to create a language connection
+     *
+     * @param Document\Page $sourceDocument
+     * @param Document\Page $targetDocument
+     *
+     */
+    public function haveTwoConnectedDocuments(Document\Page $sourceDocument, Document\Page $targetDocument)
+    {
+        $service = new Document\Service();
+        $service->addTranslation($sourceDocument, $targetDocument);
+    }
+
+    /**
+     * Actor Function to disable a document
+     *
+     * @param Document $document
+     *
+     * @return Document
+     */
+    public function haveAUnPublishedDocument(Document $document)
+    {
+        if (method_exists($document, 'setMissingRequiredEditable')) {
+            $document->setMissingRequiredEditable(false);
+        }
+
+        $document->setPublished(false);
+
+        try {
+            $document->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while un-publishing document. message was: ' . $e->getMessage()));
+        }
+
+        return $document;
+    }
+
+    /**
+     * Actor Function to move a document
+     *
+     * @param Document $document
+     * @param Document $parentDocument
+     *
+     * @return Document
+     */
+    public function moveDocument(Document $document, Document $parentDocument)
+    {
+        $document->setParent($parentDocument);
+
+        try {
+            $document->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while moving document. message was: ' . $e->getMessage()));
+        }
+
+        $this->assertEquals($parentDocument->getId(), $document->getParentId());
+
+        return $document;
+    }
+
+    /**
      * Actor Function to create a Snippet
      *
      * @param string      $key
@@ -286,6 +346,55 @@ class PimcoreBackend extends Module
     }
 
     /**
+     * Actor Function to create a Child Object
+     *
+     * @param DataObject $parent
+     * @param string     $objectType
+     * @param string     $key
+     * @param array      $params
+     *
+     * @return DataObject\Concrete
+     */
+    public function haveASubPimcoreObject(DataObject $parent, string $objectType, $key = 'bundle-sub-object-test', array $params = [])
+    {
+        $object = $this->generateObject($objectType, $key, $params);
+        $object->setParentId($parent->getId());
+
+        try {
+            $object->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving child object. message was: ' . $e->getMessage()));
+        }
+
+        $this->assertInstanceOf(get_class($object), DataObject::getById($object->getId()));
+
+        return $object;
+    }
+
+    /**
+     * Actor Function to move a object
+     *
+     * @param DataObject $object
+     * @param DataObject $parentObject
+     *
+     * @return DataObject
+     */
+    public function moveObject(DataObject $object, DataObject $parentObject)
+    {
+        $object->setParent($parentObject);
+
+        try {
+            $object->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while moving object. message was: ' . $e->getMessage()));
+        }
+
+        $this->assertEquals($parentObject->getId(), $object->getParentId());
+
+        return $object;
+    }
+
+    /**
      * Actor Function to create a pimcore asset
      *
      * @param string $key
@@ -306,6 +415,106 @@ class PimcoreBackend extends Module
         }
 
         $this->assertInstanceOf(Asset::class, Asset::getById($asset->getId()));
+
+        return $asset;
+    }
+
+    /**
+     * Actor Function to create a child asset
+     *
+     * @param Asset\Folder $parent
+     * @param string       $key
+     * @param array        $params
+     *
+     * @return Asset
+     * @throws \Exception
+     */
+    public function haveASubPimcoreAsset(Asset\Folder $parent, $key = 'bundle-sub-asset-test', array $params = [])
+    {
+        $asset = $this->generateAsset($key, $params);
+        $asset->setParentId($parent->getId());
+
+        try {
+            $asset->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving child asset. message was: ' . $e->getMessage()));
+        }
+
+        $this->assertInstanceOf(Asset::class, Asset::getById($asset->getId()));
+
+        return $asset;
+    }
+
+    /**
+     * Actor Function to create a pimcore asset folder
+     *
+     * @param string $key
+     * @param array  $params
+     *
+     * @return Asset\Folder
+     * @throws \Exception
+     */
+    public function haveAPimcoreAssetFolder($key = 'bundle-asset-folder-test', array $params = [])
+    {
+        $assetFolder = $this->generateFolder($key, 'asset', $params);
+
+        try {
+            $assetFolder->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating asset folder. message was: ' . $e->getMessage()));
+            return null;
+        }
+
+        $this->assertInstanceOf(Asset::class, Asset::getById($assetFolder->getId()));
+
+        return $assetFolder;
+    }
+
+    /**
+     * Actor Function to create a pimcore asset sub folder
+     *
+     * @param Asset\Folder $parent
+     * @param string       $key
+     * @param array        $params
+     *
+     * @return Asset\Folder
+     */
+    public function haveASubPimcoreAssetFolder(Asset\Folder $parent, $key = 'bundle-asset-sub-folder-test', array $params = [])
+    {
+        $assetFolder = $this->generateFolder($key, 'asset', $params);
+        $assetFolder->setParentId($parent->getId());
+
+        try {
+            $assetFolder->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating asset folder. message was: ' . $e->getMessage()));
+            return null;
+        }
+
+        $this->assertInstanceOf(Asset::class, Asset::getById($assetFolder->getId()));
+
+        return $assetFolder;
+    }
+
+    /**
+     * Actor Function to move a asset
+     *
+     * @param Asset $asset
+     * @param Asset $parentAsset
+     *
+     * @return Asset
+     */
+    public function moveAsset(Asset $asset, Asset $parentAsset)
+    {
+        $asset->setParent($parentAsset);
+
+        try {
+            $asset->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while moving asset. message was: ' . $e->getMessage()));
+        }
+
+        $this->assertEquals($parentAsset->getId(), $asset->getParentId());
 
         return $asset;
     }
@@ -493,43 +702,6 @@ class PimcoreBackend extends Module
         \Pimcore::collectGarbage();
 
         $this->assertCount(count($editables), VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0') ? $document->getEditables() : $document->getElements());
-    }
-
-    /**
-     * Actor Function to create a language connection
-     *
-     * @param Document\Page $sourceDocument
-     * @param Document\Page $targetDocument
-     *
-     */
-    public function haveTwoConnectedDocuments(Document\Page $sourceDocument, Document\Page $targetDocument)
-    {
-        $service = new Document\Service();
-        $service->addTranslation($sourceDocument, $targetDocument);
-    }
-
-    /**
-     * Actor Function to disable a document
-     *
-     * @param Document $document
-     *
-     * @return Document
-     */
-    public function haveAUnPublishedDocument(Document $document)
-    {
-        if (method_exists($document, 'setMissingRequiredEditable')) {
-            $document->setMissingRequiredEditable(false);
-        }
-
-        $document->setPublished(false);
-
-        try {
-            $document->save();
-        } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while un-publishing document. message was: ' . $e->getMessage()));
-        }
-
-        return $document;
     }
 
     /**
@@ -1133,6 +1305,37 @@ class PimcoreBackend extends Module
         $this->assignMethods($object, $params);
 
         return $object;
+    }
+
+    /**
+     * API Function to create a folder based on type
+     *
+     * @param string $key
+     * @param string $type
+     * @param array  $params
+     *
+     * @return Asset\Folder|Document\Folder|DataObject\Folder
+     */
+    public function generateFolder($key = 'test-asset-folder', string $type = 'asset', array $params = [])
+    {
+        if ($type === 'document') {
+            $folder = TestHelper::createDocumentFolder($key, false);
+        } elseif ($type === 'object') {
+            $folder = TestHelper::createObjectFolder($key, false);
+        } elseif ($type === 'asset') {
+            $folder = TestHelper::createAssetFolder($key, false);
+        }
+
+        $folder->setKey($key);
+
+        if (isset($params['properties'])) {
+            $folder->setProperties($params['properties']);
+            unset($params['properties']);
+        }
+
+        $this->assignMethods($folder, $params);
+
+        return $folder;
     }
 
     /**
