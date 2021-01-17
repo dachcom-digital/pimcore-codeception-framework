@@ -113,6 +113,8 @@ If you want to provide some classes to install, all the definitions need to stor
 | `$I->haveAPimcoreObject(string $objectType, $key = 'bundle-object-test', array $params = [])` | |
 | `$I->haveASubPimcoreObject(DataObject $parent, string $objectType, $key = 'bundle-sub-object-test', array $params = [])`
 | `$I->moveObject(DataObject $object, DataObject $parentObject)` | |
+| `$I->copyObject(DataObject $object, DataObject $targetObject)` | |
+| `$I->haveAPimcoreObjectFolder($key = 'bundle-object-folder-test', array $params = [])` | |
 | `$I->haveAPimcoreAsset($key = 'bundle-asset-test', array $params = [])` | |
 | `$I->haveASubPimcoreAsset(Asset\Folder $parent, $key = 'bundle-sub-asset-test', array $params = [])` | |
 | `$I->haveAPimcoreAssetFolder($key = 'bundle-asset-folder-test', array $params = [])` | |

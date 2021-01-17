@@ -395,6 +395,50 @@ class PimcoreBackend extends Module
     }
 
     /**
+     * Actor Function to copy object
+     *
+     * @param DataObject $object
+     * @param DataObject $targetObject
+     *
+     * @return DataObject|Dataobject\Concrete
+     */
+    public function copyObject(DataObject $object, DataObject $targetObject)
+    {
+        $objectService = new DataObject\Service();
+
+        $newObject = $objectService->copyAsChild($targetObject, $object);
+
+        $this->assertInstanceOf(DataObject::class, $newObject);
+
+        return $newObject;
+    }
+
+    /**
+     * Actor Function to create a pimcore object folder
+     *
+     * @param string $key
+     * @param array  $params
+     *
+     * @return Asset\Folder
+     * @throws \Exception
+     */
+    public function haveAPimcoreObjectFolder($key = 'bundle-object-folder-test', array $params = [])
+    {
+        $assetFolder = $this->generateFolder($key, 'object', $params);
+
+        try {
+            $assetFolder->save();
+        } catch (\Exception $e) {
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating object folder. message was: ' . $e->getMessage()));
+            return null;
+        }
+
+        $this->assertInstanceOf(DataObject\Folder::class, DataObject\Folder::getById($assetFolder->getId()));
+
+        return $assetFolder;
+    }
+
+    /**
      * Actor Function to create a pimcore asset
      *
      * @param string $key
@@ -465,7 +509,7 @@ class PimcoreBackend extends Module
             return null;
         }
 
-        $this->assertInstanceOf(Asset::class, Asset::getById($assetFolder->getId()));
+        $this->assertInstanceOf(Asset\Folder::class, Asset\Folder::getById($assetFolder->getId()));
 
         return $assetFolder;
     }
@@ -491,7 +535,7 @@ class PimcoreBackend extends Module
             return null;
         }
 
-        $this->assertInstanceOf(Asset::class, Asset::getById($assetFolder->getId()));
+        $this->assertInstanceOf(Asset\Folder::class, Asset\Folder::getById($assetFolder->getId()));
 
         return $assetFolder;
     }
