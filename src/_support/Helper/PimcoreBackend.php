@@ -14,6 +14,7 @@ use Dachcom\Codeception\Util\VersionHelper;
 use Pimcore\Model\Asset;
 use Pimcore\Model\DataObject;
 use Pimcore\Model\Element\ElementInterface;
+use Pimcore\Model\Element\Recyclebin\Item;
 use Pimcore\Model\Redirect;
 use Pimcore\Model\Site;
 use Pimcore\Model\Staticroute;
@@ -23,6 +24,7 @@ use Pimcore\Tests\Helper\ClassManager;
 use Pimcore\Tests\Util\TestHelper;
 use Pimcore\Model\Document;
 use Pimcore\Translation\Translator;
+use Pimcore\Model\Version;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Serializer\Serializer;
 
@@ -372,6 +374,22 @@ class PimcoreBackend extends Module
     }
 
     /**
+     * Actor Function to refresh a object
+     *
+     * @param DataObject $object
+     *
+     * @return DataObject
+     */
+    public function refreshObject(DataObject $object)
+    {
+        $reloadedObject = DataObject::getById($object->getId(), true);
+
+        $this->assertEquals($reloadedObject->getId(), $object->getId());
+
+        return $reloadedObject;
+    }
+
+    /**
      * Actor Function to move a object
      *
      * @param DataObject $object
@@ -411,6 +429,92 @@ class PimcoreBackend extends Module
         $this->assertInstanceOf(DataObject::class, $newObject);
 
         return $newObject;
+    }
+
+    /**
+     * Actor Function to create a object version only
+     *
+     * @param DataObject\Concrete $object
+     *
+     * @return DataObject|Dataobject\Concrete
+     */
+    public function createNewObjectVersion(DataObject\Concrete $object)
+    {
+        $object->saveVersion();
+
+        return $object->getLatestVersion(true);
+    }
+
+    /**
+     * Actor Function to delete a object version
+     *
+     * @param Version $version
+     *
+     * @return DataObject|Dataobject\Concrete
+     */
+    public function deleteObjectVersion(Version $version)
+    {
+        $version->delete();
+    }
+
+    /**
+     * Actor Function to publish a object version
+     *
+     * @param Version $version
+     *
+     * @return DataObject|Dataobject\Concrete
+     */
+    public function publishObjectVersion(Version $version)
+    {
+        $version = Version::getById($version->getId());
+
+        $data = $version->loadData();
+
+        $data->save();
+
+        return $data;
+    }
+
+    /**
+     * Actor Function to move object to bin
+     *
+     * @param DataObject $object
+     *
+     * @return Item
+     */
+    public function moveObjectToRecycleBin(DataObject $object)
+    {
+        $item = new Item();
+        $item->setElement($object);
+        $item->save();
+
+        $object->delete();
+
+        $deletedObject = DataObject::getById($object->getId(), true);
+
+        $this->assertNull($deletedObject);
+
+        return $item;
+    }
+
+    /**
+     * Actor Function to restore a object from bin
+     *
+     * @param DataObject $object
+     * @param Item       $item
+     *
+     * @return DataObject
+     * @throws \Exception
+     */
+    public function restoreObjectFromRecycleBin(DataObject $object, Item $item)
+    {
+        $item->restore();
+
+        $restoredObject = DataObject::getById($object->getId(), true);
+
+        $this->assertInstanceOf(DataObject::class, $restoredObject);
+
+        return $restoredObject;
     }
 
     /**

@@ -112,8 +112,14 @@ If you want to provide some classes to install, all the definitions need to stor
 | `$I->haveASubHardLink(Document $parent, Document\Page $source, $key = 'bundle-sub-hardlink-test', array $params = [], $locale = null)` | |
 | `$I->haveAPimcoreObject(string $objectType, $key = 'bundle-object-test', array $params = [])` | |
 | `$I->haveASubPimcoreObject(DataObject $parent, string $objectType, $key = 'bundle-sub-object-test', array $params = [])`
+| `$I->refreshObject(DataObject $object)` | |
 | `$I->moveObject(DataObject $object, DataObject $parentObject)` | |
 | `$I->copyObject(DataObject $object, DataObject $targetObject)` | |
+| `$I->createNewObjectVersion(DataObject\Concrete $object)` | |
+| `$I->deleteObjectVersion(Version $version)` | |
+| `$I->publishObjectVersion(Version $version)` | |
+| `$I->moveObjectToRecycleBin(DataObject $object)` | |
+| `restoreObjectFromRecycleBin(DataObject $object, Item $item)` | |
 | `$I->haveAPimcoreObjectFolder($key = 'bundle-object-folder-test', array $params = [])` | |
 | `$I->haveAPimcoreAsset($key = 'bundle-asset-test', array $params = [])` | |
 | `$I->haveASubPimcoreAsset(Asset\Folder $parent, $key = 'bundle-sub-asset-test', array $params = [])` | |
