@@ -23,5 +23,5 @@ if [ ! -z "$PACKAGES" ]; then
   echo "Installing pimcore $TEST_PIMCORE_VERSION and symfony $TEST_SYMFONY_VERSION with additional composer packages$PACKAGES"
 fi
 
-composer req pimcore/pimcore:$TEST_PIMCORE_VERSION symfony/symfony:$TEST_SYMFONY_VERSION $PACKAGES --no-interaction --ignore-platform-reqs --no-scripts --with-all-dependencies
-composer install --no-progress --prefer-dist --optimize-autoloader --ignore-platform-reqs
+composer req pimcore/pimcore:$TEST_PIMCORE_VERSION symfony/symfony:$TEST_SYMFONY_VERSION $PACKAGES --no-interaction --no-scripts --no-update
+composer update --no-progress --prefer-dist --optimize-autoloader
