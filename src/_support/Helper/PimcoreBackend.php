@@ -972,16 +972,9 @@ class PimcoreBackend extends Module
         $foundEmails = $this->getEmailsFromDocumentIds([$mail->getId()]);
         $this->assertGreaterThan(0, count($foundEmails));
 
-        $serializer = $this->getSerializer();
-
         foreach ($foundEmails as $email) {
-            $params = $serializer->decode($email->getParams(), 'json', ['json_decode_associative' => true]);
-
-            $bodyKey = array_search('body', array_column($params, 'key'));
-            $this->assertNotSame(false, $bodyKey);
-
-            $data = $params[$bodyKey];
-            $this->assertContains($string, $data['data']['value']);
+            $bodyHtml = $email->getHtmlLog();
+            $this->assertContains($string, $bodyHtml);
         }
     }
 
