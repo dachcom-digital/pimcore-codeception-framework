@@ -141,6 +141,7 @@ class PimcoreCore extends PimcoreCoreModule
      * Actor Function to boot symfony with a specific bundle configuration
      *
      * @param string $configuration
+     * @part services
      */
     public function haveABootedSymfonyConfiguration(string $configuration)
     {
