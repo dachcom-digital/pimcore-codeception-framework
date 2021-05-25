@@ -103,7 +103,6 @@ class PimcoreCore extends PimcoreCoreModule
         // we need to restore default config before starting a new test!
         $this->rebootKernelWithConfiguration(null);
         $this->kernelHasCustomConfig = false;
-
     }
 
     /**
@@ -194,7 +193,6 @@ class PimcoreCore extends PimcoreCoreModule
 
         // dispatch kernel booted event - will be used from services which need to reset state between tests
         $this->kernel->getContainer()->get('event_dispatcher')->dispatch(TestEvents::KERNEL_BOOTED);
-
     }
 
     /**

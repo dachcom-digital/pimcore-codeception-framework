@@ -20,6 +20,8 @@ class WebDriver extends Module\WebDriver
     }
 
     /**
+     * Actor Function to declare web driver download behaviour
+     *
      * @param null $path
      */
     public function setDownloadPathForWebDriver($path = null)
@@ -28,22 +30,28 @@ class WebDriver extends Module\WebDriver
             $path = FileGeneratorHelper::getWebdriverDownloadPath();
         }
 
-        $url = $this->webDriver->getCommandExecutor()->getAddressOfRemoteServer();
-        $uri = sprintf('/session/%s/chromium/send_command', $this->webDriver->getSessionID());
-
         $body = [
             'cmd'    => 'Page.setDownloadBehavior',
             'params' => ['behavior' => 'allow', 'downloadPath' => $path]
         ];
 
-        $client = new Client();
-        $response = $client->post($url . $uri, ['body' => json_encode($body)]);
+        $responseData = $this->sendWebDriverCommand($body);
 
-        try {
-            $responseData = json_decode($response->getBody()->getContents(), true);
-        } catch (\Exception $e) {
-            $responseData = [];
-        }
+        $this->assertArrayHasKey('status', $responseData);
+        $this->assertEquals(0, $responseData['status']);
+    }
+
+    /**
+     * Actor Function to clear web driver cache
+     */
+    public function clearWebDriverCache()
+    {
+        $body = [
+            'cmd'    => 'Network.clearBrowserCache',
+            'params' => ['params' => []]
+        ];
+
+        $responseData = $this->sendWebDriverCommand($body);
 
         $this->assertArrayHasKey('status', $responseData);
         $this->assertEquals(0, $responseData['status']);
@@ -59,5 +67,27 @@ class WebDriver extends Module\WebDriver
     public function seeAEditableConfiguration(string $name, string $type, array $options, $data = null, $selector = null)
     {
         $this->see(EditableHelper::generateEditableConfiguration($name, $type, $options, $data), $selector);
+    }
+
+    /**
+     * @param array $body
+     *
+     * @return array|mixed
+     */
+    protected function sendWebDriverCommand(array $body)
+    {
+        $url = $this->webDriver->getCommandExecutor()->getAddressOfRemoteServer();
+        $path = sprintf('/session/%s/chromium/send_command', $this->webDriver->getSessionID());
+
+        $client = new Client();
+        $response = $client->post($url . $path, ['body' => json_encode($body)]);
+
+        try {
+            $responseData = json_decode($response->getBody()->getContents(), true);
+        } catch (\Exception $e) {
+            $responseData = [];
+        }
+
+        return $responseData;
     }
 }
