@@ -214,6 +214,8 @@ class PimcoreCore extends PimcoreCoreModule
             $cacheDir = $this->kernel->getCacheDir();
 
             unlink($cacheDir . '/' . $class . '.php');
+
+            sleep(2);
         }
 
         $bundleTestPath = getenv('TEST_BUNDLE_TEST_DIR');
