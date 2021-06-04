@@ -6,9 +6,9 @@ use Codeception\Lib\ModuleContainer;
 use Codeception\TestInterface;
 use Codeception\Util\Debug;
 use Pimcore\Cache;
-use Pimcore\Config;
 use Pimcore\Event\TestEvents;
 use Pimcore\Tests\Helper\Pimcore as PimcoreCoreModule;
+use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Kernel;
 
@@ -42,9 +42,8 @@ class PimcoreCore extends PimcoreCoreModule
     /**
      * @inheritdoc
      */
-    public function _initialize()
+    public function _initialize(): void
     {
-        $this->setPimcoreEnvironment($this->config['environment']);
         $this->initializeKernel();
         $this->setupDbConnection();
         $this->setPimcoreCacheAvailability('disabled');
@@ -91,7 +90,7 @@ class PimcoreCore extends PimcoreCoreModule
     /**
      * @inheritDoc
      */
-    public function _after(TestInterface $test)
+    public function _after(TestInterface $test): void
     {
         parent::_after($test);
 
@@ -192,7 +191,7 @@ class PimcoreCore extends PimcoreCoreModule
         }
 
         // dispatch kernel booted event - will be used from services which need to reset state between tests
-        $this->kernel->getContainer()->get('event_dispatcher')->dispatch(TestEvents::KERNEL_BOOTED);
+        $this->kernel->getContainer()->get('event_dispatcher')->dispatch(new GenericEvent(),TestEvents::KERNEL_BOOTED);
     }
 
     /**
@@ -234,14 +233,6 @@ class PimcoreCore extends PimcoreCoreModule
         $resource = sprintf('%s/%s/%s', $bundleTestPath, '_etc/config/bundle', $configuration);
 
         $fileSystem->dumpFile($runtimeConfigDirConfig, file_get_contents($resource));
-    }
-
-    /**
-     * @param $env
-     */
-    protected function setPimcoreEnvironment($env)
-    {
-        Config::setEnvironment($env);
     }
 
     /**
@@ -290,7 +281,7 @@ class PimcoreCore extends PimcoreCoreModule
      *
      * @return array
      */
-    protected function getInternalDomains()
+    protected function getInternalDomains(): array
     {
         $internalDomains = [
             '/test-domain1.test/',

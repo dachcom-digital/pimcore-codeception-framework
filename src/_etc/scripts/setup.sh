@@ -11,11 +11,8 @@ mkdir -p $TEST_BUNDLE_TEST_DIR/_data/config
 ## release empty bundle config
 touch $TEST_BUNDLE_TEST_DIR/_data/config/config.yml
 
-## release parameters.yml
-cp $TEST_PROJECT_ROOT_DIR/app/config/parameters.example.yml $TEST_PROJECT_ROOT_DIR/app/config/parameters.yml
-
 ## move TestKernel
-cp $PIMCORE_CODECEPTION_FRAMEWORK/src/_support/App/TestKernel.php $TEST_PROJECT_ROOT_DIR/app/TestKernel.php
+cp $PIMCORE_CODECEPTION_FRAMEWORK/src/_support/App/TestKernel.php $TEST_PROJECT_ROOT_DIR/src/TestKernel.php
 
 ## Register test variables in .env
 echo "PIMCORE_KERNEL_CLASS=TestKernel" >> $TEST_PROJECT_ROOT_DIR/.env

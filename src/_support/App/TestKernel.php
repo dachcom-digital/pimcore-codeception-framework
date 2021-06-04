@@ -27,10 +27,6 @@ class TestKernel extends Kernel
     {
         $collection->addBundle(new WebProfilerBundle());
 
-        if (class_exists('\AppBundle\AppBundle')) {
-            $collection->addBundle(new \AppBundle\AppBundle());
-        }
-
         $testBundles = $this->getTestBundleConfig('bundles');
 
         if (is_array($testBundles)) {

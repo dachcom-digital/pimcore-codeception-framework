@@ -1,7 +1,14 @@
 # Pimcore Codeception Framework
 
-This Packages allows you to create fast and simple testing environments. It's also used by all pimcore Bundles created
-by [DACHCOM.DIGITAL](https://github.com/dachcom-digital?q=pimcore-).
+This Package allows you to create fast and simple testing environments. 
+It's also used by all pimcore Bundles created by [DACHCOM.DIGITAL](https://github.com/dachcom-digital?q=pimcore-).
+
+### Support Table
+
+| Branch           | Supported Pimcore Versions | Supported Symfony Versions |
+|------------------|----------------------------|----------------------------|
+| **2.0**          | `10.0`                     | `^5.2`                     |
+| **1.0**          | `6.6` - `6.9`              | `^4.4`, `^3.4`             |
 
 ## Configuration
 
@@ -35,17 +42,17 @@ include_once $bootstrap;
 
 ## Setup File
 
-Create a file called `config.yml` in `tests/_etc/config.yml`.
+Create a file called `config.yaml` in `tests/_etc/config.yaml`.
 
 ```yaml
 bundles:
     - { namespace: \MyTestBundle\MyTestBundle }
 setup_files:
-    - { path: app/config.yml, dest: ./app/config/config.yml }
-    - { path: app/system.yml, dest: ./var/config/system.yml }
-    - { path: app/controller/DefaultController.php, dest: ./src/AppBundle/Controller/DefaultController.php }
-    - { path: app/views/default.html.twig, dest: ./app/Resources/views/Default/default.html.twig }
-    - { path: app/views/snippet.html.twig, dest: ./app/Resources/views/Default/snippet.html.twig }
+    - { path: app/config.yaml, dest: ./app/config/config.yaml }
+    - { path: app/system.yaml, dest: ./var/config/system.yaml }
+    - { path: app/controller/DefaultController.php, dest: ./src/Controller/DefaultController.php }
+    - { path: app/templates/default.html.twig, dest: ./app/templates/default/default.html.twig }
+    - { path: app/templates/snippet.html.twig, dest: ./app/templates/default/snippet.html.twig }
 preload_files:
     - { path: Services/MySpecialTestService.php }
 additional_composer_packages:
@@ -65,7 +72,7 @@ additional_composer_packages:
 ## Bundle Configuration Files
 
 This Framework allows you to use multiple (bundle) configuration setups. You need to add at least one default config file
-called `default_config.yml` and store it in `/tests/_etc/config/bundle`.
+called `default_config.yaml` and store it in `/tests/_etc/config/bundle`.
 
 ### Using Bundle Configuration Files
 
