@@ -13,7 +13,6 @@ use Symfony\Component\Yaml\Yaml;
 class TestKernel extends Kernel
 {
     const PRELOAD_FILES = [
-        'App/Pimcore/TestConfig.php',
         'App/Session/MockFileSessionStorage.php',
         'DependencyInjection/MakeServicesPublicPass.php',
         'DependencyInjection/MonologChannelLoggerPass.php',

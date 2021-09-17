@@ -8,12 +8,10 @@ use Codeception\Exception\ModuleException;
 use Dachcom\Codeception\Helper\PimcoreCore;
 use Dachcom\Codeception\Helper\PimcoreUser;
 use Dachcom\Codeception\Util\EditableHelper;
-use Dachcom\Codeception\Util\VersionHelper;
 use Pimcore\Mail;
 use Pimcore\Model\AbstractModel;
 use Pimcore\Model\Document\Email;
 use Pimcore\Model\User;
-use Symfony\Bundle\SwiftmailerBundle\DataCollector\MessageDataCollector;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
 use Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -488,7 +486,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     {
         $link = $this->pimcoreCore->client->getInternalResponse()->getHeader('Link');
 
-        $this->assertInternalType('string', $link);
+        $this->assertIsString($link);
         $this->assertContains('rel="canonical"', $link);
     }
 

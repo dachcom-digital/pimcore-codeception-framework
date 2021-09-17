@@ -42,17 +42,17 @@ include_once $bootstrap;
 
 ## Setup File
 
-Create a file called `config.yaml` in `tests/_etc/config.yaml`.
+Create a file called `config.yml` in `tests/_etc/config.yml`.
 
 ```yaml
 bundles:
     - { namespace: \MyTestBundle\MyTestBundle }
 setup_files:
-    - { path: app/config.yaml, dest: ./app/config/config.yaml }
-    - { path: app/system.yaml, dest: ./var/config/system.yaml }
+    - { path: app/config.yml, dest: ./config/config.yaml }
+    - { path: app/system.yml, dest: ./var/config/system.yml }
     - { path: app/controller/DefaultController.php, dest: ./src/Controller/DefaultController.php }
-    - { path: app/templates/default.html.twig, dest: ./app/templates/default/default.html.twig }
-    - { path: app/templates/snippet.html.twig, dest: ./app/templates/default/snippet.html.twig }
+    - { path: app/templates/default.html.twig, dest: ./templates/default/default.html.twig }
+    - { path: app/templates/snippet.html.twig, dest: ./templates/default/snippet.html.twig }
 preload_files:
     - { path: Services/MySpecialTestService.php }
 additional_composer_packages:
@@ -72,7 +72,7 @@ additional_composer_packages:
 ## Bundle Configuration Files
 
 This Framework allows you to use multiple (bundle) configuration setups. You need to add at least one default config file
-called `default_config.yaml` and store it in `/tests/_etc/config/bundle`.
+called `default_config.yml` and store it in `/tests/_etc/config/bundle`.
 
 ### Using Bundle Configuration Files
 

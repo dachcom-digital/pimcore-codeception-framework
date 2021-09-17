@@ -113,11 +113,11 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
         \PHPUnit_Framework_Assert::assertNotEquals('', $responseContent, 'response is empty');
 
         $data = str_getcsv($responseContent, "\n");
-        \PHPUnit_Framework_Assert::assertInternalType('array', $data);
+        \PHPUnit_Framework_Assert::assertIsArray($data);
         \PHPUnit_Framework_Assert::assertGreaterThanOrEqual(1, count($data), 'csv data is empty');
 
         foreach ($data as $row) {
-            \PHPUnit_Framework_Assert::assertInternalType('array', str_getcsv($row));
+            \PHPUnit_Framework_Assert::assertIsArray(str_getcsv($row));
         }
     }
 }

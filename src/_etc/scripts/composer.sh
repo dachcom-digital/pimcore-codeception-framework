@@ -25,3 +25,21 @@ fi
 
 composer req pimcore/pimcore:$TEST_PIMCORE_VERSION symfony/symfony:$TEST_SYMFONY_VERSION $PACKAGES --no-interaction --no-scripts --no-update
 composer update --no-progress --prefer-dist --optimize-autoloader
+
+
+# install pimcore test infrastructure
+if [ ! -d "vendor/pimcore/pimcore/tests" ]; then
+
+  CURRENT_PIMCORE_VERSION=$(composer show pimcore/pimcore | grep 'version' | grep -o -E '\*\ .+' | cut -d' ' -f2 | cut -d',' -f1);
+  CURRENT_PIMCORE_HASH=$(composer show pimcore/pimcore | grep 'source' | grep -o -E '\git\ .+' | cut -d' ' -f2);
+
+  echo "Installing pimcore test data for version $CURRENT_PIMCORE_VERSION ($CURRENT_PIMCORE_HASH)"
+
+  git clone --depth 1 --filter=blob:none --no-checkout https://github.com/pimcore/pimcore
+  cd pimcore
+  git checkout $CURRENT_PIMCORE_HASH -- tests
+  cd ../
+  mv pimcore/tests vendor/pimcore/pimcore
+  rm -r pimcore
+
+fi
