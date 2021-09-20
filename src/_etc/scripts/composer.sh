@@ -9,8 +9,8 @@ eval "$(parse_yaml $TEST_BUNDLE_TEST_DIR/_etc/config.yml)"
 ## define structure (bundle is available under lib/test-bundle)
 ## add test-bundle composer.json to skeleton composer.json
 composer config repositories.local '{"type": "path", "url": "./lib/test-bundle", "options": {"symlink": true}}' --file composer.json
-composer config minimum-stability dev
-composer config prefer-stable true
+#composer config minimum-stability dev
+#composer config prefer-stable true
 
 PACKAGES=''
 NODE='additional_composer_packages'
@@ -29,9 +29,9 @@ if [ ! -z "$PACKAGES" ]; then
   echo "Installing pimcore $TEST_PIMCORE_VERSION with additional composer packages$PACKAGES"
 fi
 
-cat composer.json
+PACKAGE_GITHUB_REPOSITORY=$(echo $GITHUB_REPOSITORY |sed  s/pimcore-//)
 
-composer req pimcore/pimcore:$TEST_PIMCORE_VERSION $PACKAGES $GITHUB_REPOSITORY:@dev --no-interaction --no-scripts --no-update
+composer req pimcore/pimcore:$TEST_PIMCORE_VERSION $PACKAGES $PACKAGE_GITHUB_REPOSITORY:@dev --no-interaction --no-scripts --no-update
 
 cat composer.json
 
