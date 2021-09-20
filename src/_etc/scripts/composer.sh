@@ -6,6 +6,10 @@ source $PIMCORE_CODECEPTION_FRAMEWORK/src/_etc/scripts/yaml_reader.sh
 
 eval "$(parse_yaml $TEST_BUNDLE_TEST_DIR/_etc/config.yml)"
 
+## define structure (bundle is available under lib/test-bundle)
+## add test-bundle composer.json to skeleton composer.json
+composer config repositories.local '{"type": "path", "url": "./lib/test-bundle", "options": {"symlink": true}}' --file composer.json
+
 PACKAGES=''
 NODE='additional_composer_packages'
 
@@ -20,12 +24,8 @@ for CURRENT_CONFIG_NODE in ${__}; do
 done
 
 if [ ! -z "$PACKAGES" ]; then
-  echo "Installing pimcore $TEST_PIMCORE_VERSION and symfony $TEST_SYMFONY_VERSION with additional composer packages$PACKAGES"
+  echo "Installing pimcore $TEST_PIMCORE_VERSION with additional composer packages$PACKAGES"
 fi
-
-composer req pimcore/pimcore:$TEST_PIMCORE_VERSION symfony/symfony:$TEST_SYMFONY_VERSION $PACKAGES --no-interaction --no-scripts --no-update
-composer update --no-progress --prefer-dist --optimize-autoloader
-
 
 # install pimcore test infrastructure
 if [ ! -d "vendor/pimcore/pimcore/tests" ]; then
@@ -43,3 +43,6 @@ if [ ! -d "vendor/pimcore/pimcore/tests" ]; then
   rm -r pimcore
 
 fi
+
+composer req pimcore/pimcore:$TEST_PIMCORE_VERSION $PACKAGES $GITHUB_REPOSITORY:@dev --no-interaction --no-scripts --no-update
+composer update --no-progress --prefer-dist --optimize-autoloader
