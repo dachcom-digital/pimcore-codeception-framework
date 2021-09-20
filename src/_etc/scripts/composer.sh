@@ -27,6 +27,12 @@ if [ ! -z "$PACKAGES" ]; then
   echo "Installing pimcore $TEST_PIMCORE_VERSION with additional composer packages$PACKAGES"
 fi
 
+composer req pimcore/pimcore:$TEST_PIMCORE_VERSION $PACKAGES $GITHUB_REPOSITORY:@dev --no-interaction --no-scripts --no-update
+
+cat composer.json
+
+composer update --no-progress --prefer-dist --optimize-autoloader
+
 # install pimcore test infrastructure
 if [ ! -d "vendor/pimcore/pimcore/tests" ]; then
 
@@ -43,6 +49,3 @@ if [ ! -d "vendor/pimcore/pimcore/tests" ]; then
   rm -r pimcore
 
 fi
-
-composer req pimcore/pimcore:$TEST_PIMCORE_VERSION $PACKAGES $GITHUB_REPOSITORY:@dev --no-interaction --no-scripts --no-update
-composer update --no-progress --prefer-dist --optimize-autoloader
