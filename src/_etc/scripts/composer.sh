@@ -11,7 +11,7 @@ eval "$(parse_yaml $TEST_BUNDLE_TEST_DIR/_etc/config.yml)"
 composer config repositories.local '{"type": "path", "url": "./lib/test-bundle", "options": {"symlink": true}}' --file composer.json
 
 # add TestKernel to autoload-dev
-sed -i '$s%}%,"autoload-dev":{"classmap" : ["src/TestKernel.php"]} }%' public/composer.json
+sed -i '$s%}%,"autoload-dev":{"classmap" : ["src/TestKernel.php"]} }%' composer.json
 
 # define variables
 PACKAGES=''
