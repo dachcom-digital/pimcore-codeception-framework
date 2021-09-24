@@ -789,11 +789,7 @@ class PimcoreBackend extends Module
             throw new ModuleException($this, sprintf('editable generator error: %s', $e->getMessage()));
         }
 
-        if (VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0')) {
-            $document->setEditables($editables);
-        } else {
-            $document->setElements($editables);
-        }
+        $document->setEditables($editables);
 
         if (method_exists($document, 'setMissingRequiredEditable')) {
             $document->setMissingRequiredEditable(false);
@@ -807,7 +803,7 @@ class PimcoreBackend extends Module
 
         \Pimcore::collectGarbage();
 
-        $this->assertCount(count($editables), VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0') ? $document->getEditables() : $document->getElements());
+        $this->assertCount(count($editables), $document->getEditables());
     }
 
     /**
@@ -831,11 +827,7 @@ class PimcoreBackend extends Module
             throw new ModuleException($this, sprintf('area generator error: %s', $e->getMessage()));
         }
 
-        if (VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0')) {
-            $document->setEditables($editables);
-        } else {
-            $document->setElements($editables);
-        }
+        $document->setEditables($editables);
 
         if (method_exists($document, 'setMissingRequiredEditable')) {
             $document->setMissingRequiredEditable(false);
@@ -849,7 +841,7 @@ class PimcoreBackend extends Module
 
         \Pimcore::collectGarbage();
 
-        $this->assertCount(count($editables), VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0') ? $document->getEditables() : $document->getElements());
+        $this->assertCount(count($editables), $document->getEditables());
     }
 
     /**
@@ -1030,8 +1022,7 @@ class PimcoreBackend extends Module
         $defaults = [
             'id'               => 1,
             'name'             => $name,
-            'module'           => 'AppBundle',
-            'controller'       => '@AppBundle\\Controller\\DefaultController',
+            'controller'       => sprintf('App\\Controller\\DefaultController::%s', $params['action'] ?? 'defaultAction'),
             'defaults'         => null,
             'siteId'           => [],
             'priority'         => 0,
@@ -1039,6 +1030,8 @@ class PimcoreBackend extends Module
             'creationDate'     => 1545383519,
             'modificationDate' => 1545383619
         ];
+
+        unset($params['action']);
 
         $data = array_merge($defaults, $params);
 
@@ -1169,17 +1162,17 @@ class PimcoreBackend extends Module
      */
     public function generatePageDocument($key = 'test-page', $params = [], $locale = null)
     {
-        if (!isset($params['controller'])) {
-            $params['controller'] = '@AppBundle\Controller\DefaultController';
-        }
+        $controller = sprintf('%s::%s',
+            $params['controller'] ?? 'App\Controller\DefaultController',
+            $params['action'] ?? 'defaultAction',
+        );
 
-        if (!isset($params['action'])) {
-            $params['action'] = 'default';
-        }
+        unset($params['controller'], $params['action']);
 
         $document = TestHelper::createEmptyDocumentPage('', false);
 
         $document->setKey($key);
+        $document->setController($controller);
         $document->setPublished(true);
         $document->setProperty('navigation_title', 'text', $key);
         $document->setProperty('navigation_name', 'text', $key);
@@ -1209,16 +1202,22 @@ class PimcoreBackend extends Module
      */
     public function generateSnippet($key = 'test-snippet', $params = [], $locale = null)
     {
-        $document = new Document\Snippet();
+        $controller = sprintf('%s::%s',
+            $params['controller'] ?? 'App\Controller\SnippetController',
+            $params['action'] ?? 'defaultAction',
+        );
 
+        unset($params['controller'], $params['action']);
+
+        $document = new Document\Snippet();
+        $document->setKey($key);
+        $document->setController($controller);
         $document->setType('snippet');
         $document->setParentId(1);
         $document->setUserOwner(1);
         $document->setUserModification(1);
         $document->setCreationDate(time());
         $document->setPublished(true);
-
-        $document->setKey($key);
 
         if ($locale !== null) {
             $document->setProperty('language', 'text', $locale, false, 1);
@@ -1240,9 +1239,18 @@ class PimcoreBackend extends Module
      */
     public function generateEmailDocument($key = 'test-email', array $params = [], $locale = null)
     {
-        $documentKey = uniqid(sprintf('%s-', $key));
+        $controller = sprintf('%s::%s',
+            $params['controller'] ?? 'App\Controller\EmailController',
+            $params['action'] ?? 'defaultAction',
+        );
+
+        unset($params['controller'], $params['action']);
+
+        $documentKey = uniqid(sprintf('%s-', $key), true);
 
         $document = new Document\Email();
+        $document->setKey($documentKey);
+        $document->setController($controller);
         $document->setType('email');
         $document->setParentId(1);
         $document->setUserOwner(1);
@@ -1250,7 +1258,6 @@ class PimcoreBackend extends Module
         $document->setCreationDate(time());
         $document->setPublished(true);
 
-        $document->setKey($documentKey);
         $document->setProperty('test_identifier', 'text', $documentKey, false, false);
 
         if ($locale !== null) {

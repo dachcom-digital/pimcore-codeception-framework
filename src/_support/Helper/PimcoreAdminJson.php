@@ -6,7 +6,7 @@ use Codeception\Exception\ModuleException;
 use Codeception\Lib\InnerBrowser;
 use Codeception\Lib\Interfaces\DependsOnModule;
 use Codeception\Module;
-use Codeception\PHPUnit\Constraint\JsonContains;
+use Dachcom\Codeception\Constraint\JsonContains;
 
 class PimcoreAdminJson extends Module implements DependsOnModule
 {
