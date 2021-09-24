@@ -12,8 +12,8 @@ use Symfony\Component\Yaml\Yaml;
 
 class TestKernel extends Kernel
 {
-    const PRELOAD_FILES = [
-        'App/Session/MockFileSessionStorage.php',
+    public const PRELOAD_FILES = [
+        //'App/Session/MockFileSessionStorage.php',
         'DependencyInjection/MakeServicesPublicPass.php',
         'DependencyInjection/MonologChannelLoggerPass.php',
         'DependencyInjection/ServiceChangePass.php',

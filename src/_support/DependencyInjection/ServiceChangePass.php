@@ -21,6 +21,7 @@ class ServiceChangePass implements CompilerPassInterface
      */
     protected function changeSessionMockFileClass(ContainerBuilder $container)
     {
-        $container->getDefinition('session.storage.mock_file')->setClass(MockFileSessionStorage::class);
+        // @todo: check if this has been resolved.
+        //$container->getDefinition('session.storage.mock_file')->setClass(MockFileSessionStorage::class);
     }
 }

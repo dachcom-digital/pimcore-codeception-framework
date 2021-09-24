@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 /**
  * Overwritten until https://github.com/symfony/symfony/pull/39167 has been resolved!
+ * @deprecated
  */
 class MockFileSessionStorage extends MockArraySessionStorage
 {
