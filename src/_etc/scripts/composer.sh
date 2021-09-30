@@ -38,7 +38,7 @@ if [ ! -z "$PACKAGES" ]; then
 fi
 
 composer req pimcore/pimcore:$TEST_PIMCORE_VERSION $PACKAGES $PACKAGE_GITHUB_REPOSITORY:@dev --no-interaction --no-scripts --no-update
-composer update --no-progress --prefer-dist --optimize-autoloader
+composer update --no-progress --prefer-dist --no-scripts
 
 # install pimcore test infrastructure
 if [ ! -d "vendor/pimcore/pimcore/tests" ]; then
