@@ -7,7 +7,7 @@ It's also used by all pimcore Bundles created by [DACHCOM.DIGITAL](https://githu
 
 | Branch           | Supported Pimcore Versions | Supported Symfony Versions |
 |------------------|----------------------------|----------------------------|
-| **2.0**          | `10.0`                     | `^5.2`                     |
+| **2.0**          | `10.1`                     | `^5.3`                     |
 | **1.0**          | `6.6` - `6.9`              | `^4.4`, `^3.4`             |
 
 ## Configuration
@@ -126,7 +126,7 @@ If you want to provide some classes to install, all the definitions need to stor
 | `$I->deleteObjectVersion(Version $version)` | |
 | `$I->publishObjectVersion(Version $version)` | |
 | `$I->moveObjectToRecycleBin(DataObject $object)` | |
-| `restoreObjectFromRecycleBin(DataObject $object, Item $item)` | |
+| `$I->restoreObjectFromRecycleBin(DataObject $object, Item $item)` | |
 | `$I->haveAPimcoreObjectFolder($key = 'bundle-object-folder-test', array $params = [])` | |
 | `$I->haveAPimcoreAsset($key = 'bundle-asset-test', array $params = [])` | |
 | `$I->haveASubPimcoreAsset(Asset\Folder $parent, $key = 'bundle-sub-asset-test', array $params = [])` | |
@@ -172,12 +172,46 @@ If you want to provide some classes to install, all the definitions need to stor
 | `$I->haveAUser($username)` | |
 | `$I->haveAUserWithAdminRights($username)` | |
 
-### [MODULE] Unit
+***
+
+### [MODULE] Browser/PhpBrowser
 
 | Name                                  | Description        |
 |---------------------------------------|--------------------|
-| -- | |
+| `$I->amOnPageInEditMode(string $page)` | |
+| `$I->amOnPageWithLocale(string $url, ?string $locale)` | |
+| `$I->amOnPageWithLocaleAndCountry(string $url, ?string $locale, string $country)` | |
+| `$I->seeDownloadLink(AbstractModel $element, string $link)` | |
+| `$I->seeDownloadLinkZip(string $fileName, string $link)` | |
+| `$I->amOnStaticRoute(string $routeName, array $args)` | |
+| `$I->seeCurrentHostEquals(string $host)` | |
+| `$I->seeAEditableConfiguration(string $name, string $type, array $options, $data = null, $selector = null)` | |
+| `$I->seeEmailIsSentTo(string $recipient, Email $email)` | |
+| `$I->seeSentEmailHasPropertyValue(Email $email, string $property, string $value)` | |
+| `$I->seeEmailSubmissionType(string $submissionType, string $type, Email $email)` | |
+| `$I->seeEmptyEmailSubmissionType(string $type, Email $email)` | |
+| `$I->seeInSubmittedEmailBody(string $string, Email $email)` | |
+| `$I->dontSeeInSubmittedEmailBody(string $string, Email $email)` | |
+| `$I->seeInSubmittedEmailBodyOfType(string $string, string $type, Email $email)` | |
+| `$I->dontSeeInSubmittedEmailBodyOfType(string $string, string $type, Email $email)` | |
+| `$I->amLoggedInAsFrontendUser(?UserInterface $user, string $firewallName)` | |
+| `$I->amLoggedInAs(string $username)` | |
+| `$I->sendTokenAjaxPostRequest(string $url, array $params = [])` | |
+| `$I->seeLastRequestIsInPath(string $expectedPath)` | |
+| `$I->seeCanonicalLinkInResponse()` | |
+| `$I->dontSeeCanonicalLinkInResponse()` | |
+| `$I->seePimcoreOutputCacheDisabledHeader(string $disabledReasonMessage)` | |
+| `$I->dontSeePimcoreOutputCacheDisabledHeader()` | |
+| `$I->seePimcoreOutputCacheDate()` | |
+| `$I->seeEmptySessionBag(string $bagName)` | |
+| `$I->seePropertiesInLastFragmentRequest(array $properties = [])` | |
 
-## API
+### [MODULE] Browser/WebDriver
 
-TBD
+| Name                                  | Description        |
+|---------------------------------------|--------------------|
+| `$I->amOnPageInEditMode(string $page)` | |
+| `$I->setDownloadPathForWebDriver($path = null)` | |
+| `$I->clearWebDriverCache()` | |
+| `$I->seeAEditableConfiguration(string $name, string $type, array $options, $data = null, $selector = null)` | |
+| `$I->sendWebDriverCommand(array $body)` | |

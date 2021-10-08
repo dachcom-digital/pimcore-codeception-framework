@@ -165,7 +165,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     }
 
     /**
-     * Actor Function to see a editable on current page
+     * Actor Function to see an editable on current page
      */
     public function seeAEditableConfiguration(string $name, string $type, array $options, $data = null, $selector = null): void
     {
@@ -227,7 +227,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     }
 
     /**
-     * Actor Function to see if given email has been with specified address
+     * Actor Function to see if given email has been submitted with specific charset of given type
      * Only works with PhpBrowser (Symfony Client)
      */
     public function seeEmailSubmissionType(string $submissionType, string $type, Email $email): void
@@ -237,6 +237,20 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         foreach ($collectedMessages as $message) {
             $contentType = $type === 'html' ? $message->getHtmlCharset() : $message->getTextCharset();
             $this->assertEquals($submissionType, $contentType);
+        }
+    }
+
+    /**
+     * Actor Function to see if given email has no specific charset of given type
+     * Only works with PhpBrowser (Symfony Client)
+     */
+    public function seeEmptyEmailSubmissionType(string $type, Email $email): void
+    {
+        $collectedMessages = $this->getCollectedEmails($email);
+
+        foreach ($collectedMessages as $message) {
+            $contentType = $type === 'html' ? $message->getHtmlCharset() : $message->getTextCharset();
+            $this->assertEmpty($contentType);
         }
     }
 
@@ -253,7 +267,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     }
 
     /**
-     * Actor Function to see if given string is in real submitted mail body
+     * Actor Function to see if given string is not in real submitted mail body
      */
     public function dontSeeInSubmittedEmailBody(string $string, Email $email): void
     {
@@ -265,57 +279,28 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     }
 
     /**
-     * Actor Function to see if message has children
+     * Actor Function to see if given string is in mail body of type html or text
      */
-    public function haveSubmittedEmailChildren(Email $email): void
+    public function seeInSubmittedEmailBodyOfType(string $string, string $type, Email $email): void
     {
         $collectedMessages = $this->getCollectedEmails($email);
 
         foreach ($collectedMessages as $message) {
-            $this->assertGreaterThan(0, count($message->getChildren()));
+            $body = $type === 'html' ? $message->getHtmlBody() : $message->getTextBody();
+            $this->assertStringContainsString($string, is_null($body) ? '' : $body);
         }
     }
 
     /**
-     * Actor Function to see if message has no children
+     * Actor Function to see if given string is not in mail body of type html or text
      */
-    public function dontHaveSubmittedEmailChildren(Email $email): void
+    public function dontSeeInSubmittedEmailBodyOfType(string $string, string $type, Email $email): void
     {
         $collectedMessages = $this->getCollectedEmails($email);
 
         foreach ($collectedMessages as $message) {
-            $this->assertEquals(0, count($message->getChildren()));
-        }
-    }
-
-    /**
-     * Actor Function to see if given string is in real submitted child body
-     */
-    public function seeInSubmittedEmailChildrenBody(string $string, Email $email): void
-    {
-        $collectedMessages = $this->getCollectedEmails($email);
-
-        foreach ($collectedMessages as $message) {
-
-            $this->assertGreaterThan(0, count($message->getChildren()));
-
-            foreach ($message->getChildren() as $child) {
-                $this->assertContains($string, is_null($child->getBody()) ? '' : $child->getBody());
-            }
-        }
-    }
-
-    /**
-     * Actor Function to see if given string is not in real submitted child body
-     */
-    public function dontSeeInSubmittedEmailChildrenBody(string $string, Email $email): void
-    {
-        $collectedMessages = $this->getCollectedEmails($email);
-
-        foreach ($collectedMessages as $message) {
-            foreach ($message->getChildren() as $child) {
-                $this->assertNotContains($string, is_null($child->getBody()) ? '' : $child->getBody());
-            }
+            $body = $type === 'html' ? $message->getHtmlBody() : $message->getTextBody();
+            $this->assertStringNotContainsString($string, is_null($body) ? '' : $body);
         }
     }
 

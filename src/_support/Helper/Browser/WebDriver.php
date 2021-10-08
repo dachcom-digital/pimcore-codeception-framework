@@ -53,11 +53,17 @@ class WebDriver extends Module\WebDriver
         $this->assertEquals(0, $responseData['status']);
     }
 
+    /**
+     * Actor Function to see an editable on current page
+     */
     public function seeAEditableConfiguration(string $name, string $type, array $options, $data = null, $selector = null): void
     {
         $this->see(EditableHelper::generateEditableConfiguration($name, $type, $options, $data), $selector);
     }
 
+    /**
+     * Actor Function to send command to a web driver
+     */
     protected function sendWebDriverCommand(array $body): array
     {
         $url = $this->webDriver->getCommandExecutor()->getAddressOfRemoteServer();
