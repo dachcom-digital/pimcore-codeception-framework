@@ -3,28 +3,15 @@
 namespace Dachcom\Codeception\Util;
 
 use Pimcore\Model\Document\Editable;
+use Pimcore\Model\Document\Editable\Areablock;
 
 class EditableHelper
 {
-    const AREA_TEST_NAMESPACE = 'bundleTestArea';
+    public const AREA_TEST_NAMESPACE = 'bundleTestArea';
 
-    /**
-     * @param string $areaName
-     * @param array  $editables
-     *
-     * @return array
-     * @throws \Exception
-     */
-    public static function generateEditablesForArea(string $areaName, array $editables = [])
+    public static function generateEditablesForArea(string $areaName, array $editables = []): array
     {
-        if (VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0')) {
-            $blockAreaClass = 'Pimcore\Model\Document\Editable\Areablock';
-        } else {
-            $blockAreaClass = 'Pimcore\Model\Document\Tag\Areablock';
-        }
-
-        /** @var Editable $blockArea */
-        $blockArea = new $blockAreaClass();
+        $blockArea = new Areablock();
         $blockArea->setName(self::AREA_TEST_NAMESPACE);
         $blockArea->setDataFromEditmode([
             [
@@ -39,21 +26,8 @@ class EditableHelper
         return array_merge([$blockArea->getName() => $blockArea], $editables);
     }
 
-    /**
-     * @param array       $editables
-     * @param string|null $editableNamespace
-     *
-     * @return array
-     * @throws \Exception
-     */
-    public static function generateEditables(array $editables = [], ?string $editableNamespace = null)
+    public static function generateEditables(array $editables = [], ?string $editableNamespace = null): array
     {
-        if (VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0')) {
-            $namespace = 'Pimcore\Model\Document\Editable';
-        } else {
-            $namespace = 'Pimcore\Model\Document\Tag';
-        }
-
         if (count($editables) === 0) {
             return [];
         }
@@ -62,7 +36,7 @@ class EditableHelper
         foreach ($editables as $editableName => $editableConfig) {
 
             $editableType = $editableConfig['type'] ?: 'unknown';
-            $elementClass = sprintf('%s\%s', $namespace, ucfirst($editableType));
+            $elementClass = sprintf('Pimcore\Model\Document\Editable\%s', ucfirst($editableType));
 
             if (!class_exists($elementClass)) {
                 throw new \Exception(sprintf('Editable type %s does not exist', $elementClass));
@@ -96,15 +70,7 @@ class EditableHelper
         return $elements;
     }
 
-    /**
-     * @param string $name
-     * @param string $type
-     * @param array  $options
-     * @param null   $data
-     *
-     * @return string
-     */
-    public static function generateEditableConfiguration(string $name, string $type, array $options, $data = null)
+    public static function generateEditableConfiguration(string $name, string $type, array $options, $data = null): string
     {
         $editableConfig = [
             'id'       => sprintf('pimcore_editable_%s%s1%s%s', self::AREA_TEST_NAMESPACE, '_', '_', $name),
@@ -132,8 +98,6 @@ class EditableHelper
             ]);
         }
 
-        $data = sprintf('%s.push(%s);', $configName, json_encode($editableConfig, JSON_PRETTY_PRINT));
-
-        return $data;
+        return sprintf('%s.push(%s);', $configName, json_encode($editableConfig, JSON_PRETTY_PRINT));
     }
 }

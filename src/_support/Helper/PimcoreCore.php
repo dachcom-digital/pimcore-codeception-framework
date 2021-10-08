@@ -14,21 +14,11 @@ use Symfony\Component\HttpKernel\Kernel;
 
 class PimcoreCore extends PimcoreCoreModule
 {
-    const DEFAULT_CONFIG_FILE = 'config_default.yml';
+    public const DEFAULT_CONFIG_FILE = 'config_default.yml';
 
-    /**
-     * @var bool
-     */
-    protected $kernelHasCustomConfig = false;
+    protected bool $kernelHasCustomConfig = false;
+    protected bool $kernelHasCustomSuiteConfig = false;
 
-    /**
-     * @var bool
-     */
-    protected $kernelHasCustomSuiteConfig = false;
-
-    /**
-     * @inheritDoc
-     */
     public function __construct(ModuleContainer $moduleContainer, $config = null)
     {
         $this->config = array_merge($this->config, [
@@ -39,9 +29,6 @@ class PimcoreCore extends PimcoreCoreModule
         parent::__construct($moduleContainer, $config);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function _initialize(): void
     {
         $this->initializeKernel();
@@ -49,9 +36,6 @@ class PimcoreCore extends PimcoreCoreModule
         $this->setPimcoreCacheAvailability('disabled');
     }
 
-    /**
-     * @inheritdoc
-     */
     public function _beforeSuite($settings = [])
     {
         parent::_beforeSuite($settings);
@@ -70,9 +54,6 @@ class PimcoreCore extends PimcoreCoreModule
         $this->rebootKernelWithConfiguration($configuration);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function _afterSuite()
     {
         parent::_afterSuite();
@@ -87,9 +68,6 @@ class PimcoreCore extends PimcoreCoreModule
         $this->kernelHasCustomSuiteConfig = false;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function _after(TestInterface $test): void
     {
         parent::_after($test);
@@ -104,14 +82,9 @@ class PimcoreCore extends PimcoreCoreModule
         $this->kernelHasCustomConfig = false;
     }
 
-    /**
-     * @param string   $exception
-     * @param string   $message
-     * @param \Closure $callback
-     */
-    public function seeException($exception, $message, \Closure $callback)
+    public function seeException(string $exception, ?string $message, \Closure $callback): void
     {
-        $function = function () use ($callback, $exception, $message) {
+        $function = static function () use ($callback, $exception, $message) {
             try {
 
                 $callback();
@@ -138,18 +111,14 @@ class PimcoreCore extends PimcoreCoreModule
     /**
      * Actor Function to boot symfony with a specific bundle configuration
      *
-     * @param string $configuration
      * @part services
      */
-    public function haveABootedSymfonyConfiguration(string $configuration)
+    public function haveABootedSymfonyConfiguration(string $configuration): void
     {
         $this->kernelHasCustomConfig = true;
         $this->rebootKernelWithConfiguration($configuration);
     }
 
-    /**
-     * @inheritdoc
-     */
     protected function initializeKernel()
     {
         $maxNestingLevel = 200; // Symfony may have very long nesting level
@@ -194,19 +163,13 @@ class PimcoreCore extends PimcoreCoreModule
         $this->kernel->getContainer()->get('event_dispatcher')->dispatch(new GenericEvent(),TestEvents::KERNEL_BOOTED);
     }
 
-    /**
-     * @param string|null $configFile
-     */
-    protected function rebootKernelWithConfiguration($configFile = null)
+    protected function rebootKernelWithConfiguration(?string $configFile = null): void
     {
         $this->setConfiguration($configFile);
         $this->getKernel()->reboot($this->getKernel()->getCacheDir());
     }
 
-    /**
-     * @param null|string $configuration
-     */
-    protected function setConfiguration($configuration = null)
+    protected function setConfiguration(?string $configuration = null): void
     {
         if ($this->kernel !== null && $this->getContainer() !== null) {
             $class = $this->getContainer()->getParameter('kernel.container_class');
@@ -235,10 +198,7 @@ class PimcoreCore extends PimcoreCoreModule
         $fileSystem->dumpFile($runtimeConfigDirConfig, file_get_contents($resource));
     }
 
-    /**
-     * @param string $state
-     */
-    protected function setPimcoreCacheAvailability($state = 'disabled')
+    protected function setPimcoreCacheAvailability(string $state = 'disabled'): void
     {
         if ($state === 'disabled') {
             Cache::disable();
@@ -247,7 +207,7 @@ class PimcoreCore extends PimcoreCoreModule
         }
     }
 
-    protected function clearCache()
+    protected function clearCache(): void
     {
         // not required anymore in S4.
         if (Kernel::MAJOR_VERSION > 3) {
@@ -276,10 +236,7 @@ class PimcoreCore extends PimcoreCoreModule
 
     /**
      * Override symfony internal Domains check.
-     *
      * We're able to allow different hosts via pimcore sites.
-     *
-     * @return array
      */
     protected function getInternalDomains(): array
     {

@@ -14,7 +14,6 @@ use InvalidArgumentException;
 class JsonContains extends Constraint
 {
     protected array $jsonArray = [];
-
     protected mixed $expected;
 
     public function __construct(array $expected)
@@ -32,7 +31,7 @@ class JsonContains extends Constraint
             throw new InvalidArgumentException('$jsonString param must be a string.');
         }
 
-        $jsonDecode = json_decode($other, true);
+        $jsonDecode = json_decode($other, true, 512, JSON_THROW_ON_ERROR);
 
         if (!is_array($jsonDecode)) {
             $jsonDecode = [$jsonDecode];
@@ -73,7 +72,7 @@ class JsonContains extends Constraint
         return false;
     }
 
-    public function containsArray(array $needle)
+    public function containsArray(array $needle): bool
     {
         return (new ArrayContainsComparator($this->jsonArray))->containsArray($needle);
     }

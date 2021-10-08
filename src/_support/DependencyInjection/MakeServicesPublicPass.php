@@ -7,14 +7,11 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class MakeServicesPublicPass implements CompilerPassInterface
 {
-    /**
-     * @param ContainerBuilder $container
-     */
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $prefix = getenv('TEST_BUNDLE_NAME');
-        $serviceIds = array_filter($container->getServiceIds(), function (string $id) use ($prefix) {
-            return strpos($id, $prefix) === 0;
+        $serviceIds = array_filter($container->getServiceIds(), static function (string $id) use ($prefix) {
+            return str_starts_with($id, $prefix);
         });
 
         foreach ($serviceIds as $serviceId) {

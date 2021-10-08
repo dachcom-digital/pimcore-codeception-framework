@@ -8,9 +8,6 @@ use Codeception\Module;
 
 class PimcoreBundleCore extends Module
 {
-    /**
-     * @inheritDoc
-     */
     public function __construct(ModuleContainer $moduleContainer, $config = null)
     {
         $this->config = array_merge($this->config, [
@@ -20,11 +17,6 @@ class PimcoreBundleCore extends Module
         parent::__construct($moduleContainer, $config);
     }
 
-    /**
-     * @param array $settings
-     *
-     * @throws ModuleException
-     */
     public function _beforeSuite($settings = [])
     {
         parent::_beforeSuite($settings);
@@ -34,12 +26,7 @@ class PimcoreBundleCore extends Module
         }
     }
 
-    /**
-     * @param $settings
-     *
-     * @throws ModuleException
-     */
-    protected function installBundle($settings)
+    protected function installBundle(array $settings): void
     {
         /** @var PimcoreCore $pimcoreModule */
         $pimcoreModule = $this->getModule('\\' . PimcoreCore::class);

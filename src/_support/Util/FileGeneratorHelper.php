@@ -7,11 +7,7 @@ use Symfony\Component\Finder\Finder;
 
 class FileGeneratorHelper
 {
-    /**
-     * @param     $fileName
-     * @param int $fileSizeInMb
-     */
-    public static function generateDummyFile($fileName, $fileSizeInMb = 1)
+    public static function generateDummyFile(string $fileName, int $fileSizeInMb = 1): void
     {
         $dataDir = self::getStoragePath();
 
@@ -26,7 +22,7 @@ class FileGeneratorHelper
         fclose($fp);
     }
 
-    public static function preparePaths()
+    public static function preparePaths(): void
     {
         $fs = new Filesystem();
         $dataDir = codecept_data_dir();
@@ -40,33 +36,24 @@ class FileGeneratorHelper
         }
     }
 
-    /**
-     * @return string
-     */
-    public static function getStoragePath()
+    public static function getStoragePath(): string
     {
         return codecept_data_dir() . 'generated' . DIRECTORY_SEPARATOR;
     }
 
-    /**
-     * @return string
-     */
-    public static function getDownloadPath()
+    public static function getDownloadPath(): string
     {
         return codecept_data_dir() . 'downloads' . DIRECTORY_SEPARATOR;
     }
 
-    /**
-     * @return string
-     */
-    public static function getWebdriverDownloadPath()
+    public static function getWebdriverDownloadPath(): string
     {
         return getenv('WEBDRIVER_DOWNLOAD_PATH') !== false
             ? getenv('WEBDRIVER_DOWNLOAD_PATH')
             : codecept_data_dir() . 'downloads' . DIRECTORY_SEPARATOR;
     }
 
-    public static function cleanUp()
+    public static function cleanUp(): void
     {
         $finder = new Finder();
         $fs = new Filesystem();

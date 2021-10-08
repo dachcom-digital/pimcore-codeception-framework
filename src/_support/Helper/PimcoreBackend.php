@@ -10,7 +10,6 @@ use Dachcom\Codeception\Helper\Browser\PhpBrowser;
 use Dachcom\Codeception\Util\EditableHelper;
 use Dachcom\Codeception\Util\FileGeneratorHelper;
 use Dachcom\Codeception\Util\SystemHelper;
-use Dachcom\Codeception\Util\VersionHelper;
 use Pimcore\Model\Asset;
 use Pimcore\Model\DataObject;
 use Pimcore\Model\Element\ElementInterface;
@@ -19,7 +18,7 @@ use Pimcore\Model\Redirect;
 use Pimcore\Model\Site;
 use Pimcore\Model\Staticroute;
 use Pimcore\Model\Tool\Email\Log;
-use Pimcore\Model\Translation\Website;
+use Pimcore\Model\Translation;
 use Pimcore\Tests\Helper\ClassManager;
 use Pimcore\Tests\Util\TestHelper;
 use Pimcore\Model\Document;
@@ -30,9 +29,6 @@ use Symfony\Component\Serializer\Serializer;
 
 class PimcoreBackend extends Module
 {
-    /**
-     * @param TestInterface $test
-     */
     public function _before(TestInterface $test)
     {
         FileGeneratorHelper::preparePaths();
@@ -40,9 +36,6 @@ class PimcoreBackend extends Module
         parent::_before($test);
     }
 
-    /**
-     * @param TestInterface $test
-     */
     public function _after(TestInterface $test)
     {
         SystemHelper::cleanUp();
@@ -53,22 +46,15 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a Page Document
-     *
-     * @param string      $key
-     * @param array       $params
-     * @param null|string $locale
-     *
-     * @return Document\Page
-     * @throws \Exception
      */
-    public function haveAPageDocument($key = 'bundle-page-test', array $params = [], $locale = null)
+    public function haveAPageDocument(string $key = 'bundle-page-test', array $params = [], ?string $locale = null): Document\Page
     {
         $document = $this->generatePageDocument($key, $params, $locale);
 
         try {
             $document->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving document page. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving document page. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(Document\Page::class, Document\Page::getById($document->getId()));
@@ -78,16 +64,8 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a Child Page Document
-     *
-     * @param Document    $parent
-     * @param string      $key
-     * @param array       $params
-     * @param null|string $locale
-     *
-     * @return Document\Page
-     * @throws \Exception
      */
-    public function haveASubPageDocument(Document $parent, $key = 'bundle-sub-page-test', array $params = [], $locale = null)
+    public function haveASubPageDocument(Document $parent, string $key = 'bundle-sub-page-test', array $params = [], ?string $locale = null): Document\Page
     {
         $document = $this->generatePageDocument($key, $params, $locale);
         $document->setParentId($parent->getId());
@@ -95,7 +73,7 @@ class PimcoreBackend extends Module
         try {
             $document->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving child document page. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving child document page. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(Document\Page::class, Document\Page::getById($document->getId()));
@@ -105,12 +83,8 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a language connection
-     *
-     * @param Document\Page $sourceDocument
-     * @param Document\Page $targetDocument
-     *
      */
-    public function haveTwoConnectedDocuments(Document\Page $sourceDocument, Document\Page $targetDocument)
+    public function haveTwoConnectedDocuments(Document\Page $sourceDocument, Document\Page $targetDocument): void
     {
         $service = new Document\Service();
         $service->addTranslation($sourceDocument, $targetDocument);
@@ -118,12 +92,8 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to disable a document
-     *
-     * @param Document $document
-     *
-     * @return Document
      */
-    public function haveAUnPublishedDocument(Document $document)
+    public function haveAUnPublishedDocument(Document $document): Document
     {
         if (method_exists($document, 'setMissingRequiredEditable')) {
             $document->setMissingRequiredEditable(false);
@@ -134,7 +104,7 @@ class PimcoreBackend extends Module
         try {
             $document->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while un-publishing document. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while un-publishing document. message was: %s', $e->getMessage()));
         }
 
         return $document;
@@ -142,20 +112,15 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to move a document
-     *
-     * @param Document $document
-     * @param Document $parentDocument
-     *
-     * @return Document
      */
-    public function moveDocument(Document $document, Document $parentDocument)
+    public function moveDocument(Document $document, Document $parentDocument): Document
     {
         $document->setParent($parentDocument);
 
         try {
             $document->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while moving document. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while moving document. message was: %s', $e->getMessage()));
         }
 
         $this->assertEquals($parentDocument->getId(), $document->getParentId());
@@ -165,23 +130,15 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a Snippet
-     *
-     * @param string      $key
-     * @param array       $params
-     * @param null|string $locale
-     *
-     * @return Document\Snippet
-     * @throws \Exception
      */
-    public function haveASnippet($key = 'bundle-snippet-test', $params = [], $locale = null)
+    public function haveASnippet(string $key = 'bundle-snippet-test', array $params = [], ?string $locale = null): Document\Snippet
     {
         $document = $this->generateSnippet($key, $params, $locale);
 
         try {
             $document->save();
         } catch (\Exception $e) {
-            $this->debug(sprintf('[TEST BUNDLE ERROR]: error while saving snippet: ' . $e->getMessage()));
-            return null;
+            $this->debug(sprintf('[TEST BUNDLE ERROR]: error while saving snippet: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(Document\Snippet::class, Document\Snippet::getById($document->getId()));
@@ -191,22 +148,15 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a mail document
-     *
-     * @param string      $key
-     * @param array       $params
-     * @param null|string $locale
-     *
-     * @return Document\Email
      */
-    public function haveAEmail($key = 'bundle-email-test', array $params = [], $locale = null)
+    public function haveAEmail(string $key = 'bundle-email-test', array $params = [], ?string $locale = null): Document\Email
     {
         $document = $this->generateEmailDocument($key, $params, $locale);
 
         try {
             $document->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating email. message was: ' . $e->getMessage()));
-            return null;
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating email. message was: %s', $e->getMessage()));
         }
 
         // needed?
@@ -219,22 +169,15 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a link
-     *
-     * @param Document\Page $source
-     * @param string        $key
-     * @param array         $params
-     * @param string        $locale
-     *
-     * @return Document\Link
      */
-    public function haveALink(Document\Page $source, $key = 'bundle-link-test', array $params = [], $locale = null)
+    public function haveALink(Document\Page $source, string $key = 'bundle-link-test', array $params = [], ?string $locale = null): Document\Link
     {
         $link = $this->generateLink($source, $key, $params, $locale);
 
         try {
             $link->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving link. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving link. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(Document\Link::class, Document\Link::getById($link->getId()));
@@ -244,16 +187,8 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a link
-     *
-     * @param Document      $parent
-     * @param Document\Page $source
-     * @param string        $key
-     * @param array         $params
-     * @param string        $locale
-     *
-     * @return Document\Link
      */
-    public function haveASubLink(Document $parent, Document\Page $source, $key = 'bundle-sub-link-test', array $params = [], $locale = null)
+    public function haveASubLink(Document $parent, Document\Page $source, string $key = 'bundle-sub-link-test', array $params = [], ?string $locale = null): Document\Link
     {
         $link = $this->generateLink($source, $key, $params, $locale);
         $link->setParent($parent);
@@ -261,7 +196,7 @@ class PimcoreBackend extends Module
         try {
             $link->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving sub link. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving sub link. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(Document\Link::class, Document\Link::getById($link->getId()));
@@ -271,22 +206,15 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a Hardlink
-     *
-     * @param Document\Page $source
-     * @param string        $key
-     * @param array         $params
-     * @param string        $locale
-     *
-     * @return Document\Hardlink
      */
-    public function haveAHardLink(Document\Page $source, $key = 'bundle-hardlink-test', array $params = [], $locale = null)
+    public function haveAHardLink(Document\Page $source, string $key = 'bundle-hardlink-test', array $params = [], ?string $locale = null): Document\Hardlink
     {
         $hardlink = $this->generateHardlink($source, $key, $params, $locale);
 
         try {
             $hardlink->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving hardlink. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving hardlink. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(Document\Hardlink::class, Document\Hardlink::getById($hardlink->getId()));
@@ -296,24 +224,21 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a child Hardlink
-     *
-     * @param Document      $parent
-     * @param Document\Page $source
-     * @param string        $key
-     * @param array         $params
-     * @param string        $locale
-     *
-     * @return Document\Hardlink
      */
-    public function haveASubHardLink(Document $parent, Document\Page $source, $key = 'bundle-sub-hardlink-test', array $params = [], $locale = null)
-    {
+    public function haveASubHardLink(
+        Document $parent,
+        Document\Page $source,
+        string $key = 'bundle-sub-hardlink-test',
+        array $params = [],
+        ?string $locale = null
+    ): Document\Hardlink {
         $hardlink = $this->generateHardlink($source, $key, $params, $locale);
         $hardlink->setParent($parent);
 
         try {
             $hardlink->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving sub hardlink. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving sub hardlink. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(Document\Hardlink::class, Document\Hardlink::getById($hardlink->getId()));
@@ -323,23 +248,15 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a pimcore object
-     *
-     * @param string $objectType
-     * @param string $key
-     * @param array  $params
-     *
-     * @return DataObject\Concrete
-     * @throws \Exception
      */
-    public function haveAPimcoreObject(string $objectType, $key = 'bundle-object-test', array $params = [])
+    public function haveAPimcoreObject(string $objectType, string $key = 'bundle-object-test', array $params = []): DataObject\Concrete
     {
         $object = $this->generateObject($objectType, $key, $params);
 
         try {
             $object->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating object. message was: ' . $e->getMessage()));
-            return null;
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating object. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(get_class($object), DataObject::getById($object->getId()));
@@ -348,16 +265,9 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a Child Object
-     *
-     * @param DataObject $parent
-     * @param string     $objectType
-     * @param string     $key
-     * @param array      $params
-     *
-     * @return DataObject\Concrete
+     * Actor Function to create a child object
      */
-    public function haveASubPimcoreObject(DataObject $parent, string $objectType, $key = 'bundle-sub-object-test', array $params = [])
+    public function haveASubPimcoreObject(DataObject $parent, string $objectType, string $key = 'bundle-sub-object-test', array $params = []): DataObject\Concrete
     {
         $object = $this->generateObject($objectType, $key, $params);
         $object->setParentId($parent->getId());
@@ -365,7 +275,7 @@ class PimcoreBackend extends Module
         try {
             $object->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving child object. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving child object. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(get_class($object), DataObject::getById($object->getId()));
@@ -374,13 +284,9 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to refresh a object
-     *
-     * @param DataObject $object
-     *
-     * @return DataObject
+     * Actor Function to refresh an object
      */
-    public function refreshObject(DataObject $object)
+    public function refreshObject(DataObject $object): DataObject
     {
         $reloadedObject = DataObject::getById($object->getId(), true);
 
@@ -390,21 +296,16 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to move a object
-     *
-     * @param DataObject $object
-     * @param DataObject $parentObject
-     *
-     * @return DataObject
+     * Actor Function to move an object
      */
-    public function moveObject(DataObject $object, DataObject $parentObject)
+    public function moveObject(DataObject $object, DataObject $parentObject): DataObject
     {
         $object->setParent($parentObject);
 
         try {
             $object->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while moving object. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while moving object. message was: %s', $e->getMessage()));
         }
 
         $this->assertEquals($parentObject->getId(), $object->getParentId());
@@ -414,13 +315,8 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to copy object
-     *
-     * @param DataObject $object
-     * @param DataObject $targetObject
-     *
-     * @return DataObject|Dataobject\Concrete
      */
-    public function copyObject(DataObject $object, DataObject $targetObject)
+    public function copyObject(DataObject $object, DataObject $targetObject): DataObject|Dataobject\Concrete
     {
         $objectService = new DataObject\Service();
 
@@ -432,13 +328,9 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a object version only
-     *
-     * @param DataObject\Concrete $object
-     *
-     * @return DataObject|Dataobject\Concrete
+     * Actor Function to create an object version only
      */
-    public function createNewObjectVersion(DataObject\Concrete $object)
+    public function createNewObjectVersion(DataObject\Concrete $object): Version
     {
         $object->saveVersion();
 
@@ -447,24 +339,16 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to delete a object version
-     *
-     * @param Version $version
-     *
-     * @return DataObject|Dataobject\Concrete
      */
-    public function deleteObjectVersion(Version $version)
+    public function deleteObjectVersion(Version $version): void
     {
         $version->delete();
     }
 
     /**
-     * Actor Function to publish a object version
-     *
-     * @param Version $version
-     *
-     * @return DataObject|Dataobject\Concrete
+     * Actor Function to publish an object version
      */
-    public function publishObjectVersion(Version $version)
+    public function publishObjectVersion(Version $version): DataObject|Dataobject\Concrete
     {
         $version = Version::getById($version->getId());
 
@@ -477,12 +361,8 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to move object to bin
-     *
-     * @param DataObject $object
-     *
-     * @return Item
      */
-    public function moveObjectToRecycleBin(DataObject $object)
+    public function moveObjectToRecycleBin(DataObject $object): Item
     {
         $item = new Item();
         $item->setElement($object);
@@ -498,15 +378,9 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to restore a object from bin
-     *
-     * @param DataObject $object
-     * @param Item       $item
-     *
-     * @return DataObject
-     * @throws \Exception
+     * Actor Function to restore an object from bin
      */
-    public function restoreObjectFromRecycleBin(DataObject $object, Item $item)
+    public function restoreObjectFromRecycleBin(DataObject $object, Item $item): DataObject
     {
         $item->restore();
 
@@ -519,22 +393,15 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a pimcore object folder
-     *
-     * @param string $key
-     * @param array  $params
-     *
-     * @return Asset\Folder
-     * @throws \Exception
      */
-    public function haveAPimcoreObjectFolder($key = 'bundle-object-folder-test', array $params = [])
+    public function haveAPimcoreObjectFolder(string $key = 'bundle-object-folder-test', array $params = []): Asset\Folder
     {
         $assetFolder = $this->generateFolder($key, 'object', $params);
 
         try {
             $assetFolder->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating object folder. message was: ' . $e->getMessage()));
-            return null;
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating object folder. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(DataObject\Folder::class, DataObject\Folder::getById($assetFolder->getId()));
@@ -544,22 +411,15 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a pimcore asset
-     *
-     * @param string $key
-     * @param array  $params
-     *
-     * @return Asset
-     * @throws \Exception
      */
-    public function haveAPimcoreAsset($key = 'bundle-asset-test', array $params = [])
+    public function haveAPimcoreAsset(string $key = 'bundle-asset-test', array $params = []): Asset
     {
         $asset = $this->generateAsset($key, $params);
 
         try {
             $asset->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating asset. message was: ' . $e->getMessage()));
-            return null;
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating asset. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(Asset::class, Asset::getById($asset->getId()));
@@ -569,15 +429,8 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a child asset
-     *
-     * @param Asset\Folder $parent
-     * @param string       $key
-     * @param array        $params
-     *
-     * @return Asset
-     * @throws \Exception
      */
-    public function haveASubPimcoreAsset(Asset\Folder $parent, $key = 'bundle-sub-asset-test', array $params = [])
+    public function haveASubPimcoreAsset(Asset\Folder $parent, string $key = 'bundle-sub-asset-test', array $params = []): Asset
     {
         $asset = $this->generateAsset($key, $params);
         $asset->setParentId($parent->getId());
@@ -585,7 +438,7 @@ class PimcoreBackend extends Module
         try {
             $asset->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving child asset. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving child asset. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(Asset::class, Asset::getById($asset->getId()));
@@ -595,22 +448,15 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a pimcore asset folder
-     *
-     * @param string $key
-     * @param array  $params
-     *
-     * @return Asset\Folder
-     * @throws \Exception
      */
-    public function haveAPimcoreAssetFolder($key = 'bundle-asset-folder-test', array $params = [])
+    public function haveAPimcoreAssetFolder(string $key = 'bundle-asset-folder-test', array $params = []): Asset\Folder
     {
         $assetFolder = $this->generateFolder($key, 'asset', $params);
 
         try {
             $assetFolder->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating asset folder. message was: ' . $e->getMessage()));
-            return null;
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating asset folder. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(Asset\Folder::class, Asset\Folder::getById($assetFolder->getId()));
@@ -620,14 +466,8 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a pimcore asset sub folder
-     *
-     * @param Asset\Folder $parent
-     * @param string       $key
-     * @param array        $params
-     *
-     * @return Asset\Folder
      */
-    public function haveASubPimcoreAssetFolder(Asset\Folder $parent, $key = 'bundle-asset-sub-folder-test', array $params = [])
+    public function haveASubPimcoreAssetFolder(Asset\Folder $parent, string $key = 'bundle-asset-sub-folder-test', array $params = []): Asset\Folder
     {
         $assetFolder = $this->generateFolder($key, 'asset', $params);
         $assetFolder->setParentId($parent->getId());
@@ -635,8 +475,7 @@ class PimcoreBackend extends Module
         try {
             $assetFolder->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating asset folder. message was: ' . $e->getMessage()));
-            return null;
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating asset folder. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(Asset\Folder::class, Asset\Folder::getById($assetFolder->getId()));
@@ -646,20 +485,15 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to move a asset
-     *
-     * @param Asset $asset
-     * @param Asset $parentAsset
-     *
-     * @return Asset
      */
-    public function moveAsset(Asset $asset, Asset $parentAsset)
+    public function moveAsset(Asset $asset, Asset $parentAsset): Asset
     {
         $asset->setParent($parentAsset);
 
         try {
             $asset->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while moving asset. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while moving asset. message was: %s', $e->getMessage()));
         }
 
         $this->assertEquals($parentAsset->getId(), $asset->getParentId());
@@ -668,35 +502,24 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor function to generate a dummy asset file.
-     *
-     * @param string $fileName
-     * @param int    $fileSizeInMb Mb
+     * Actor function to generate a dummy asset file
      */
-    public function haveADummyFile($fileName, $fileSizeInMb = 1)
+    public function haveADummyFile(string $fileName, int $fileSizeInMb = 1)
     {
         FileGeneratorHelper::generateDummyFile($fileName, $fileSizeInMb);
     }
 
     /**
      * Actor Function to create a Site Document
-     *
-     * @param string $siteKey
-     * @param array  $params
-     * @param null   $locale
-     * @param bool   $add3w
-     * @param array  $additionalDomains
-     *
-     * @return Site
      */
-    public function haveASite($siteKey, array $params = [], $locale = null, $add3w = false, $additionalDomains = [])
+    public function haveASite($siteKey, array $params = [], ?string $locale = null, bool $add3w = false, array $additionalDomains = []): Site
     {
         $site = $this->generateSiteDocument($siteKey, $params, $locale, $add3w, $additionalDomains);
 
         try {
             $site->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving site. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving site. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(Site::class, Site::getById($site->getId()));
@@ -706,16 +529,8 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a Document for a Site
-     *
-     * @param Site        $site
-     * @param string      $key
-     * @param array       $params
-     * @param null|string $locale
-     *
-     * @return Document\Page
-     * @throws \Exception
      */
-    public function haveAPageDocumentForSite(Site $site, $key = 'document-test', array $params = [], $locale = null)
+    public function haveAPageDocumentForSite(Site $site, string $key = 'document-test', array $params = [], ?string $locale = null): Document\Page
     {
         $document = $this->generatePageDocument($key, $params, $locale);
         $document->setParentId($site->getRootDocument()->getId());
@@ -723,7 +538,7 @@ class PimcoreBackend extends Module
         try {
             $document->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while document page for site. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while document page for site. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(Document\Page::class, Document\Page::getById($document->getId()));
@@ -733,24 +548,21 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to create a Hard Link for a Site
-     *
-     * @param Site          $site
-     * @param Document\Page $document
-     * @param string        $key
-     * @param array         $params
-     * @param string        $locale
-     *
-     * @return Document\Hardlink
      */
-    public function haveAHardlinkForSite(Site $site, Document\Page $document, $key = 'hardlink-test', array $params = [], $locale = null)
-    {
+    public function haveAHardlinkForSite(
+        Site $site,
+        Document\Page $document,
+        string $key = 'hardlink-test',
+        array $params = [],
+        ?string $locale = null
+    ): Document\Hardlink {
         $hardLink = $this->generateHardlink($document, $key, $params, $locale);
         $hardLink->setParentId($site->getRootDocument()->getId());
 
         try {
             $hardLink->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while document page for site. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while document page for site. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(Document\Hardlink::class, Document\Hardlink::getById($hardLink->getId()));
@@ -759,11 +571,9 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor function to see a generated dummy file in download directory.
-     *
-     * @param $fileName
+     * Actor function to see a generated dummy file in download directory
      */
-    public function seeDownload($fileName)
+    public function seeDownload(string $fileName): void
     {
         $supportDir = FileGeneratorHelper::getDownloadPath();
         $filePath = $supportDir . $fileName;
@@ -772,15 +582,12 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * @param Document $document
-     * @param array    $editables
-     *
-     * @throws \Exception
+     * Actor to place editables on document
      */
-    public function seeEditablesPlacedOnDocument(Document $document, array $editables)
+    public function seeEditablesPlacedOnDocument(Document $document, array $editables): void
     {
         if (!$document instanceof Document\Snippet && !$document instanceof Document\Page) {
-            throw new ModuleException($this, sprintf('%s must be instance of %s or %s.', $document->getFullPath(), Document\Snippet::class, Document\Page::class));
+            throw new ModuleException($this, sprintf('%s must be instance of %s or %s', $document->getFullPath(), Document\Snippet::class, Document\Page::class));
         }
 
         try {
@@ -790,15 +597,12 @@ class PimcoreBackend extends Module
         }
 
         $document->setEditables($editables);
-
-        if (method_exists($document, 'setMissingRequiredEditable')) {
-            $document->setMissingRequiredEditable(false);
-        }
+        $document->setMissingRequiredEditable(false);
 
         try {
             $document->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while adding editables to document. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while adding editables to document. message was: %s', $e->getMessage()));
         }
 
         \Pimcore::collectGarbage();
@@ -808,14 +612,8 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to place a area on a document
-     *
-     * @param Document $document
-     * @param string   $areaName
-     * @param array    $editables
-     *
-     * @throws ModuleException
      */
-    public function seeAnAreaElementPlacedOnDocument(Document $document, string $areaName, array $editables = [])
+    public function seeAnAreaElementPlacedOnDocument(Document $document, string $areaName, array $editables = []): void
     {
         if (!$document instanceof Document\Snippet && !$document instanceof Document\Page) {
             throw new ModuleException($this, sprintf('%s must be instance of %s or %s.', $document->getFullPath(), Document\Snippet::class, Document\Page::class));
@@ -828,15 +626,12 @@ class PimcoreBackend extends Module
         }
 
         $document->setEditables($editables);
-
-        if (method_exists($document, 'setMissingRequiredEditable')) {
-            $document->setMissingRequiredEditable(false);
-        }
+        $document->setMissingRequiredEditable(false);
 
         try {
             $document->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while adding area element to document. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while adding area element to document. message was: %s', $e->getMessage()));
         }
 
         \Pimcore::collectGarbage();
@@ -846,10 +641,8 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to see if given email has been sent
-     *
-     * @param Document\Email $email
      */
-    public function seeEmailIsSent(Document\Email $email)
+    public function seeEmailIsSent(Document\Email $email): void
     {
         $this->assertInstanceOf(Document\Email::class, $email);
 
@@ -859,10 +652,8 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to see if an email has been sent to admin
-     *
-     * @param Document\Email $email
      */
-    public function seeEmailIsNotSent(Document\Email $email)
+    public function seeEmailIsNotSent(Document\Email $email): void
     {
         $this->assertInstanceOf(Document\Email::class, $email);
 
@@ -872,11 +663,8 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to see if admin email contains given properties
-     *
-     * @param Document\Email $mail
-     * @param array          $properties
      */
-    public function seePropertiesInEmail(Document\Email $mail, array $properties)
+    public function seePropertiesInEmail(Document\Email $mail, array $properties): void
     {
         $this->assertInstanceOf(Document\Email::class, $mail);
 
@@ -888,7 +676,7 @@ class PimcoreBackend extends Module
         foreach ($foundEmails as $email) {
             $params = $serializer->decode($email->getParams(), 'json', ['json_decode_associative' => true]);
             foreach ($properties as $propertyKey => $propertyValue) {
-                $key = array_search($propertyKey, array_column($params, 'key'));
+                $key = array_search($propertyKey, array_column($params, 'key'), true);
                 if ($key === false) {
                     $this->fail(sprintf('Failed asserting that mail params array has the key "%s".', $propertyKey));
                 }
@@ -901,11 +689,8 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to see if admin email contains given properties
-     *
-     * @param Document\Email $mail
-     * @param array          $properties
      */
-    public function seePropertyKeysInEmail(Document\Email $mail, array $properties)
+    public function seePropertyKeysInEmail(Document\Email $mail, array $properties): void
     {
         $this->assertInstanceOf(Document\Email::class, $mail);
 
@@ -917,7 +702,7 @@ class PimcoreBackend extends Module
         foreach ($foundEmails as $email) {
             $params = $serializer->decode($email->getParams(), 'json', ['json_decode_associative' => true]);
             foreach ($properties as $propertyKey) {
-                $key = array_search($propertyKey, array_column($params, 'key'));
+                $key = array_search($propertyKey, array_column($params, 'key'), true);
                 $this->assertNotSame(false, $key);
             }
         }
@@ -925,11 +710,8 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to see if admin email not contains given properties
-     *
-     * @param Document\Email $mail
-     * @param array          $properties
      */
-    public function cantSeePropertyKeysInEmail(Document\Email $mail, array $properties)
+    public function cantSeePropertyKeysInEmail(Document\Email $mail, array $properties): void
     {
         $this->assertInstanceOf(Document\Email::class, $mail);
 
@@ -942,9 +724,7 @@ class PimcoreBackend extends Module
             $params = $serializer->decode($email->getParams(), 'json', ['json_decode_associative' => true]);
             foreach ($properties as $propertyKey) {
                 $this->assertFalse(
-                    array_search(
-                        $propertyKey,
-                        array_column($params, 'key')),
+                    array_search($propertyKey, array_column($params, 'key'), true),
                     sprintf('Failed asserting that search for "%s" is false.', $propertyKey)
                 );
             }
@@ -953,11 +733,8 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to see rendered body text in given email
-     *
-     * @param Document\Email $mail
-     * @param string         $string
      */
-    public function seeInRenderedEmailBody(Document\Email $mail, string $string)
+    public function seeInRenderedEmailBody(Document\Email $mail, string $string): void
     {
         $this->assertInstanceOf(Document\Email::class, $mail);
 
@@ -966,58 +743,45 @@ class PimcoreBackend extends Module
 
         foreach ($foundEmails as $email) {
             $bodyHtml = $email->getHtmlLog();
-            $this->assertContains($string, $bodyHtml);
+            $this->assertStringContainsString($string, $bodyHtml);
         }
     }
 
     /**
      * Actor Function to see if a key has been stored in admin translations
-     *
-     * @param string $key
      */
-    public function seeKeyInFrontendTranslations(string $key)
+    public function seeKeyInFrontendTranslations(string $key): void
     {
         /** @var Translator $translator */
-        $translator = \Pimcore::getContainer()->get('pimcore.translator');
+        $translator = \Pimcore::getContainer()->get('translator');
         $this->assertTrue($translator->getCatalogue()->has($key));
     }
 
     /**
      * Actor Function to generate a translation for website catalog
-     *
-     * @param string $key
-     * @param string $translation
-     * @param string $language
-     *
-     * @return Website|null
      */
-    public function haveAFrontendTranslatedKey(string $key, string $translation, string $language)
+    public function haveAFrontendTranslatedKey(string $key, string $translation, string $language): ?Translation
     {
         $t = null;
 
         try {
             /** @var Translator $translator */
-            $t = Website::getByKey($key, true);
+            $t = Translation::getByKey($key, 'messages', true);
             $t->addTranslation($language, $translation);
             $t->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating translation. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating translation. message was: %s', $e->getMessage()));
         }
 
-        $this->assertInstanceOf(Website::class, $t);
+        $this->assertInstanceOf(Translation::class, $t);
 
         return $t;
     }
 
     /**
-     * Actor Function to generate a single static route.
-     *
-     * @param string $name
-     * @param array  $params
-     *
-     * @return Staticroute
+     * Actor Function to generate a single static route
      */
-    public function haveAStaticRoute(string $name = 'test_route', array $params = [])
+    public function haveAStaticRoute(string $name = 'test_route', array $params = []): Staticroute
     {
         $defaults = [
             'id'               => 1,
@@ -1045,13 +809,9 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to generate a single pimcore redirect.
-     *
-     * @param array $data
-     *
-     * @return Redirect
+     * Actor Function to generate a single pimcore redirect
      */
-    public function haveAPimcoreRedirect(array $data)
+    public function haveAPimcoreRedirect(array $data): Redirect
     {
         $redirect = new Redirect();
         $redirect->setValues($data);
@@ -1061,14 +821,11 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to generate a pimcore class from json definition file.
+     * Actor Function to generate a pimcore class from json definition file
      *
-     * @param string $name
-     *
-     * @return DataObject\ClassDefinition
      * @throws ModuleException
      */
-    public function haveAPimcoreClass(string $name = 'TestClass')
+    public function haveAPimcoreClass(string $name = 'TestClass'): DataObject\ClassDefinition
     {
         $cm = $this->getClassManager();
 
@@ -1084,11 +841,9 @@ class PimcoreBackend extends Module
     /**
      * Actor Function to submit document to xliff exporter
      *
-     * @param Document $document
-     *
-     * @throws ModuleException
+     * @throws \Exception
      */
-    public function submitDocumentToXliffExporter(Document $document)
+    public function submitDocumentToXliffExporter(Document $document): void
     {
         /** @var PimcoreCore $pimcoreCore */
         $pimcoreCore = $this->getModule('\\' . PimcoreCore::class);
@@ -1104,11 +859,11 @@ class PimcoreBackend extends Module
                     'type'     => 'document',
                     'children' => true
                 ]
-            ]),
+            ], JSON_THROW_ON_ERROR),
             'type'      => 'xliff'
         ]);
 
-        $this->assertContains(['success' => true], json_decode($pimcoreCore->_getResponseContent(), true));
+        $this->assertContains(['success' => true], json_decode($pimcoreCore->_getResponseContent(), true, 512, JSON_THROW_ON_ERROR));
     }
 
     /**
@@ -1116,11 +871,9 @@ class PimcoreBackend extends Module
      *
      * @public to allow usage from other modules
      *
-     * @param array $documentIds
-     *
      * @return Log[]
      */
-    public function getEmailsFromDocumentIds(array $documentIds)
+    public function getEmailsFromDocumentIds(array $documentIds): array
     {
         $emailLogs = new Log\Listing();
         $emailLogs->addConditionParam(sprintf('documentId IN (%s)', implode(',', $documentIds)));
@@ -1132,17 +885,15 @@ class PimcoreBackend extends Module
      * API Function to get pimcore serializer
      *
      * @public to allow usage from other modules
-     * @return Serializer
-     *
      */
-    public function getSerializer()
+    public function getSerializer(): Serializer
     {
         $serializer = null;
 
         try {
             $serializer = $this->getContainer()->get('pimcore_admin.serializer');
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while getting pimcore admin serializer. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while getting pimcore admin serializer. message was: %s', $e->getMessage()));
         }
 
         $this->assertInstanceOf(Serializer::class, $serializer);
@@ -1152,15 +903,8 @@ class PimcoreBackend extends Module
 
     /**
      * API Function to create a page document
-     *
-     * @param string      $key
-     * @param array       $params
-     * @param null|string $locale
-     *
-     * @return Document\Page
-     * @throws \Exception
      */
-    public function generatePageDocument($key = 'test-page', $params = [], $locale = null)
+    public function generatePageDocument(string $key = 'test-page', array $params = [], ?string $locale = null): Document\Page
     {
         $controller = sprintf('%s::%s',
             $params['controller'] ?? 'App\Controller\DefaultController',
@@ -1181,9 +925,7 @@ class PimcoreBackend extends Module
             $document->setProperty('language', 'text', $locale, false, true);
         }
 
-        if (method_exists($document, 'setMissingRequiredEditable')) {
-            $document->setMissingRequiredEditable(false);
-        }
+        $document->setMissingRequiredEditable(false);
 
         $this->assignMethods($document, $params);
 
@@ -1192,15 +934,8 @@ class PimcoreBackend extends Module
 
     /**
      * API Function to create a Snippet
-     *
-     * @param string      $key
-     * @param array       $params
-     * @param null|string $locale
-     *
-     * @return null|Document\Snippet
-     * @throws \Exception
      */
-    public function generateSnippet($key = 'test-snippet', $params = [], $locale = null)
+    public function generateSnippet(string $key = 'test-snippet', array $params = [], ?string $locale = null): Document\Snippet
     {
         $controller = sprintf('%s::%s',
             $params['controller'] ?? 'App\Controller\SnippetController',
@@ -1230,14 +965,8 @@ class PimcoreBackend extends Module
 
     /**
      * API Function to create a email document
-     *
-     * @param string      $key
-     * @param array       $params
-     * @param null|string $locale
-     *
-     * @return Document\Email
      */
-    public function generateEmailDocument($key = 'test-email', array $params = [], $locale = null)
+    public function generateEmailDocument(string $key = 'test-email', array $params = [], ?string $locale = null): Document\Email
     {
         $controller = sprintf('%s::%s',
             $params['controller'] ?? 'App\Controller\EmailController',
@@ -1269,8 +998,10 @@ class PimcoreBackend extends Module
         }
 
         if (!isset($params['subject'])) {
-            $params['subject'] = sprintf('TEST BUNDLE EMAIL %s', $documentKey);
+            $params['subject'] = 'TEST BUNDLE';
         }
+
+        $params['subject'] = sprintf('[%s] %s', $documentKey, $params['subject']);
 
         if (isset($params['properties'])) {
             $document->setProperties($params['properties']);
@@ -1284,15 +1015,8 @@ class PimcoreBackend extends Module
 
     /**
      * API Function to create a link document
-     *
-     * @param Document\Page $source
-     * @param string        $key
-     * @param array         $params
-     * @param string        $locale
-     *
-     * @return Document\Link
      */
-    public function generateLink(Document\Page $source, $key = 'test-link', array $params = [], $locale = null)
+    public function generateLink(Document\Page $source, string $key = 'test-link', array $params = [], ?string $locale = null): Document\Link
     {
         $link = new Document\Link();
         $link->setKey($key);
@@ -1321,15 +1045,8 @@ class PimcoreBackend extends Module
 
     /**
      * API Function to create a hardlink document
-     *
-     * @param Document\Page $source
-     * @param string        $key
-     * @param array         $params
-     * @param string        $locale
-     *
-     * @return Document\Hardlink
      */
-    public function generateHardlink(Document\Page $source, $key = 'test-hardlink', array $params = [], $locale = null)
+    public function generateHardlink(Document\Page $source, string $key = 'test-hardlink', array $params = [], ?string $locale = null): Document\Hardlink
     {
         $hardlink = new Document\Hardlink();
         $hardlink->setKey($key);
@@ -1355,16 +1072,8 @@ class PimcoreBackend extends Module
 
     /**
      * API Function to create a site document
-     *
-     * @param string      $domain
-     * @param array       $params
-     * @param null|string $locale
-     * @param bool        $add3w
-     * @param array       $additionalDomains
-     *
-     * @return Site
      */
-    public function generateSiteDocument(string $domain, array $params = [], $locale = null, $add3w = false, $additionalDomains = [])
+    public function generateSiteDocument(string $domain, array $params = [], ?string $locale = null, bool $add3w = false, array $additionalDomains = []): Site
     {
         $document = TestHelper::createEmptyDocumentPage($domain, false);
         $document->setProperty('navigation_title', 'text', $domain);
@@ -1377,9 +1086,7 @@ class PimcoreBackend extends Module
             $document->setProperty('language', 'text', $locale, false, true);
         }
 
-        if (method_exists($document, 'setMissingRequiredEditable')) {
-            $document->setMissingRequiredEditable(false);
-        }
+        $document->setMissingRequiredEditable(false);
 
         if (isset($params['properties'])) {
             $document->setProperties($params['properties']);
@@ -1391,7 +1098,7 @@ class PimcoreBackend extends Module
         try {
             $document->save();
         } catch (\Exception $e) {
-            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving document for site. message was: ' . $e->getMessage()));
+            Debug::debug(sprintf('[TEST BUNDLE ERROR] error while saving document for site. message was: %s' . $e->getMessage()));
         }
 
         $site = new Site();
@@ -1407,13 +1114,8 @@ class PimcoreBackend extends Module
 
     /**
      * API Function to create a asset element
-     *
-     * @param string $key
-     * @param array  $params
-     *
-     * @return Asset
      */
-    public function generateAsset($key = 'test-asset', array $params = [])
+    public function generateAsset(string $key = 'test-asset', array $params = []): Asset
     {
         $asset = TestHelper::createImageAsset($key, false, false);
         $asset->setKey($key);
@@ -1430,14 +1132,8 @@ class PimcoreBackend extends Module
 
     /**
      * API Function to create a object
-     *
-     * @param string $objectType
-     * @param string $key
-     * @param array  $params
-     *
-     * @return DataObject\Concrete
      */
-    public function generateObject(string $objectType, $key = 'test-object', array $params = [])
+    public function generateObject(string $objectType, string $key = 'test-object', array $params = []): DataObject\Concrete
     {
         $type = sprintf('\\Pimcore\\Model\\DataObject\\%s', $objectType);
         $object = TestHelper::createEmptyObject($key, true, false, $type);
@@ -1457,14 +1153,8 @@ class PimcoreBackend extends Module
 
     /**
      * API Function to create a folder based on type
-     *
-     * @param string $key
-     * @param string $type
-     * @param array  $params
-     *
-     * @return Asset\Folder|Document\Folder|DataObject\Folder
      */
-    public function generateFolder($key = 'test-asset-folder', string $type = 'asset', array $params = [])
+    public function generateFolder(string $key = 'test-asset-folder', string $type = 'asset', array $params = []): Asset\Folder|Document\Folder|DataObject\Folder
     {
         if ($type === 'document') {
             $folder = TestHelper::createDocumentFolder($key, false);
@@ -1486,29 +1176,17 @@ class PimcoreBackend extends Module
         return $folder;
     }
 
-    /**
-     * @return Container
-     * @throws ModuleException
-     */
-    protected function getContainer()
+    protected function getContainer(): Container
     {
         return $this->getModule('\\' . PimcoreCore::class)->getContainer();
     }
 
-    /**
-     * @return Module|ClassManager
-     * @throws ModuleException
-     */
-    protected function getClassManager()
+    protected function getClassManager(): ClassManager
     {
         return $this->getModule('\\' . ClassManager::class);
     }
 
-    /**
-     * @param ElementInterface $entity
-     * @param array            $params
-     */
-    protected function assignMethods($entity, array $params)
+    protected function assignMethods(ElementInterface $entity, array $params): void
     {
         if (count($params) === 0) {
             return;

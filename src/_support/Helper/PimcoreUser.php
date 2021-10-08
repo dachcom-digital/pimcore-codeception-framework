@@ -10,14 +10,8 @@ use Pimcore\Tool\Authentication;
 
 class PimcoreUser extends Module
 {
-    /**
-     * @var User[]
-     */
-    protected $users = [];
+    protected array $users = [];
 
-    /**
-     * @param TestInterface $test
-     */
     public function _before(TestInterface $test)
     {
         parent::_before($test);
@@ -25,12 +19,8 @@ class PimcoreUser extends Module
 
     /**
      * Actor Function to create a User
-     *
-     * @param $username
-     *
-     * @return User
      */
-    public function haveAUser($username)
+    public function haveAUser(string $username): User
     {
         $user = $this->createUser($username, false);
         $this->assertInstanceOf(User::class, $user);
@@ -40,12 +30,8 @@ class PimcoreUser extends Module
 
     /**
      * Actor Function to create a Admin User
-     *
-     * @param $username
-     *
-     * @return User
      */
-    public function haveAUserWithAdminRights($username)
+    public function haveAUserWithAdminRights(string $username): User
     {
         $user = $this->createUser($username, true);
         $this->assertInstanceOf(User::class, $user);
@@ -55,12 +41,8 @@ class PimcoreUser extends Module
 
     /**
      * API Function to get a User
-     *
-     * @param string $username
-     *
-     * @return User
      */
-    public function getUser($username)
+    public function getUser(string $username): User
     {
         if (isset($this->users[$username])) {
             return $this->users[$username];
@@ -71,24 +53,18 @@ class PimcoreUser extends Module
 
     /**
      * API Function to create a User
-     *
-     * @param string $username
-     * @param bool   $admin
-     *
-     * @return null|User|User\AbstractUser
      */
-    protected function createUser($username, $admin = true)
+    protected function createUser(string $username, bool $admin = true): ?User
     {
         if (!TestHelper::supportsDbTests()) {
             $this->debug(sprintf('[PIMCORE USER MODULE] Not initializing user %s as DB is not connected', $username));
             return null;
-        } else {
-            $this->debug(sprintf('[PIMCORE USER MODULE] Initializing user %s', $username));
         }
 
-        $password = $username;
+        $this->debug(sprintf('[PIMCORE USER MODULE] Initializing user %s', $username));
 
         $user = null;
+        $password = $username;
 
         try {
             $user = User::getByName($username);

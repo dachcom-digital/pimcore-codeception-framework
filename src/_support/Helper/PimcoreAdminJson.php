@@ -2,7 +2,6 @@
 
 namespace Dachcom\Codeception\Helper;
 
-use Codeception\Exception\ModuleException;
 use Codeception\Lib\InnerBrowser;
 use Codeception\Lib\Interfaces\DependsOnModule;
 use Codeception\Module;
@@ -10,35 +9,22 @@ use Dachcom\Codeception\Constraint\JsonContains;
 
 class PimcoreAdminJson extends Module implements DependsOnModule
 {
-    /**
-     * @var InnerBrowser
-     */
-    protected $connectionModule;
+    protected InnerBrowser $connectionModule;
 
-    /**
-     * @return array|mixed
-     */
-    public function _depends()
+    public function _depends(): array
     {
-        return ['Codeception\Lib\InnerBrowser' => 'PimcoreAdminJson needs a valid browser to work.'];
+        return [InnerBrowser::class => 'PimcoreAdminJson needs a valid browser to work.'];
     }
 
-    /**
-     * @param InnerBrowser $connection
-     */
-    public function _inject(InnerBrowser $connection)
+    public function _inject(InnerBrowser $connection): void
     {
         $this->connectionModule = $connection;
     }
 
     /**
      * Actor Function to see response contains csv
-     *
-     * @param array $json
-     *
-     * @throws ModuleException
      */
-    public function seeResponseContainsJson($json = [])
+    public function seeResponseContainsJson(array $json = []): void
     {
         \PHPUnit_Framework_Assert::assertThat(
             $this->connectionModule->_getResponseContent(),
@@ -48,10 +34,8 @@ class PimcoreAdminJson extends Module implements DependsOnModule
 
     /**
      * Actor Function to see response is json
-     *
-     * @throws ModuleException
      */
-    public function seeResponseIsJson()
+    public function seeResponseIsJson(): void
     {
         $responseContent = $this->connectionModule->_getResponseContent();
         \PHPUnit_Framework_Assert::assertNotEquals('', $responseContent, 'response is empty');

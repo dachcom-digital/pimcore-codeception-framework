@@ -165,12 +165,6 @@ If you want to provide some classes to install, all the definitions need to stor
 |---------------------------------------|--------------------|
 | `$I->haveABootedSymfonyConfiguration(string $configuration)` | |
 
-### [MODULE] PimcoreRest
-
-| Name                                  | Description        |
-|---------------------------------------|--------------------|
-| -- | |
-
 ### [MODULE] PimcoreUser
 
 | Name                                  | Description        |

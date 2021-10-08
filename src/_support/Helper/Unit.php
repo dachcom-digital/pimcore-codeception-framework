@@ -2,15 +2,9 @@
 
 namespace Dachcom\Codeception\Helper;
 
-use Codeception\Lib\ModuleContainer;
+use Codeception\Module;
 
-class Unit extends \Codeception\Module
+class Unit extends Module
 {
-    /**
-     * @inheritDoc
-     */
-    public function __construct(ModuleContainer $moduleContainer, $config = null)
-    {
-        parent::__construct($moduleContainer, $config);
-    }
+
 }

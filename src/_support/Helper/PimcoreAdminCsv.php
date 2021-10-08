@@ -2,42 +2,28 @@
 
 namespace Dachcom\Codeception\Helper;
 
-use Codeception\Exception\ModuleException;
 use Codeception\Lib\InnerBrowser;
 use Codeception\Lib\Interfaces\DependsOnModule;
 use Codeception\Module;
 
 class PimcoreAdminCsv extends Module implements DependsOnModule
 {
-    /**
-     * @var InnerBrowser
-     */
-    protected $connectionModule;
+    protected InnerBrowser $connectionModule;
 
-    /**
-     * @return array|mixed
-     */
-    public function _depends()
+    public function _depends(): array
     {
-        return ['Codeception\Lib\InnerBrowser' => 'PimcoreAdminCsv needs a valid browser to work.'];
+        return [InnerBrowser::class => 'PimcoreAdminCsv needs a valid browser to work.'];
     }
 
-    /**
-     * @param InnerBrowser $connection
-     */
-    public function _inject(InnerBrowser $connection)
+    public function _inject(InnerBrowser $connection): void
     {
         $this->connectionModule = $connection;
     }
 
     /**
      * Actor Function to see values in csv response
-     *
-     * @param array $headerValues
-     *
-     * @throws ModuleException
      */
-    public function seeResponseCsvHeaderHasValues(array $headerValues)
+    public function seeResponseCsvHeaderHasValues(array $headerValues): void
     {
         $responseContent = $this->connectionModule->_getResponseContent();
 
@@ -53,13 +39,8 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
 
     /**
      * Actor Function to see values in specific csv row of csv response
-     *
-     * @param int   $index
-     * @param array $values
-     *
-     * @throws ModuleException
      */
-    public function seeResponseCsvRowValues(int $index, array $values)
+    public function seeResponseCsvRowValues(int $index, array $values): void
     {
         $responseContent = $this->connectionModule->_getResponseContent();
 
@@ -85,12 +66,8 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
 
     /**
      * Actor Function to see response csv length
-     *
-     * @param int $length
-     *
-     * @throws ModuleException
      */
-    public function seeResponseCsvLength(int $length)
+    public function seeResponseCsvLength(int $length): void
     {
         $responseContent = $this->connectionModule->_getResponseContent();
 
@@ -104,10 +81,8 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
 
     /**
      * Actor Function to see response is csv
-     *
-     * @throws ModuleException
      */
-    public function seeResponseIsCsv()
+    public function seeResponseIsCsv(): void
     {
         $responseContent = $this->connectionModule->_getResponseContent();
         \PHPUnit_Framework_Assert::assertNotEquals('', $responseContent, 'response is empty');

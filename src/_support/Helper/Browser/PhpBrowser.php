@@ -19,46 +19,32 @@ use Symfony\Component\HttpKernel\DataCollector\RequestDataCollector;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\HttpKernel\Profiler\Profile;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
+use Symfony\Component\Mailer\DataCollector\MessageDataCollector;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Codeception\Module\Symfony;
 
 class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 {
-    const PIMCORE_ADMIN_CSRF_TOKEN_NAME = 'MOCK_CSRF_TOKEN';
+    public const PIMCORE_ADMIN_CSRF_TOKEN_NAME = 'MOCK_CSRF_TOKEN';
 
-    /**
-     * @var Cookie
-     */
-    protected $sessionSnapShot;
+    protected array $sessionSnapShot;
+    protected PimcoreCore $pimcoreCore;
 
-    /**
-     * @var PimcoreCore
-     */
-    protected $pimcoreCore;
-
-    /**
-     * @return array|mixed
-     */
-    public function _depends()
+    public function _depends(): array
     {
         return [
-            'Codeception\Module\Symfony' => 'PhpBrowser needs the pimcore core framework to work.'
+            Symfony::class => 'PhpBrowser needs the pimcore core framework to work.'
         ];
     }
 
-    /**
-     * @param PimcoreCore $pimcoreCore
-     */
-    public function _inject($pimcoreCore)
+    public function _inject(PimcoreCore $pimcoreCore): void
     {
         $this->pimcoreCore = $pimcoreCore;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function _initialize()
+    public function _initialize(): void
     {
         $this->sessionSnapShot = [];
 
@@ -67,26 +53,21 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 
     /**
      * Actor Function to see a page with enabled edit-mode
-     *
-     * @param string $page
      */
-    public function amOnPageInEditMode(string $page)
+    public function amOnPageInEditMode(string $page): void
     {
         $this->pimcoreCore->amOnPage(sprintf('%s?pimcore_editmode=true', $page));
     }
 
     /**
      *  Actor Function to see a page with given locale
-     *
-     * @param string       $url
-     * @param string|array $locale
      */
-    public function amOnPageWithLocale($url, $locale)
+    public function amOnPageWithLocale(string $url, ?string $locale): void
     {
         $parsedLocale = [];
         if (is_string($locale)) {
             $parsedLocale[] = $locale;
-            if (strpos($locale, '_') !== false) {
+            if (str_contains($locale, '_')) {
                 // add language ISO as fallback
                 $parsedLocale[] = substr($locale, 0, 2);
             }
@@ -94,19 +75,13 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
             $parsedLocale = $locale;
         }
 
-        $this->pimcoreCore->_loadPage('GET', $url, [], [], ['HTTP_ACCEPT_LANGUAGE' => join(',', $parsedLocale)]);
+        $this->pimcoreCore->_loadPage('GET', $url, [], [], ['HTTP_ACCEPT_LANGUAGE' => implode(',', $parsedLocale)]);
     }
 
     /**
      *  Actor Function to see a page with given locale and country
-     *
-     * @param string       $url
-     * @param string|array $locale
-     * @param string       $country
-     *
-     * @throws \Exception
      */
-    public function amOnPageWithLocaleAndCountry($url, $locale, $country)
+    public function amOnPageWithLocaleAndCountry(string $url, ?string $locale, string $country): void
     {
         $countryIps = [
             'hongKong'    => '21 59.148.0.0',
@@ -119,14 +94,14 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
             'us'          => '52.33.249.128',
         ];
 
-        if (!key_exists($country, $countryIps)) {
+        if (!array_key_exists($country, $countryIps)) {
             throw new \Exception(sprintf('%s is not a valid test country', $country));
         }
 
         $parsedLocale = [];
         if (is_string($locale)) {
             $parsedLocale[] = $locale;
-            if (strpos($locale, '_') !== false) {
+            if (str_contains($locale, '_')) {
                 // add language ISO as fallback
                 $parsedLocale[] = substr($locale, 0, 2);
             }
@@ -134,16 +109,13 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
             $parsedLocale = $locale;
         }
 
-        $this->pimcoreCore->_loadPage('POST', $url, [], [], ['HTTP_ACCEPT_LANGUAGE' => join(',', $parsedLocale), 'HTTP_CLIENT_IP' => $countryIps[$country]]);
+        $this->pimcoreCore->_loadPage('POST', $url, [], [], ['HTTP_ACCEPT_LANGUAGE' => implode(',', $parsedLocale), 'HTTP_CLIENT_IP' => $countryIps[$country]]);
     }
 
     /**
      * Actor Function to see if Link is a download file
-     *
-     * @param AbstractModel $element
-     * @param string        $link
      */
-    public function seeDownloadLink(AbstractModel $element, string $link)
+    public function seeDownloadLink(AbstractModel $element, string $link): void
     {
         $this->pimcoreCore->_loadPage('HEAD', $link);
         $response = $this->pimcoreCore->client->getInternalResponse();
@@ -152,18 +124,15 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         $symfonyVersion = Kernel::MAJOR_VERSION;
         $contentDisposition = sprintf('attachment; filename=%s', ($symfonyVersion >= 4 ? $element->getKey() : sprintf('"%s"', $element->getKey())));
 
-        $this->assertEquals(200, $response->getStatus());
+        $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals($contentDisposition, $headers['content-disposition'][0]);
         $this->assertEquals($element->getMimetype(), $headers['content-type'][0]);
     }
 
     /**
      * Actor Function to see if Link is a download file
-     *
-     * @param string $fileName
-     * @param string $link
      */
-    public function seeDownloadLinkZip(string $fileName, string $link)
+    public function seeDownloadLinkZip(string $fileName, string $link): void
     {
         $this->pimcoreCore->_loadPage('HEAD', $link);
         $response = $this->pimcoreCore->client->getInternalResponse();
@@ -172,18 +141,15 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         $symfonyVersion = Kernel::MAJOR_VERSION;
         $contentDisposition = sprintf('attachment; filename=%s', ($symfonyVersion >= 4 ? $fileName : sprintf('"%s"', $fileName)));
 
-        $this->assertEquals(200, $response->getStatus());
+        $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals($contentDisposition, $headers['content-disposition'][0]);
         $this->assertEquals('application/zip', $headers['content-type'][0]);
     }
 
     /**
-     * Actor Function to see a page generated by a static route definition.
-     *
-     * @param string $routeName
-     * @param array  $args
+     * Actor Function to see a page generated by a static route definition
      */
-    public function amOnStaticRoute(string $routeName, array $args)
+    public function amOnStaticRoute(string $routeName, array $args): void
     {
         $path = $this->pimcoreCore->getContainer()->get('router')->generate($routeName, $args, false);
         $this->pimcoreCore->amOnPage($path);
@@ -191,25 +157,17 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 
     /**
      * Actor Function to see current uri matches given host
-     *
-     * @param $host
      */
-    public function seeCurrentHostEquals($host)
+    public function seeCurrentHostEquals(string $host): void
     {
         $server = $this->pimcoreCore->client->getHistory()->current()->getServer();
         $this->assertEquals($host, $server['HTTP_HOST']);
     }
 
     /**
-     * Actor Function to see a editable on current page.
-     *
-     * @param string $name
-     * @param string $type
-     * @param array  $options
-     * @param null   $data
-     * @param null   $selector
+     * Actor Function to see a editable on current page
      */
-    public function seeAEditableConfiguration(string $name, string $type, array $options, $data = null, $selector = null)
+    public function seeAEditableConfiguration(string $name, string $type, array $options, $data = null, $selector = null): void
     {
         $this->pimcoreCore->see(EditableHelper::generateEditableConfiguration($name, $type, $options, $data), $selector);
     }
@@ -217,34 +175,43 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     /**
      * Actor Function to see if given email has been with specified address
      * Only works with PhpBrowser (Symfony Client)
-     *
-     * @param string $recipient
-     * @param Email  $email
      */
-    public function seeEmailIsSentTo(string $recipient, Email $email)
+    public function seeEmailIsSentTo(string $recipient, Email $email): void
     {
         $collectedMessages = $this->getCollectedEmails($email);
 
         $recipients = [];
         foreach ($collectedMessages as $message) {
-            if ($email->getSubject() !== $message->getSubject()) {
+
+            // yes. that's because it's impossible to fetch recipients in pimcore mail log while in debug mode.
+            $htmlParser = new \DOMDocument();
+            $htmlParser->loadHTML($message->getHtmlBody());
+            $xpath = new \DOMXPath($htmlParser);
+
+            $debugTable = $xpath->query('//table[@class="pimcore_debug_information"]')->item(0);
+
+            if ($debugTable === null) {
                 continue;
             }
-            $recipients = array_merge($recipients, $message->getTo());
+
+            foreach ($debugTable->getElementsByTagName('tr') as $row) {
+
+                if (str_contains($row->nodeValue, 'To:') === false) {
+                    continue;
+                }
+
+                $recipients[] = str_replace('To: ', '', $row->nodeValue);
+            }
         }
 
-        $this->assertContains($recipient, array_keys($recipients));
+        $this->assertContains($recipient, $recipients);
 
     }
 
     /**
      * Actor Function to see if given email has been sent
-     *
-     * @param Email  $email
-     * @param string $property
-     * @param string $value
      */
-    public function seeSentEmailHasPropertyValue(Email $email, string $property, string $value)
+    public function seeSentEmailHasPropertyValue(Email $email, string $property, string $value): void
     {
         $collectedMessages = $this->getCollectedEmails($email);
 
@@ -262,42 +229,24 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     /**
      * Actor Function to see if given email has been with specified address
      * Only works with PhpBrowser (Symfony Client)
-     *
-     * @param string $submissionType
-     * @param Email  $email
-     *
-     * @throws \ReflectionException
      */
-    public function seeEmailSubmissionType(string $submissionType, Email $email)
+    public function seeEmailSubmissionType(string $submissionType, string $type, Email $email): void
     {
         $collectedMessages = $this->getCollectedEmails($email);
 
-        /** @var Mail $message */
         foreach ($collectedMessages as $message) {
-            if (method_exists($message, 'getBodyContentType')) {
-                $contentType = $message->getBodyContentType();
-            } else {
-                // swift mailer < 6.0
-                $reflectionClass = new \ReflectionClass($message);
-                $contentTypeProperty = $reflectionClass->getProperty('_userContentType');
-                $contentTypeProperty->setAccessible(true);
-                $contentType = $contentTypeProperty->getValue($message);
-            }
+            $contentType = $type === 'html' ? $message->getHtmlCharset() : $message->getTextCharset();
             $this->assertEquals($submissionType, $contentType);
         }
     }
 
     /**
      * Actor Function to see if given string is in real submitted mail body
-     *
-     * @param string $string
-     * @param Email  $email
      */
-    public function seeInSubmittedEmailBody(string $string, Email $email)
+    public function seeInSubmittedEmailBody(string $string, Email $email): void
     {
         $collectedMessages = $this->getCollectedEmails($email);
 
-        /** @var Mail $message */
         foreach ($collectedMessages as $message) {
             $this->assertContains($string, is_null($message->getBody()) ? '' : $message->getBody());
         }
@@ -305,15 +254,11 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 
     /**
      * Actor Function to see if given string is in real submitted mail body
-     *
-     * @param string $string
-     * @param Email  $email
      */
-    public function dontSeeInSubmittedEmailBody(string $string, Email $email)
+    public function dontSeeInSubmittedEmailBody(string $string, Email $email): void
     {
         $collectedMessages = $this->getCollectedEmails($email);
 
-        /** @var Mail $message */
         foreach ($collectedMessages as $message) {
             $this->assertNotContains($string, is_null($message->getBody()) ? '' : $message->getBody());
         }
@@ -321,14 +266,11 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 
     /**
      * Actor Function to see if message has children
-     *
-     * @param Email $email
      */
-    public function haveSubmittedEmailChildren(Email $email)
+    public function haveSubmittedEmailChildren(Email $email): void
     {
         $collectedMessages = $this->getCollectedEmails($email);
 
-        /** @var Mail $message */
         foreach ($collectedMessages as $message) {
             $this->assertGreaterThan(0, count($message->getChildren()));
         }
@@ -336,14 +278,11 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 
     /**
      * Actor Function to see if message has no children
-     *
-     * @param Email $email
      */
-    public function dontHaveSubmittedEmailChildren(Email $email)
+    public function dontHaveSubmittedEmailChildren(Email $email): void
     {
         $collectedMessages = $this->getCollectedEmails($email);
 
-        /** @var Mail $message */
         foreach ($collectedMessages as $message) {
             $this->assertEquals(0, count($message->getChildren()));
         }
@@ -351,15 +290,11 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 
     /**
      * Actor Function to see if given string is in real submitted child body
-     *
-     * @param string $string
-     * @param Email  $email
      */
-    public function seeInSubmittedEmailChildrenBody(string $string, Email $email)
+    public function seeInSubmittedEmailChildrenBody(string $string, Email $email): void
     {
         $collectedMessages = $this->getCollectedEmails($email);
 
-        /** @var Mail $message */
         foreach ($collectedMessages as $message) {
 
             $this->assertGreaterThan(0, count($message->getChildren()));
@@ -372,15 +307,11 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 
     /**
      * Actor Function to see if given string is not in real submitted child body
-     *
-     * @param string $string
-     * @param Email  $email
      */
-    public function dontSeeInSubmittedEmailChildrenBody(string $string, Email $email)
+    public function dontSeeInSubmittedEmailChildrenBody(string $string, Email $email): void
     {
         $collectedMessages = $this->getCollectedEmails($email);
 
-        /** @var Mail $message */
         foreach ($collectedMessages as $message) {
             foreach ($message->getChildren() as $child) {
                 $this->assertNotContains($string, is_null($child->getBody()) ? '' : $child->getBody());
@@ -389,12 +320,9 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     }
 
     /**
-     * Actor Function to login in FrontEnd
-     *
-     * @param UserInterface $user
-     * @param string        $firewallName
+     * Actor Function to log-in in front end
      */
-    public function amLoggedInAsFrontendUser(UserInterface $user, string $firewallName)
+    public function amLoggedInAsFrontendUser(?UserInterface $user, string $firewallName): void
     {
         if (!$user instanceof UserInterface) {
             $this->debug(sprintf('[PIMCORE BUNDLE MODULE] user needs to be a instance of %s.', UserInterface::class));
@@ -417,11 +345,9 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     }
 
     /**
-     * Actor Function to login into Pimcore Backend
-     *
-     * @param $username
+     * Actor Function to log-in into Pimcore Backend
      */
-    public function amLoggedInAs($username)
+    public function amLoggedInAs(string $username): void
     {
         try {
             /** @var PimcoreUser $userModule */
@@ -454,11 +380,8 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 
     /**
      * Actor Function to send tokenized ajax request in backend
-     *
-     * @param string $url
-     * @param array  $params
      */
-    public function sendTokenAjaxPostRequest(string $url, array $params = [])
+    public function sendTokenAjaxPostRequest(string $url, array $params = []): void
     {
         $params['csrfToken'] = self::PIMCORE_ADMIN_CSRF_TOKEN_NAME;
         $this->pimcoreCore->sendAjaxPostRequest($url, $params);
@@ -466,10 +389,8 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 
     /**
      * Actor Function to see if last executed request is in given path
-     *
-     * @param string $expectedPath
      */
-    public function seeLastRequestIsInPath(string $expectedPath)
+    public function seeLastRequestIsInPath(string $expectedPath): void
     {
         $requestUri = $this->pimcoreCore->client->getInternalRequest()->getUri();
         $requestServer = $this->pimcoreCore->client->getInternalRequest()->getServer();
@@ -482,7 +403,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     /**
      * Actor Function to see canonical rel in link header
      */
-    public function seeCanonicalLinkInResponse()
+    public function seeCanonicalLinkInResponse(): void
     {
         $link = $this->pimcoreCore->client->getInternalResponse()->getHeader('Link');
 
@@ -493,7 +414,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     /**
      * Actor Function to not see canonical rel in link header
      */
-    public function dontSeeCanonicalLinkInResponse()
+    public function dontSeeCanonicalLinkInResponse(): void
     {
         $link = $this->pimcoreCore->client->getInternalResponse()->getHeader('Link');
 
@@ -502,10 +423,8 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 
     /**
      * Actor Function to see pimcore output cached disabled header
-     *
-     * @param $disabledReasonMessage
      */
-    public function seePimcoreOutputCacheDisabledHeader($disabledReasonMessage)
+    public function seePimcoreOutputCacheDisabledHeader(string $disabledReasonMessage): void
     {
         $disabledReason = $this->pimcoreCore->client->getInternalResponse()->getHeader('X-Pimcore-Output-Cache-Disable-Reason');
 
@@ -513,9 +432,9 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     }
 
     /**
-     * Actor Function to not to see pimcore output cached disabled header
+     * Actor Function to not see pimcore output cached disabled header
      */
-    public function dontSeePimcoreOutputCacheDisabledHeader()
+    public function dontSeePimcoreOutputCacheDisabledHeader(): void
     {
         $disabledReason = $this->pimcoreCore->client->getInternalResponse()->getHeader('X-Pimcore-Output-Cache-Disable-Reason');
 
@@ -523,9 +442,9 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     }
 
     /**
-     * Actor Function to not to see pimcore output cached disabled header
+     * Actor Function to not see pimcore output cached disabled header
      */
-    public function seePimcoreOutputCacheDate()
+    public function seePimcoreOutputCacheDate(): void
     {
         $cacheDateHeader = $this->pimcoreCore->client->getInternalResponse()->getHeader('x-pimcore-cache-date');
 
@@ -534,10 +453,8 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 
     /**
      * Actor Function to assert empty session bag
-     *
-     * @param string $bagName
      */
-    public function seeEmptySessionBag(string $bagName)
+    public function seeEmptySessionBag(string $bagName): void
     {
         /** @var NamespacedAttributeBag $sessionBag */
         $sessionBag = $this->pimcoreCore->client->getRequest()->getSession()->getBag($bagName);
@@ -546,11 +463,9 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     }
 
     /**
-     * Actor Function to check if last _fragment request has given properties in request attributes.
-     *
-     * @param array $properties
+     * Actor Function to check if last _fragment request has given properties in request attributes
      */
-    public function seePropertiesInLastFragmentRequest(array $properties = [])
+    public function seePropertiesInLastFragmentRequest(array $properties = []): void
     {
         /** @var Profiler $profiler */
         $profiler = $this->pimcoreCore->_getContainer()->get('profiler');
@@ -577,11 +492,9 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     }
 
     /**
-     * @param Email $email
-     *
-     * @return array
+     * @return Mail[]
      */
-    protected function getCollectedEmails(Email $email)
+    protected function getCollectedEmails(Email $email): array
     {
         $this->assertInstanceOf(Email::class, $email);
 
@@ -602,19 +515,18 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         }
 
         /** @var MessageDataCollector $mailCollector */
-        $mailCollector = $profile->getCollector('swiftmailer');
+        $mailCollector = $profile->getCollector('mailer');
 
-        $this->assertGreaterThan(0, $mailCollector->getMessageCount());
+        $collectedMessages = $mailCollector->getEvents()->getMessages();
 
-        $collectedMessages = $mailCollector->getMessages();
+        $this->assertGreaterThan(0, count($collectedMessages));
 
         $emails = [];
         /** @var Mail $message */
         foreach ($collectedMessages as $message) {
-            if ($email->getProperty('test_identifier') !== $message->getDocument()->getProperty('test_identifier')) {
-                continue;
+            if (str_contains($message->getSubject(), sprintf('[%s]', $email->getProperty('test_identifier')))) {
+                $emails[] = $message;
             }
-            $emails[] = $message;
         }
 
         return $emails;

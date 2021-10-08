@@ -10,12 +10,7 @@ use Pimcore\Tests\Util\TestHelper;
 
 class SystemHelper
 {
-    /**
-     * @param array $tablesToTruncate
-     *
-     * @throws Exception
-     */
-    public static function cleanUp(array $tablesToTruncate = [])
+    public static function cleanUp(array $tablesToTruncate = []): void
     {
         TestHelper::cleanUp();
         FileGeneratorHelper::cleanUp();

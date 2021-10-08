@@ -11,20 +11,16 @@ class WebDriver extends Module\WebDriver
 {
     /**
      * Actor Function to see a page with enabled edit-mode
-     *
-     * @param string $page
      */
-    public function amOnPageInEditMode(string $page)
+    public function amOnPageInEditMode(string $page): void
     {
         $this->amOnPage(sprintf('%s?pimcore_editmode=true', $page));
     }
 
     /**
      * Actor Function to declare web driver download behaviour
-     *
-     * @param null $path
      */
-    public function setDownloadPathForWebDriver($path = null)
+    public function setDownloadPathForWebDriver($path = null): void
     {
         if (is_null($path)) {
             $path = FileGeneratorHelper::getWebdriverDownloadPath();
@@ -44,7 +40,7 @@ class WebDriver extends Module\WebDriver
     /**
      * Actor Function to clear web driver cache
      */
-    public function clearWebDriverCache()
+    public function clearWebDriverCache(): void
     {
         $body = [
             'cmd'    => 'Network.clearBrowserCache',
@@ -57,24 +53,12 @@ class WebDriver extends Module\WebDriver
         $this->assertEquals(0, $responseData['status']);
     }
 
-    /**
-     * @param string $name
-     * @param string $type
-     * @param array  $options
-     * @param null   $data
-     * @param null   $selector
-     */
-    public function seeAEditableConfiguration(string $name, string $type, array $options, $data = null, $selector = null)
+    public function seeAEditableConfiguration(string $name, string $type, array $options, $data = null, $selector = null): void
     {
         $this->see(EditableHelper::generateEditableConfiguration($name, $type, $options, $data), $selector);
     }
 
-    /**
-     * @param array $body
-     *
-     * @return array|mixed
-     */
-    protected function sendWebDriverCommand(array $body)
+    protected function sendWebDriverCommand(array $body): array
     {
         $url = $this->webDriver->getCommandExecutor()->getAddressOfRemoteServer();
         $path = sprintf('/session/%s/chromium/send_command', $this->webDriver->getSessionID());
@@ -83,7 +67,7 @@ class WebDriver extends Module\WebDriver
         $response = $client->post($url . $path, ['body' => json_encode($body)]);
 
         try {
-            $responseData = json_decode($response->getBody()->getContents(), true);
+            $responseData = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\Exception $e) {
             $responseData = [];
         }
