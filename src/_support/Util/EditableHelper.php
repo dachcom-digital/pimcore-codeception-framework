@@ -70,7 +70,7 @@ class EditableHelper
         return $elements;
     }
 
-    public static function generateEditableConfiguration(string $name, string $type, array $options, $data = null): string
+    public static function generateEditableConfiguration(string $name, string $type, ?string $label, array $options, $data = null): string
     {
         $editableConfig = [
             'id'       => sprintf('pimcore_editable_%s%s1%s%s', self::AREA_TEST_NAMESPACE, '_', '_', $name),
@@ -78,26 +78,25 @@ class EditableHelper
             'realName' => $name
         ];
 
-        if (VersionHelper::pimcoreVersionIsGreaterOrEqualThan('6.8.0')) {
-            $configName = 'editableDefinitions';
-            $editableConfig = array_merge($editableConfig, [
-                'config'      => $options,
-                'data'        => is_int($data) ? (string) $data : $data,
-                'type'        => $type,
-                'inherited'   => false,
-                'inDialogBox' => null
-            ]);
-
-        } else {
-            $configName = 'editableConfigurations';
-            $editableConfig = array_merge($editableConfig, [
-                'options'   => $options,
-                'data'      => is_int($data) ? (string) $data : $data,
-                'type'      => $type,
-                'inherited' => false
+        if ($label !== null) {
+            $options = array_merge($options, [
+                'dialogBoxConfig' => [
+                    'type'   => $type,
+                    'name'   => $name,
+                    'label'  => $label,
+                    'config' => $options,
+                ]
             ]);
         }
 
-        return sprintf('%s.push(%s);', $configName, json_encode($editableConfig, JSON_PRETTY_PRINT));
+        $editableConfig = array_merge($editableConfig, [
+            'config'      => $options,
+            'data'        => is_int($data) ? (string) $data : $data,
+            'type'        => $type,
+            'inherited'   => false,
+            'inDialogBox' => $label === null ? null : 'dialogBox-bundleTestArea-1',
+        ]);
+
+        return sprintf(json_encode($editableConfig, JSON_PRETTY_PRINT));
     }
 }

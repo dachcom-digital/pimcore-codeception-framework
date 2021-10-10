@@ -56,9 +56,9 @@ class WebDriver extends Module\WebDriver
     /**
      * Actor Function to see an editable on current page
      */
-    public function seeAEditableConfiguration(string $name, string $type, array $options, $data = null, $selector = null): void
+    public function seeAEditableConfiguration(string $name, string $type, ?string $label, array $options, $data = null, $selector = null): void
     {
-        $this->see(EditableHelper::generateEditableConfiguration($name, $type, $options, $data), $selector);
+        $this->see(EditableHelper::generateEditableConfiguration($name, $type, $label, $options, $data), $selector);
     }
 
     /**

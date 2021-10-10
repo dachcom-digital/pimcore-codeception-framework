@@ -185,7 +185,7 @@ If you want to provide some classes to install, all the definitions need to stor
 | `$I->seeDownloadLinkZip(string $fileName, string $link)` | |
 | `$I->amOnStaticRoute(string $routeName, array $args)` | |
 | `$I->seeCurrentHostEquals(string $host)` | |
-| `$I->seeAEditableConfiguration(string $name, string $type, array $options, $data = null, $selector = null)` | |
+| `$I->seeAEditableConfiguration(string $name, string $type, ?string $label, array $options, $data = null, $selector = null)` | |
 | `$I->seeEmailIsSentTo(string $recipient, Email $email)` | |
 | `$I->seeSentEmailHasPropertyValue(Email $email, string $property, string $value)` | |
 | `$I->seeEmailSubmissionType(string $submissionType, string $type, Email $email)` | |
@@ -213,5 +213,5 @@ If you want to provide some classes to install, all the definitions need to stor
 | `$I->amOnPageInEditMode(string $page)` | |
 | `$I->setDownloadPathForWebDriver($path = null)` | |
 | `$I->clearWebDriverCache()` | |
-| `$I->seeAEditableConfiguration(string $name, string $type, array $options, $data = null, $selector = null)` | |
+| `$I->seeAEditableConfiguration(string $name, string $type, ?string $label, array $options, $data = null, $selector = null)` | |
 | `$I->sendWebDriverCommand(array $body)` | |
