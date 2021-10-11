@@ -953,6 +953,7 @@ class PimcoreBackend extends Module
         $document->setUserModification(1);
         $document->setCreationDate(time());
         $document->setPublished(true);
+        $document->setMissingRequiredEditable(false);
 
         if ($locale !== null) {
             $document->setProperty('language', 'text', $locale, false, 1);
@@ -986,6 +987,7 @@ class PimcoreBackend extends Module
         $document->setUserModification(1);
         $document->setCreationDate(time());
         $document->setPublished(true);
+        $document->setMissingRequiredEditable(false);
 
         $document->setProperty('test_identifier', 'text', $documentKey, false, false);
 

@@ -20,6 +20,7 @@ use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\HttpKernel\Profiler\Profile;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Mailer\DataCollector\MessageDataCollector;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -209,7 +210,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     }
 
     /**
-     * Actor Function to see if given email has been sent
+     * Actor Function to see if given email has property (method) with specific value
      */
     public function seeSentEmailHasPropertyValue(Email $email, string $property, string $value): void
     {
@@ -219,7 +220,10 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         foreach ($collectedMessages as $message) {
             $getterData = $message->$getter();
             if (is_array($getterData)) {
-                $this->assertContains($value, array_keys($getterData));
+                $mappedValues = array_map(static function ($row) {
+                    return $row instanceof Address ? $row->getAddress() : $row;
+                }, $getterData);
+                $this->assertContains($value, $mappedValues);
             } else {
                 $this->assertEquals($value, $getterData);
             }
