@@ -33,8 +33,8 @@ class WebDriver extends Module\WebDriver
 
         $responseData = $this->sendWebDriverCommand($body);
 
-        $this->assertArrayHasKey('status', $responseData);
-        $this->assertEquals(0, $responseData['status']);
+        $this->assertArrayHasKey('value', $responseData);
+        $this->assertEquals(null, $responseData['value']);
     }
 
     /**
@@ -49,8 +49,8 @@ class WebDriver extends Module\WebDriver
 
         $responseData = $this->sendWebDriverCommand($body);
 
-        $this->assertArrayHasKey('status', $responseData);
-        $this->assertEquals(0, $responseData['status']);
+        $this->assertArrayHasKey('value', $responseData);
+        $this->assertEquals(null, $responseData['value']);
     }
 
     /**
