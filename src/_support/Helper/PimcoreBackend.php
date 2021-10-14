@@ -394,7 +394,7 @@ class PimcoreBackend extends Module
     /**
      * Actor Function to create a pimcore object folder
      */
-    public function haveAPimcoreObjectFolder(string $key = 'bundle-object-folder-test', array $params = []): Asset\Folder
+    public function haveAPimcoreObjectFolder(string $key = 'bundle-object-folder-test', array $params = []): DataObject\Folder
     {
         $assetFolder = $this->generateFolder($key, 'object', $params);
 
