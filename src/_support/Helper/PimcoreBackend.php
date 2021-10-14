@@ -316,7 +316,7 @@ class PimcoreBackend extends Module
     /**
      * Actor Function to copy object
      */
-    public function copyObject(DataObject $object, DataObject $targetObject): DataObject|Dataobject\Concrete
+    public function copyObject(DataObject $object, DataObject $targetObject): DataObject
     {
         $objectService = new DataObject\Service();
 
@@ -347,8 +347,10 @@ class PimcoreBackend extends Module
 
     /**
      * Actor Function to publish an object version
+     *
+     * @return DataObject
      */
-    public function publishObjectVersion(Version $version): DataObject|Dataobject\Concrete
+    public function publishObjectVersion(Version $version): DataObject
     {
         $version = Version::getById($version->getId());
 
