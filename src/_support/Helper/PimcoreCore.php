@@ -7,6 +7,7 @@ use Codeception\TestInterface;
 use Pimcore\Cache;
 use Pimcore\Event\TestEvents;
 use Pimcore\Tests\Helper\Pimcore as PimcoreCoreModule;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -39,7 +40,7 @@ class PimcoreCore extends PimcoreCoreModule
     {
         parent::_beforeSuite($settings);
 
-        $this->buildKernel($this->getDefaultSuiteContainerConfiguration(), $this->config['debug']);
+        $this->buildKernel($this->getDefaultSuiteContainerConfiguration(), $this->config['debug'], '_beforeSuite');
 
         $this->setPimcoreCacheAvailability('disabled');
         $this->checkDatabaseState();
@@ -53,9 +54,7 @@ class PimcoreCore extends PimcoreCoreModule
             return;
         }
 
-        codecept_debug('Container defaults changed _afterSuite. Rebuild Kernel...');
-
-        $this->buildKernel($this->getDefaultSuiteContainerConfiguration(), $this->config['debug']);
+        $this->buildKernel($this->getDefaultSuiteContainerConfiguration(), $this->config['debug'], '_afterSuite');
     }
 
     public function _after(TestInterface $test): void
@@ -66,9 +65,7 @@ class PimcoreCore extends PimcoreCoreModule
             return;
         }
 
-        codecept_debug('Container defaults changed _after. Rebuild Kernel...');
-
-        $this->buildKernel($this->getDefaultSuiteContainerConfiguration(), $this->config['debug']);
+        $this->buildKernel($this->getDefaultSuiteContainerConfiguration(), $this->config['debug'], '_after');
     }
 
     protected function setupTestEnvironment()
@@ -112,11 +109,15 @@ class PimcoreCore extends PimcoreCoreModule
             $kernelDebugState = $this->kernel->isDebug();
         }
 
+        if ($this->currentContainerConfiguration !== $this->getDefaultSuiteContainerConfiguration()) {
+            return true;
+        }
+
         if ($kernelDebugState !== $defaultDebugState) {
             return true;
         }
 
-        return $this->currentContainerConfiguration !== $this->getDefaultSuiteContainerConfiguration();
+        return false;
     }
 
     protected function getDefaultSuiteContainerConfiguration()
@@ -130,16 +131,14 @@ class PimcoreCore extends PimcoreCoreModule
         return $configuration;
     }
 
-    protected function buildKernel(string $configuration, bool $debug = true)
+    protected function buildKernel(string $configuration, bool $debug, string $dispatcher): void
     {
         // nothing to do. kernel hasn't changed
         if (($this->currentContainerConfiguration === $configuration) && $this->getKernel()->isDebug() === $debug) {
             return;
         }
 
-        if ($this->getKernel() instanceof KernelInterface) {
-            $this->getKernel()->shutdown();
-        }
+        codecept_debug(sprintf('Container defaults changed by "%s". Rebuilding Kernel...', $dispatcher));
 
         $this->setConfiguration($configuration);
 
@@ -159,6 +158,15 @@ class PimcoreCore extends PimcoreCoreModule
     {
         $this->currentContainerConfiguration = $configuration;
 
+        if ($this->getKernel() instanceof KernelInterface && $this->getContainer() instanceof ContainerInterface) {
+
+            $class = $this->getContainer()->getParameter('kernel.container_class');
+            $cacheDir = $this->kernel->getCacheDir();
+
+            unlink($cacheDir . '/' . $class . '.php');
+            sleep(2);
+        }
+
         $bundleTestPath = getenv('TEST_BUNDLE_TEST_DIR');
         $bundleName = getenv('TEST_BUNDLE_NAME');
 
@@ -175,8 +183,6 @@ class PimcoreCore extends PimcoreCoreModule
         $resource = sprintf('%s/%s/%s', $bundleTestPath, '_etc/config/bundle', $configuration);
 
         $fileSystem->dumpFile($runtimeConfigDirConfig, file_get_contents($resource));
-
-        sleep(1);
     }
 
     protected function setPimcoreCacheAvailability(string $state = 'disabled'): void
@@ -253,10 +259,10 @@ class PimcoreCore extends PimcoreCoreModule
             $kernelDebugState = $this->kernel->isDebug();
         }
 
-        if($kernelDebugState !== $debug) {
-            $this->buildKernel($configuration, $debug);
+        if ($kernelDebugState !== $debug) {
+            $this->buildKernel($configuration, $debug, '_actor[haveABootedSymfonyConfiguration]');
         } elseif ($this->currentContainerConfiguration !== $configuration) {
-            $this->buildKernel($configuration, $debug);
+            $this->buildKernel($configuration, $debug, '_actor[haveABootedSymfonyConfiguration]');
         }
     }
 
@@ -268,7 +274,7 @@ class PimcoreCore extends PimcoreCoreModule
     public function haveAKernelWithoutDebugMode(): void
     {
         $this->assertNotNull($this->currentContainerConfiguration, 'current container configuration must not be null');
-        $this->buildKernel($this->currentContainerConfiguration, false);
+        $this->buildKernel($this->currentContainerConfiguration, false, '_actor[haveAKernelWithoutDebugMode]');
     }
 }
 
