@@ -63,7 +63,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     /**
      *  Actor Function to see a page with given locale
      */
-    public function amOnPageWithLocale(string $url, ?string $locale): void
+    public function amOnPageWithLocale(string $url, null|string|array $locale): void
     {
         $parsedLocale = [];
         if (is_string($locale)) {
@@ -397,7 +397,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         $link = $this->pimcoreCore->client->getInternalResponse()->getHeader('Link');
 
         $this->assertIsString($link);
-        $this->assertContains('rel="canonical"', $link);
+        $this->assertStringContainsString('rel="canonical"', $link);
     }
 
     /**

@@ -164,6 +164,8 @@ If you want to provide some classes to install, all the definitions need to stor
 | Name                                  | Description        |
 |---------------------------------------|--------------------|
 | `$I->haveABootedSymfonyConfiguration(string $configuration)` | |
+| `$I->haveAKernelWithoutDebugMode()` | |
+| `$I->seeException(string $exception, ?string $message, \Closure $callback)` | |
 
 ### [MODULE] PimcoreUser
 
@@ -179,7 +181,7 @@ If you want to provide some classes to install, all the definitions need to stor
 | Name                                  | Description        |
 |---------------------------------------|--------------------|
 | `$I->amOnPageInEditMode(string $page)` | |
-| `$I->amOnPageWithLocale(string $url, ?string $locale)` | |
+| `$I->amOnPageWithLocale(string $url, null|string|array $locale)` | |
 | `$I->amOnPageWithLocaleAndCountry(string $url, ?string $locale, string $country)` | |
 | `$I->seeDownloadLink(AbstractModel $element, string $link)` | |
 | `$I->seeDownloadLinkZip(string $fileName, string $link)` | |

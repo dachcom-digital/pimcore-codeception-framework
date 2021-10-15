@@ -13,16 +13,12 @@ use Symfony\Component\Yaml\Yaml;
 class TestKernel extends Kernel
 {
     public const PRELOAD_FILES = [
-        //'App/Session/MockFileSessionStorage.php',
         'DependencyInjection/MakeServicesPublicPass.php',
         'DependencyInjection/MonologChannelLoggerPass.php',
         'DependencyInjection/ServiceChangePass.php',
     ];
 
-    /**
-     * {@inheritdoc}
-     */
-    public function registerBundlesToCollection(BundleCollection $collection)
+    public function registerBundlesToCollection(BundleCollection $collection): void
     {
         $collection->addBundle(new WebProfilerBundle());
 
@@ -35,10 +31,7 @@ class TestKernel extends Kernel
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function registerContainerConfiguration(LoaderInterface $loader)
+    public function registerContainerConfiguration(LoaderInterface $loader): void
     {
         parent::registerContainerConfiguration($loader);
 
@@ -53,12 +46,7 @@ class TestKernel extends Kernel
         });
     }
 
-    /**
-     * @param ContainerBuilder $container
-     *
-     * @throws \Exception
-     */
-    protected function build(ContainerBuilder $container)
+    protected function build(ContainerBuilder $container): void
     {
         $this->preloadClasses();
 
@@ -67,7 +55,7 @@ class TestKernel extends Kernel
         $container->addCompilerPass(new \Dachcom\Codeception\DependencyInjection\MonologChannelLoggerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
     }
 
-    protected function preloadClasses()
+    protected function preloadClasses(): void
     {
         $fwDir = sprintf('%s/src', $_SERVER['PIMCORE_CODECEPTION_FRAMEWORK']);
         $bDir = sprintf('%s', $_SERVER['TEST_BUNDLE_TEST_DIR']);
@@ -89,24 +77,10 @@ class TestKernel extends Kernel
         }
     }
 
-    /**
-     * @param string $section
-     *
-     * @return mixed|null
-     */
-    protected function getTestBundleConfig(string $section)
+    protected function getTestBundleConfig(string $section): mixed
     {
         $data = Yaml::parse(file_get_contents(sprintf('%s/_etc/config.yml', $_SERVER['TEST_BUNDLE_TEST_DIR'])));
 
-        return isset($data[$section]) ? $data[$section] : null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function boot()
-    {
-        parent::boot();
-        \Pimcore::setKernel($this);
+        return $data[$section] ?? null;
     }
 }
