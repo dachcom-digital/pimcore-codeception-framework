@@ -59,6 +59,8 @@ class PimcoreCore extends PimcoreCoreModule
     {
         parent::_after($test);
 
+        \Pimcore\Db::get()->close();
+
         KernelHelper::removeLocalEnvVarsForRemoteKernel();
     }
 
