@@ -786,13 +786,12 @@ class PimcoreBackend extends Module
     public function haveAStaticRoute(string $name = 'test_route', array $params = []): Staticroute
     {
         $defaults = [
-            'id'               => 1,
             'name'             => $name,
             'controller'       => sprintf('App\\Controller\\DefaultController::%s', $params['action'] ?? 'defaultAction'),
             'defaults'         => null,
             'siteId'           => [],
             'priority'         => 0,
-            'legacy'           => false,
+            'methods'          => null,
             'creationDate'     => 1545383519,
             'modificationDate' => 1545383619
         ];

@@ -4,6 +4,7 @@ namespace Dachcom\Codeception\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 class MakeServicesPublicPass implements CompilerPassInterface
 {
@@ -15,13 +16,15 @@ class MakeServicesPublicPass implements CompilerPassInterface
         });
 
         foreach ($serviceIds as $serviceId) {
-            if ($container->hasAlias($serviceId)) {
-                $container->getAlias($serviceId)->setPublic(true);
+
+            try {
+                $definition = $container->findDefinition($serviceId);
+            } catch (ServiceNotFoundException $e) {
+                // fails silently.
+                continue;
             }
 
-            $container
-                ->findDefinition($serviceId)
-                ->setPublic(true);
+            $definition->setPublic(true);
         }
     }
 }
