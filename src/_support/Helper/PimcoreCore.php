@@ -76,7 +76,7 @@ class PimcoreCore extends PimcoreCoreModule
         return $configuration;
     }
 
-    protected function buildKernel(string $configuration, bool $debug, string $dispatcher, bool $isHardReset = false): void
+    protected function buildKernel(string $configuration, bool $debug, string $dispatcher): void
     {
         // nothing to do. kernel hasn't changed
         if (($this->currentContainerConfiguration === $configuration) && $this->getKernel()->isDebug() === $debug) {
@@ -103,8 +103,8 @@ class PimcoreCore extends PimcoreCoreModule
 
         $this->kernel = KernelHelper::buildTestKernel($debug, $configuration);
 
-        // hardReset = config/debug changed during test (via actor), so we need to reset clients kernel too!
-        if ($isHardReset === true && $this->client instanceof SymfonyConnector) {
+        // config/debug may have changed during test (via actor), so we need to reset clients kernel too!
+        if ($this->client instanceof SymfonyConnector) {
             $this->client = new SymfonyConnector($this->kernel, $this->client->persistentServices, $this->config['rebootable_client']);
         }
 
@@ -232,9 +232,9 @@ class PimcoreCore extends PimcoreCoreModule
         }
 
         if ($kernelDebugState !== $debug) {
-            $this->buildKernel($configuration, $debug, '_actor[haveABootedSymfonyConfiguration]', true);
+            $this->buildKernel($configuration, $debug, '_actor[haveABootedSymfonyConfiguration]');
         } elseif ($this->currentContainerConfiguration !== $configuration) {
-            $this->buildKernel($configuration, $debug, '_actor[haveABootedSymfonyConfiguration]', true);
+            $this->buildKernel($configuration, $debug, '_actor[haveABootedSymfonyConfiguration]');
         }
     }
 
@@ -246,7 +246,7 @@ class PimcoreCore extends PimcoreCoreModule
     public function haveAKernelWithoutDebugMode(): void
     {
         $this->assertNotNull($this->currentContainerConfiguration, 'current container configuration must not be null');
-        $this->buildKernel($this->currentContainerConfiguration, false, '_actor[haveAKernelWithoutDebugMode]', true);
+        $this->buildKernel($this->currentContainerConfiguration, false, '_actor[haveAKernelWithoutDebugMode]');
     }
 }
 
