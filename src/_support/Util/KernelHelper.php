@@ -35,6 +35,8 @@ class KernelHelper
 
     public static function setLocalEnvVarsForRemoteKernel(array $localEnvVariables = []): void
     {
+        self::removeLocalEnvVarsForRemoteKernel();
+
         $vars = '';
         foreach ($localEnvVariables as $key => $value) {
             $vars .= sprintf('%s=%s' . "\n", $key, $value);

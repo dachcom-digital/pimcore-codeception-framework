@@ -8,7 +8,6 @@ use Codeception\TestInterface;
 use Dachcom\Codeception\Util\KernelHelper;
 use Pimcore\Cache;
 use Pimcore\Event\TestEvents;
-use Pimcore\Helper\LongRunningHelper;
 use Pimcore\Tests\Helper\Pimcore as PimcoreCoreModule;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -54,15 +53,6 @@ class PimcoreCore extends PimcoreCoreModule
         }
 
         $this->buildKernel($this->getDefaultSuiteContainerConfiguration(), $this->config['debug'], '_before');
-    }
-
-    public function _after(TestInterface $test): void
-    {
-        parent::_after($test);
-
-        $this->getContainer()->get(LongRunningHelper::class)?->cleanUp();
-
-        KernelHelper::removeLocalEnvVarsForRemoteKernel();
     }
 
     protected function getDefaultSuiteContainerConfiguration(): string
