@@ -8,6 +8,7 @@ use Codeception\TestInterface;
 use Dachcom\Codeception\Util\KernelHelper;
 use Pimcore\Cache;
 use Pimcore\Event\TestEvents;
+use Pimcore\Helper\LongRunningHelper;
 use Pimcore\Tests\Helper\Pimcore as PimcoreCoreModule;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -59,7 +60,7 @@ class PimcoreCore extends PimcoreCoreModule
     {
         parent::_after($test);
 
-        \Pimcore\Db::get()->close();
+        $this->getContainer()->get(LongRunningHelper::class)?->cleanUp();
 
         KernelHelper::removeLocalEnvVarsForRemoteKernel();
     }
@@ -105,11 +106,6 @@ class PimcoreCore extends PimcoreCoreModule
         // hardReset = config/debug changed during test (via actor), so we need to reset clients kernel too!
         if ($isHardReset === true && $this->client instanceof SymfonyConnector) {
             $this->client = new SymfonyConnector($this->kernel, $this->client->persistentServices, $this->config['rebootable_client']);
-        }
-
-        $conf = $this->kernel->getContainer()->getParameter('pimcore.config');
-        if (isset($conf['general']['timezone']) && !empty($conf['general']['timezone'])) {
-            date_default_timezone_set($conf['general']['timezone']);
         }
 
         if ($this->config['cache_router'] === true) {

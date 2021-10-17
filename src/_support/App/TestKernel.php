@@ -39,7 +39,12 @@ class TestKernel extends Kernel
             return parent::getCacheDir();
         }
 
-        return $this->getProjectDir() . '/var/cache/' . $this->kernelName . '/' . $this->environment;
+        return sprintf(
+            '%s/var/cache/%s/%s',
+            $this->getProjectDir(),
+            $this->kernelName,
+            $this->environment
+        );
     }
 
     public function registerBundlesToCollection(BundleCollection $collection): void
