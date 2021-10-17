@@ -190,6 +190,7 @@ If you want to provide some classes to install, all the definitions need to stor
 | `$I->seeAEditableConfiguration(string $name, string $type, ?string $label, array $options, $data = null, $selector = null)` | |
 | `$I->seeEmailIsSentTo(string $recipient, Email $email)` | |
 | `$I->seeSentEmailHasPropertyValue(Email $email, string $property, string $value)` | |
+| `$I->seeSentEmailHasHeaderValue(Email $email, string $property, string $value)` | |
 | `$I->seeEmailSubmissionType(string $submissionType, string $type, Email $email)` | |
 | `$I->seeEmptyEmailSubmissionType(string $type, Email $email)` | |
 | `$I->seeInSubmittedEmailBody(string $string, Email $email)` | |

@@ -21,6 +21,8 @@ use Symfony\Component\HttpKernel\Profiler\Profile;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Mailer\DataCollector\MessageDataCollector;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Header\MailboxListHeader;
+use Symfony\Component\Mime\Header\UnstructuredHeader;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -220,12 +222,39 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         foreach ($collectedMessages as $message) {
             $getterData = $message->$getter();
             if (is_array($getterData)) {
-                $mappedValues = array_map(static function ($row) {
+                $this->assertContains($value, array_map(static function ($row) {
                     return $row instanceof Address ? $row->getAddress() : $row;
-                }, $getterData);
-                $this->assertContains($value, $mappedValues);
+                }, $getterData));
             } else {
                 $this->assertEquals($value, $getterData);
+            }
+        }
+    }
+
+    /**
+     * Actor Function to see if given email has header with specific value
+     */
+    public function seeSentEmailHasHeaderValue(Email $email, string $property, string $value): void
+    {
+        $collectedMessages = $this->getCollectedEmails($email);
+
+        foreach ($collectedMessages as $message) {
+
+            foreach ($message->getheaders() as $identifier => $headerData) {
+
+                if ($property !== $identifier) {
+                    continue;
+                }
+
+                foreach ($headerData as $headerValue) {
+                    if ($headerValue instanceof MailboxListHeader) {
+                        $this->assertContains($value, array_map(static function (Address $row) {
+                            return $row->getAddress();
+                        }, $headerValue->getAddresses()));
+                    } elseif ($headerValue instanceof UnstructuredHeader) {
+                        $this->assertEquals($value, $headerValue->getValue());
+                    }
+                }
             }
         }
     }
