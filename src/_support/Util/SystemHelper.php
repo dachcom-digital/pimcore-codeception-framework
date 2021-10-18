@@ -56,11 +56,7 @@ class SystemHelper
         $staticRoutes = new Staticroute\Listing();
         foreach ($staticRoutes->getRoutes() as $staticRoute) {
             \Codeception\Util\Debug::debug('[TEST BUNDLE] Deleting static route: ' . $staticRoute->getId());
-            try {
-                $staticRoute->delete();
-            } catch (\Throwable $e) {
-                // fail silently?
-            }
+            $staticRoute->delete();
         }
 
         if (count($tablesToTruncate) === 0) {
