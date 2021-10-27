@@ -134,7 +134,7 @@ If you want to provide some classes to install, all the definitions need to stor
 | `$I->haveASubPimcoreAssetFolder(Asset\Folder $parent, $key = 'bundle-asset-sub-folder-test', array $params = [])` | |
 | `$I->moveAsset(Asset $asset, Asset $parentAsset)` | |
 | `$I->haveADummyFile($fileName, $fileSizeInMb = 1)` | |
-| `$I->haveASite($siteKey, array $params = [], $locale = null, $add3w = false, $additionalDomains = [])` | |
+| `$I->haveASite($siteKey, array $params = [], $locale = null, $add3w = false, $additionalDomains = [], array $errorDocuments = [])` | |
 | `$I->haveAPageDocumentForSite(Site $site, $key = 'document-test', array $params = [], $locale = null)` | |
 | `$I->haveAHardlinkForSite(Site $site, Document\Page $document, $key = 'hardlink-test', array $params = [], $locale = null)` | |
 | `$I->seeDownload($fileName)` | |
@@ -180,6 +180,7 @@ If you want to provide some classes to install, all the definitions need to stor
 
 | Name                                  | Description        |
 |---------------------------------------|--------------------|
+| `$I->haveReplacedPimcoreRuntimeConfigurationNode(array $overrideConfig)` | |
 | `$I->amOnPageInEditMode(string $page)` | |
 | `$I->amOnPageWithLocale(string $url, null|string|array $locale)` | |
 | `$I->amOnPageWithLocaleAndCountry(string $url, ?string $locale, string $country)` | |

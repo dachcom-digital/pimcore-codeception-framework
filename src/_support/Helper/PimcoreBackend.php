@@ -514,9 +514,9 @@ class PimcoreBackend extends Module
     /**
      * Actor Function to create a Site Document
      */
-    public function haveASite($siteKey, array $params = [], ?string $locale = null, bool $add3w = false, array $additionalDomains = []): Site
+    public function haveASite($siteKey, array $params = [], ?string $locale = null, bool $add3w = false, array $additionalDomains = [], array $errorDocuments = []): Site
     {
-        $site = $this->generateSiteDocument($siteKey, $params, $locale, $add3w, $additionalDomains);
+        $site = $this->generateSiteDocument($siteKey, $params, $locale, $add3w, $additionalDomains, $errorDocuments);
 
         try {
             $site->save();
@@ -1076,7 +1076,14 @@ class PimcoreBackend extends Module
     /**
      * API Function to create a site document
      */
-    public function generateSiteDocument(string $domain, array $params = [], ?string $locale = null, bool $add3w = false, array $additionalDomains = []): Site
+    public function generateSiteDocument(
+        string $domain,
+        array $params = [],
+        ?string $locale = null,
+        bool $add3w = false,
+        array $additionalDomains = [],
+        array $errorDocuments = []
+    ): Site
     {
         $document = TestHelper::createEmptyDocumentPage($domain, false);
         $document->setProperty('navigation_title', 'text', $domain);
@@ -1111,6 +1118,24 @@ class PimcoreBackend extends Module
         if (count($additionalDomains) > 0) {
             $site->setDomains($additionalDomains);
         }
+
+        $localizedErrorDocuments = [];
+
+        if (count($errorDocuments) > 0) {
+            /**
+             * @var string $locale
+             * @var string $errorDocumentPath
+             */
+            foreach ($errorDocuments as $errorDocumentLocale => $errorDocumentPath) {
+                if ($errorDocumentLocale === 'default') {
+                    $site->setErrorDocument($errorDocumentPath);
+                } else {
+                    $localizedErrorDocuments[$errorDocumentLocale] = $errorDocumentPath;
+                }
+            }
+        }
+
+        $site->setLocalizedErrorDocuments($localizedErrorDocuments);
 
         return $site;
     }

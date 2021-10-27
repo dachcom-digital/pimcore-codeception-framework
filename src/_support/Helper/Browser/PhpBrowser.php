@@ -8,6 +8,7 @@ use Codeception\Exception\ModuleException;
 use Dachcom\Codeception\Helper\PimcoreCore;
 use Dachcom\Codeception\Helper\PimcoreUser;
 use Dachcom\Codeception\Util\EditableHelper;
+use Pimcore\Config;
 use Pimcore\Mail;
 use Pimcore\Model\AbstractModel;
 use Pimcore\Model\Document\Email;
@@ -52,6 +53,14 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         $this->sessionSnapShot = [];
 
         parent::_initialize();
+    }
+
+    /**
+     * Actor Function to replace a pimcore system configuration node on the fly
+     */
+    public function haveReplacedPimcoreRuntimeConfigurationNode(array $overrideConfig): void
+    {
+        Config::setSystemConfiguration(array_replace_recursive(config::getSystemConfiguration(), $overrideConfig));
     }
 
     /**
