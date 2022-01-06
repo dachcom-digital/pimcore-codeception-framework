@@ -17,6 +17,10 @@ class MakeServicesPublicPass implements CompilerPassInterface
 
         foreach ($serviceIds as $serviceId) {
 
+            if ($container->hasAlias($serviceId)) {
+                $container->getAlias($serviceId)->setPublic(true);
+            }
+
             try {
                 $definition = $container->findDefinition($serviceId);
             } catch (ServiceNotFoundException $e) {
