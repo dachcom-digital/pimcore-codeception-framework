@@ -14,6 +14,9 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 class PimcoreCore extends PimcoreCoreModule
 {
+    public $kernel;
+    public $client;
+
     public const DEFAULT_CONFIG_FILE = 'config_default.yml';
 
     protected bool $dbInitialized = false;
@@ -98,7 +101,7 @@ class PimcoreCore extends PimcoreCoreModule
             $this->client = new SymfonyConnector($this->kernel, $this->client->persistentServices, $this->config['rebootable_client']);
         }
 
-        if ($this->config['cache_router'] === true) {
+        if (array_key_exists('cache_router', $this->config) && $this->config['cache_router'] === true) {
             $this->persistService('router', true);
         }
 
