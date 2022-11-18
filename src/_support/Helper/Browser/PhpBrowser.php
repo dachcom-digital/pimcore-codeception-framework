@@ -27,7 +27,6 @@ use Symfony\Component\Mime\Header\UnstructuredHeader;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Codeception\Module\Symfony;
 
 class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 {
@@ -39,7 +38,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     public function _depends(): array
     {
         return [
-            Symfony::class => 'PhpBrowser needs the pimcore core framework to work.'
+            PimcoreCore::class => 'PhpBrowser needs the pimcore core framework to work.'
         ];
     }
 
@@ -163,7 +162,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
      */
     public function amOnStaticRoute(string $routeName, array $args): void
     {
-        $path = $this->pimcoreCore->getContainer()->get('router')->generate($routeName, $args, false);
+        $path = $this->pimcoreCore->_getContainer()->get('router')->generate($routeName, $args, false);
         $this->pimcoreCore->amOnPage($path);
     }
 
@@ -357,10 +356,10 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         }
 
         /** @var Session $session */
-        $session = $this->pimcoreCore->getContainer()->get('session');
+        $session = $this->pimcoreCore->_getContainer()->get('session');
 
         $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
-        $this->pimcoreCore->getContainer()->get('security.token_storage')->setToken($token);
+        $this->pimcoreCore->_getContainer()->get('security.token_storage')->setToken($token);
 
         $session->set('_security_' . $firewallName, serialize($token));
         $session->save();

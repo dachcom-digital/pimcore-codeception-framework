@@ -1206,12 +1206,15 @@ class PimcoreBackend extends Module
 
     protected function getContainer(): Container
     {
-        return $this->getModule('\\' . PimcoreCore::class)->getContainer();
+        return $this->getModule('\\' . PimcoreCore::class)->_getContainer();
     }
 
     protected function getClassManager(): ClassManager
     {
-        return $this->getModule('\\' . ClassManager::class);
+        /** @var ClassManager $classManager */
+        $classManager = $this->getModule('\\' . ClassManager::class);
+
+        return $classManager;
     }
 
     protected function assignMethods(ElementInterface $entity, array $params): void

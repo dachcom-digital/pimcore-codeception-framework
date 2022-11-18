@@ -2,21 +2,20 @@
 
 namespace Dachcom\Codeception\Helper;
 
-use Codeception\Lib\InnerBrowser;
 use Codeception\Lib\Interfaces\DependsOnModule;
 use Codeception\Module;
 use Dachcom\Codeception\Constraint\JsonContains;
 
 class PimcoreAdminJson extends Module implements DependsOnModule
 {
-    protected InnerBrowser $connectionModule;
+    protected PimcoreCore $connectionModule;
 
     public function _depends(): array
     {
-        return [InnerBrowser::class => 'PimcoreAdminJson needs a valid browser to work.'];
+        return [PimcoreCore::class => 'PimcoreAdminJson needs a valid browser to work.'];
     }
 
-    public function _inject(InnerBrowser $connection): void
+    public function _inject(PimcoreCore $connection): void
     {
         $this->connectionModule = $connection;
     }

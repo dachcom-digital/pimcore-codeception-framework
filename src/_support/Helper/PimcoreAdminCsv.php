@@ -2,20 +2,19 @@
 
 namespace Dachcom\Codeception\Helper;
 
-use Codeception\Lib\InnerBrowser;
 use Codeception\Lib\Interfaces\DependsOnModule;
 use Codeception\Module;
 
 class PimcoreAdminCsv extends Module implements DependsOnModule
 {
-    protected InnerBrowser $connectionModule;
+    protected PimcoreCore $connectionModule;
 
     public function _depends(): array
     {
-        return [InnerBrowser::class => 'PimcoreAdminCsv needs a valid browser to work.'];
+        return [PimcoreCore::class => 'PimcoreAdminCsv needs a valid browser to work.'];
     }
 
-    public function _inject(InnerBrowser $connection): void
+    public function _inject(PimcoreCore $connection): void
     {
         $this->connectionModule = $connection;
     }

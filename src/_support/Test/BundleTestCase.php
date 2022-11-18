@@ -25,16 +25,7 @@ abstract class BundleTestCase extends TestCase
      */
     protected function getContainer()
     {
-        return $this->getPimcoreBundle()->getContainer();
-    }
-
-    /**
-     * @return PimcoreCore
-     * @throws ModuleException
-     */
-    protected function getPimcoreBundle()
-    {
-        return $this->getModule('\\' . PimcoreCore::class);
+        return $this->getModule('\\' . PimcoreCore::class)->_getContainer();
     }
 
     /**
@@ -50,8 +41,8 @@ abstract class BundleTestCase extends TestCase
      */
     public static function assertEqualXMLStructureByCodeception(\DOMElement $expectedElement, \DOMElement $actualElement, bool $checkAttributes = false, string $message = ''): void
     {
-        $expectedElement = (new \DOMDocument)->importNode($expectedElement, true);;
-        $actualElement   = (new \DOMDocument)->importNode($actualElement, true);;
+        $expectedElement = (new \DOMDocument)->importNode($expectedElement, true);
+        $actualElement   = (new \DOMDocument)->importNode($actualElement, true);
 
         static::assertSame(
             $expectedElement->tagName,
