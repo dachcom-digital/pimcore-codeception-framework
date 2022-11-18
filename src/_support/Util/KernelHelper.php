@@ -22,13 +22,15 @@ class KernelHelper
         \Pimcore::setKernel($kernel);
         $kernel->boot();
 
-        $conf = $kernel->getContainer()->getParameter('pimcore.config');
+        $config = $kernel->getContainer()->getParameter('pimcore.config');
+        $adminConfig = $kernel->getContainer()->hasParameter('pimcore_admin.config') ? $kernel->getContainer()->getParameter('pimcore_admin.config') : [];
+
         if (isset($conf['general']['timezone']) && !empty($conf['general']['timezone'])) {
             date_default_timezone_set($conf['general']['timezone']);
         }
 
         // override config with (maybe changed) core config
-        Config::setSystemConfiguration($conf);
+        Config::setSystemConfiguration(array_merge_recursive($config, $adminConfig));
 
         return $kernel;
     }

@@ -4,10 +4,10 @@ It's also used by all pimcore Bundles created by [DACHCOM.DIGITAL](https://githu
 
 ### Support Table
 
-| Branch           | Supported Pimcore Versions | Supported Symfony Versions |
-|------------------|----------------------------|----------------------------|
-| **2.0**          | `10.1`                     | `^5.3`                     |
-| **1.0**          | `6.6` - `6.9`              | `^4.4`, `^3.4`             |
+| Branch  | Supported Pimcore Versions | Supported Symfony Versions |
+|---------|----------------------------|----------------------------|
+| **2.0** | `10.1`- `10.5`             | `^5.4`                     |
+| **1.0** | `6.6` - `6.9`              | `^4.4`, `^3.4`             |
 
 ## Configuration
 All test files need to be stored in `/tests`.
