@@ -85,6 +85,7 @@ class TestKernel extends Kernel
 
         $container->addCompilerPass(new \Dachcom\Codeception\DependencyInjection\MakeServicesPublicPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, -100000);
         $container->addCompilerPass(new \Dachcom\Codeception\DependencyInjection\MonologChannelLoggerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
+        $container->addCompilerPass(new \Dachcom\Codeception\DependencyInjection\ServiceReplacePass(), PassConfig::TYPE_BEFORE_REMOVING, 250);
     }
 
     protected function preloadClasses(): void
