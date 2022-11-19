@@ -14,8 +14,7 @@ class ServiceReplacePass implements CompilerPassInterface
     {
         // @todo: remove this if https://github.com/pimcore/pimcore/issues/11927#issuecomment-1320510099 has been fixed
 
-        $definition = $container
-            ->getDefinition(AdminSessionHandler::class);
+        $definition = $container->getDefinition(AdminSessionHandler::class);
 
         $aware = false;
         /** @var TypedReference $argument */
@@ -30,8 +29,13 @@ class ServiceReplacePass implements CompilerPassInterface
             return;
         }
 
-        $container
-            ->getDefinition(AdminSessionHandler::class)
-            ->setClass(\Dachcom\Codeception\App\Services\AdminSessionHandler::class);
+        codecept_debug(sprintf(
+            '[Quirks] Replacing %s with %s',
+            AdminSessionHandler::class,
+            \Dachcom\Codeception\App\Services\AdminSessionHandler::class
+            )
+        );
+
+        $definition->setClass(\Dachcom\Codeception\App\Services\AdminSessionHandler::class);
     }
 }
