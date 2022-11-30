@@ -17,8 +17,12 @@ class ServiceReplacePass implements CompilerPassInterface
         $definition = $container->getDefinition(AdminSessionHandler::class);
 
         $aware = false;
-        /** @var TypedReference $argument */
         foreach ($definition->getArguments() as $argument) {
+
+            if (!$argument instanceof TypedReference) {
+                continue;
+            }
+
             if ($argument->getType() === RequestHelper::class) {
                 $aware = true;
                 break;
