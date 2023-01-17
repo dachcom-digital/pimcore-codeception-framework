@@ -66,6 +66,9 @@ class PimcoreCore extends Symfony
     {
         parent::_before($test);
 
+        // always reset admin mode before starting a test
+        \Pimcore::unsetAdminMode();
+
         if ($this->containerDefaultsChanged() === false) {
             return;
         }
