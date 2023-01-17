@@ -107,6 +107,9 @@ class PimcoreCore extends Symfony
             codecept_debug(sprintf('Container defaults or debug mode changed by "%s" to "%s". Rebuilding Kernel...', $dispatcher, $configuration));
         }
 
+        // invalidate pimcore session
+        \Pimcore\Tool\Session::invalidate();
+
         // set new configuration
         $this->currentContainerConfiguration = $configuration;
 
