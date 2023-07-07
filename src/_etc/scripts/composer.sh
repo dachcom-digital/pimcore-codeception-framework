@@ -4,7 +4,7 @@ set -e
 
 source $PIMCORE_CODECEPTION_FRAMEWORK/src/_etc/scripts/yaml_reader.sh
 
-eval "$(parse_yaml $TEST_BUNDLE_TEST_DIR/_etc/config.yml)"
+eval "$(parse_yaml $TEST_BUNDLE_TEST_DIR/_etc/config.yaml)"
 
 # define variables
 PACKAGES=''

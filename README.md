@@ -6,8 +6,18 @@ It's also used by all pimcore Bundles created by [DACHCOM.DIGITAL](https://githu
 
 | Branch  | Supported Pimcore Versions | Supported Symfony Versions |
 |---------|----------------------------|----------------------------|
+| **3.0** | `11.0`                     | `^6.2`                     |
 | **2.0** | `10.1`- `10.6`             | `^5.4`                     |
 | **1.0** | `6.6` - `6.9`              | `^4.4`, `^3.4`             |
+
+### Upgrade Notes
+#### 3.0.0
+- Yaml extension changed from `yml` to `yaml`
+- `_support` path has changed to `Support`. All `Dachcom\Codeception\*` namespaces have changed to `Dachcom\Codeception\Support\*`
+- Using rsync for `setup_files` so you need to adjust your `setup_files` stack accordingly (see example below)
+- You need to define PIMCORE `config_location` in your ci configuration (See section "Configuration Location" below)
+- You have to add additional PIMCORE Bundles to the `bundles` config section (see example below)
+***
 
 ## Configuration
 All test files need to be stored in `/tests`.
@@ -38,22 +48,29 @@ include_once $bootstrap;
 ```
 
 ## Setup File
-Create a file called `config.yml` in `tests/_etc/config.yml`.
+Create a file called `config.yaml` in `tests/_etc/config.yaml`.
 
 ```yaml
 bundles:
     - { namespace: \MyTestBundle\MyTestBundle }
+    - { namespace: \Pimcore\Bundle\SeoBundle\PimcoreSeoBundle, priority: 0, execute_installer: true } # if you need the seo bundle
 setup_files:
-    - { path: app/config.yml, dest: ./config/config.yaml }
-    - { path: app/system.yml, dest: ./var/config/system.yml }
-    - { path: app/controller/DefaultController.php, dest: ./src/Controller/DefaultController.php }
-    - { path: app/templates/default.html.twig, dest: ./templates/default/default.html.twig }
-    - { path: app/templates/snippet.html.twig, dest: ./templates/default/snippet.html.twig }
+    - { path: app/config.yaml, dest: ./config/ }
+    - { path: app/system_settings.yaml, dest: ./var/config/system_settings/ }
+    - { path: app/controller/DefaultController.php, dest: ./src/Controller/ }
+    - { path: app/templates/default.html.twig, dest: ./templates/default/ }
+    - { path: app/templates/snippet.html.twig, dest: ./templates/default/ }
 preload_files:
     - { path: Services/MySpecialTestService.php }
 additional_composer_packages:
-    - { package: vendor/foo-bar:^1.0 }
+    - { package: pimcore/admin-ui-classic-bundle, version: ^1.0 } # this one is most likely needed
+    - { package: vendor/foo-bar, version: ^1.0}                   # additional packages
 ```
+### Configuration Location
+In your `app/config.yaml` you should move all config locations to `settings-store`,
+see pimcore ci [example](https://github.com/pimcore/pimcore/blob/11.x/.github/ci/files/config/config.yaml)
+
+> Attention! Do not set `system_settings` to `settings-store`!
 
 ### Setup File Parameters
 - **bundles** _(required)_: At least your test bundle should be registered here. Add more, if needed
@@ -66,7 +83,7 @@ additional_composer_packages:
 
 ## Bundle Configuration Files
 This Framework allows you to use multiple (bundle) configuration setups. You need to add at least one default config file
-called `default_config.yml` and store it in `/tests/_etc/config/bundle`.
+called `default_config.yaml` and store it in `/tests/_etc/config/bundle`.
 
 ### Using Bundle Configuration Files
 TBD
