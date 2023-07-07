@@ -159,9 +159,6 @@ class PimcoreBackend extends Module
             Debug::debug(sprintf('[TEST BUNDLE ERROR] error while creating email. message was: %s', $e->getMessage()));
         }
 
-        // needed?
-        //\Pimcore\Cache\Runtime::set(sprintf('document_%s', $document->getId()), null);
-
         $this->assertInstanceOf(Document\Email::class, Document\Email::getById($document->getId()));
 
         return $document;
