@@ -6,7 +6,7 @@ It's also used by all pimcore Bundles created by [DACHCOM.DIGITAL](https://githu
 
 | Branch  | Supported Pimcore Versions | Supported Symfony Versions |
 |---------|----------------------------|----------------------------|
-| **2.0** | `10.1`- `10.5`             | `^5.4`                     |
+| **2.0** | `10.1`- `10.6`             | `^5.4`                     |
 | **1.0** | `6.6` - `6.9`              | `^4.4`, `^3.4`             |
 
 ## Configuration
