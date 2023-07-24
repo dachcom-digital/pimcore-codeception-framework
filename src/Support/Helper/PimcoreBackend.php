@@ -846,8 +846,7 @@ class PimcoreBackend extends Module
         /** @var PimcoreCore $pimcoreCore */
         $pimcoreCore = $this->getModule('\\' . PimcoreCore::class);
 
-        $pimcoreCore->_loadPage('POST', '/admin/translation/xliff-export', [
-            'csrfToken' => PhpBrowser::PIMCORE_ADMIN_CSRF_TOKEN_NAME,
+        $pimcoreCore->sendAjaxPostRequest('/admin/translation/xliff-export', [
             'source'    => 'en',
             'target'    => 'de',
             'data'      => json_encode([

@@ -8,13 +8,18 @@ use Codeception\Exception\ModuleException;
 use Dachcom\Codeception\Support\Helper\PimcoreCore;
 use Dachcom\Codeception\Support\Helper\PimcoreUser;
 use Dachcom\Codeception\Support\Util\EditableHelper;
+use Pimcore\Bundle\AdminBundle\Security\CsrfProtectionHandler;
 use Pimcore\Config;
 use Pimcore\Mail;
 use Pimcore\Model\AbstractModel;
 use Pimcore\Model\Document\Email;
 use Pimcore\Model\User;
+use Pimcore\Session\Attribute\LockableAttributeBag;
+use Symfony\Bundle\FrameworkBundle\Test\TestBrowserToken;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\DataCollector\RequestDataCollector;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\HttpKernel\Profiler\Profile;
@@ -23,16 +28,18 @@ use Symfony\Component\Mailer\DataCollector\MessageDataCollector;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Header\MailboxListHeader;
 use Symfony\Component\Mime\Header\UnstructuredHeader;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken;
 
 class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 {
-    public const PIMCORE_ADMIN_CSRF_TOKEN_NAME = 'MOCK_CSRF_TOKEN';
-
     protected array $sessionSnapShot;
     protected PimcoreCore $pimcoreCore;
+
+    protected $csrfToken;
 
     public function _depends(): array
     {
@@ -356,6 +363,8 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 
         $client = $this->pimcoreCore->_getContainer()->get('test.client');
         $client->loginUser($user, $firewallName);
+
+        $this->pimcoreCore->client->getCookieJar()->clear();
         $this->pimcoreCore->client->getCookieJar()->set(new Cookie('PHPSESSID', $client->getCookieJar()->get('PHPSESSID')));
     }
 
@@ -379,9 +388,20 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
             return;
         }
 
-        $client = $this->pimcoreCore->_getContainer()->get('test.client');
-        $client->loginUser(new \Pimcore\Security\User\User($pimcoreUser), 'pimcore_admin');
-        $this->pimcoreCore->client->getCookieJar()->set(new Cookie('PHPSESSID', $client->getCookieJar()->get('PHPSESSID')));
+        // we cannot use the simple client->loginUser() method: we need to set csrf token here too!
+
+        $securityUser = new \Pimcore\Security\User\User($pimcoreUser);
+        $token = new TestBrowserToken($securityUser->getRoles(), $securityUser, 'pimcore_admin');
+        $this->pimcoreCore->_getContainer()->get('security.untracked_token_storage')->setToken($token);
+
+        $session = $this->getCurrentSession();
+        $session->set(sprintf('_security_%s', 'pimcore_admin'), serialize($token));
+        $session->save();
+
+        $this->csrfToken = $this->pimcoreCore->_getContainer()->get(CsrfProtectionHandler::class)->getCsrfToken($session);
+
+        $this->pimcoreCore->client->getCookieJar()->clear();
+        $this->pimcoreCore->client->getCookieJar()->set(new Cookie($session->getName(), $session->getId()));
     }
 
     /**
@@ -389,7 +409,8 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
      */
     public function sendTokenAjaxPostRequest(string $url, array $params = []): void
     {
-        $params['csrfToken'] = self::PIMCORE_ADMIN_CSRF_TOKEN_NAME;
+        $params['csrfToken'] = $this->csrfToken;
+
         $this->pimcoreCore->sendAjaxPostRequest($url, $params);
     }
 
@@ -535,5 +556,24 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         }
 
         return $emails;
+    }
+
+    protected function getCurrentSession(): SessionInterface
+    {
+        $container = $this->pimcoreCore->_getContainer();
+
+        if ($container->has('session')) {
+            return $container->get('session');
+        }
+
+        $session = $container->get('session.factory')->createSession();
+
+        $bag = new LockableAttributeBag('pimcore_admin');
+        $bag->setName('pimcore_admin');
+        $session->registerBag($bag);
+
+        $container->set('session', $session);
+
+        return $session;
     }
 }
