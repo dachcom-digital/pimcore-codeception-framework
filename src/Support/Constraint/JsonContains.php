@@ -2,7 +2,6 @@
 
 namespace Dachcom\Codeception\Support\Constraint;
 
-use Codeception\Util\ArrayContainsComparator;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Constraint\Constraint;
 use PHPUnit\Framework\ExpectationFailedException;

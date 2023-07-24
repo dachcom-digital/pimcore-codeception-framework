@@ -125,7 +125,6 @@ class PimcoreCore extends Symfony
         try {
             $kernel = $this->kernel;
         } catch (\Throwable $e) {
-            codecept_debug($e->getMessage());
             $hasKernel = false;
         }
 

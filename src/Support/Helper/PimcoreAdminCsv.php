@@ -4,6 +4,7 @@ namespace Dachcom\Codeception\Support\Helper;
 
 use Codeception\Lib\Interfaces\DependsOnModule;
 use Codeception\Module;
+use PHPUnit\Framework\Assert;
 
 class PimcoreAdminCsv extends Module implements DependsOnModule
 {
@@ -32,7 +33,7 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
         }
 
         foreach ($headerValues as $value) {
-            \PHPUnit_Framework_Assert::assertContains($value, $rows[0]);
+            Assert::assertContains($value, $rows[0]);
         }
     }
 
@@ -48,7 +49,7 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
             $rows[] = str_getcsv($row);
         }
 
-        \PHPUnit_Framework_Assert::assertArrayHasKey($index, $rows, 'index not available in csv data');
+        Assert::assertArrayHasKey($index, $rows, 'index not available in csv data');
         $data = $rows[$index];
 
         foreach ($values as $key => $value) {
@@ -59,7 +60,7 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
                 $headerKey = array_search($key, $rows[0]);
                 $csvValue = $data[$headerKey];
             }
-            \PHPUnit_Framework_Assert::assertEquals($value, $csvValue);
+            Assert::assertEquals($value, $csvValue);
         }
     }
 
@@ -75,7 +76,7 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
             $rows[] = str_getcsv($row);
         }
 
-        \PHPUnit_Framework_Assert::assertCount($length, $rows);
+        Assert::assertCount($length, $rows);
     }
 
     /**
@@ -84,14 +85,14 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
     public function seeResponseIsCsv(): void
     {
         $responseContent = $this->connectionModule->_getResponseContent();
-        \PHPUnit_Framework_Assert::assertNotEquals('', $responseContent, 'response is empty');
+        Assert::assertNotEquals('', $responseContent, 'response is empty');
 
         $data = str_getcsv($responseContent, "\n");
-        \PHPUnit_Framework_Assert::assertIsArray($data);
-        \PHPUnit_Framework_Assert::assertGreaterThanOrEqual(1, count($data), 'csv data is empty');
+        Assert::assertIsArray($data);
+        Assert::assertGreaterThanOrEqual(1, count($data), 'csv data is empty');
 
         foreach ($data as $row) {
-            \PHPUnit_Framework_Assert::assertIsArray(str_getcsv($row));
+            Assert::assertIsArray(str_getcsv($row));
         }
     }
 }

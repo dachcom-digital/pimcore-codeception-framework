@@ -5,6 +5,7 @@ namespace Dachcom\Codeception\Support\Helper;
 use Codeception\Lib\Interfaces\DependsOnModule;
 use Codeception\Module;
 use Dachcom\Codeception\Support\Constraint\JsonContains;
+use PHPUnit\Framework\Assert;
 
 class PimcoreAdminJson extends Module implements DependsOnModule
 {
@@ -25,7 +26,7 @@ class PimcoreAdminJson extends Module implements DependsOnModule
      */
     public function seeResponseContainsJson(array $json = []): void
     {
-        \PHPUnit_Framework_Assert::assertThat(
+        Assert::assertThat(
             $this->connectionModule->_getResponseContent(),
             new JsonContains($json)
         );
@@ -37,11 +38,11 @@ class PimcoreAdminJson extends Module implements DependsOnModule
     public function seeResponseIsJson(): void
     {
         $responseContent = $this->connectionModule->_getResponseContent();
-        \PHPUnit_Framework_Assert::assertNotEquals('', $responseContent, 'response is empty');
+        Assert::assertNotEquals('', $responseContent, 'response is empty');
         json_decode($responseContent);
         $errorCode = json_last_error();
         $errorMessage = json_last_error_msg();
-        \PHPUnit_Framework_Assert::assertEquals(
+        Assert::assertEquals(
             JSON_ERROR_NONE,
             $errorCode,
             sprintf(

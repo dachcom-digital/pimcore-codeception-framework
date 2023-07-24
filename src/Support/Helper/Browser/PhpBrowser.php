@@ -354,19 +354,9 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
             return;
         }
 
-        /** @var Session $session */
-        $session = $this->pimcoreCore->_getContainer()->get('session');
-
-        $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
-        $this->pimcoreCore->_getContainer()->get('security.token_storage')->setToken($token);
-
-        $session->set('_security_' . $firewallName, serialize($token));
-        $session->save();
-
-        $cookie = new Cookie($session->getName(), $session->getId());
-
-        $this->pimcoreCore->client->getCookieJar()->clear();
-        $this->pimcoreCore->client->getCookieJar()->set($cookie);
+        $client = $this->pimcoreCore->_getContainer()->get('test.client');
+        $client->loginUser($user, $firewallName);
+        $this->pimcoreCore->client->getCookieJar()->set(new Cookie('PHPSESSID', $client->getCookieJar()->get('PHPSESSID')));
     }
 
     /**
@@ -389,18 +379,9 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
             return;
         }
 
-        \Pimcore\Tool\Session::useSession(function (AttributeBagInterface $adminSession) use ($pimcoreUser) {
-
-            \Pimcore\Tool\Session::invalidate();
-
-            $adminSession->set('user', $pimcoreUser);
-            $adminSession->set('csrfToken', self::PIMCORE_ADMIN_CSRF_TOKEN_NAME);
-        });
-
-        $cookie = new Cookie(\Pimcore\Tool\Session::getSessionName(), \Pimcore\Tool\Session::getSessionId());
-
-        $this->pimcoreCore->client->getCookieJar()->clear();
-        $this->pimcoreCore->client->getCookieJar()->set($cookie);
+        $client = $this->pimcoreCore->_getContainer()->get('test.client');
+        $client->loginUser(new \Pimcore\Security\User\User($pimcoreUser), 'pimcore_admin');
+        $this->pimcoreCore->client->getCookieJar()->set(new Cookie('PHPSESSID', $client->getCookieJar()->get('PHPSESSID')));
     }
 
     /**
