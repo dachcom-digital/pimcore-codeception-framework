@@ -186,7 +186,8 @@ class PimcoreCore extends Symfony
                     Console::getPhpCli(),
                     'bin/console',
                     'pimcore:bundle:install',
-                    $reflectBundleClass->getShortName()
+                    $reflectBundleClass->getShortName(),
+                    '--no-cache-clear'
                 ]);
 
                 $process->run();
