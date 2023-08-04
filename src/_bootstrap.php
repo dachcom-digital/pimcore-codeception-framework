@@ -3,6 +3,14 @@
 use Codeception\Util\Autoload;
 use Pimcore\Bootstrap;
 
+if (!isset($_SERVER['REQUEST_URI'])) {
+    $_SERVER['REQUEST_URI'] = '';
+}
+
+if (!isset($_SERVER['HTTP_USER_AGENT'])) {
+    $_SERVER['HTTP_USER_AGENT'] = '';
+}
+
 if (file_exists(sprintf('%s/../autoload.php', __DIR__))) {
     include_once sprintf('%s/../autoload.php', __DIR__);
 } elseif (file_exists(sprintf('%s/../../../autoload.php', __DIR__))) {

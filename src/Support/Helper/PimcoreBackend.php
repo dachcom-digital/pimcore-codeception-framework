@@ -785,10 +785,10 @@ class PimcoreBackend extends Module
         $defaults = [
             'name'             => $name,
             'controller'       => sprintf('App\\Controller\\DefaultController::%s', $params['action'] ?? 'defaultAction'),
-            'defaults'         => null,
+            'defaults'         => '',
             'siteId'           => [],
             'priority'         => 0,
-            'methods'          => null,
+            'methods'          => '',
             'creationDate'     => 1545383519,
             'modificationDate' => 1545383619
         ];
@@ -845,8 +845,11 @@ class PimcoreBackend extends Module
     {
         /** @var PimcoreCore $pimcoreCore */
         $pimcoreCore = $this->getModule('\\' . PimcoreCore::class);
+        /** @var PhpBrowser $phpBrowser */
+        $phpBrowser = $this->getModule('\\' . PhpBrowser::class);
 
-        $pimcoreCore->sendAjaxPostRequest('/admin/translation/xliff-export', [
+        $pimcoreCore->sendAjaxPostRequest('/admin/bundle/xliff/translation/xliff-export', [
+            'csrfToken' => $phpBrowser->csrfToken,
             'source'    => 'en',
             'target'    => 'de',
             'data'      => json_encode([
@@ -860,7 +863,10 @@ class PimcoreBackend extends Module
             'type'      => 'xliff'
         ]);
 
-        $this->assertSame(['success' => true], json_decode($pimcoreCore->_getResponseContent(), true, 512, JSON_THROW_ON_ERROR));
+        $this->assertSame(
+            ['success' => true],
+            json_decode($pimcoreCore->_getResponseContent(), true, 512, JSON_THROW_ON_ERROR)
+        );
     }
 
     /**

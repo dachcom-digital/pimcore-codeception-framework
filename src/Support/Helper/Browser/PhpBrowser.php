@@ -39,7 +39,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     protected array $sessionSnapShot;
     protected PimcoreCore $pimcoreCore;
 
-    protected $csrfToken;
+    public $csrfToken;
 
     public function _depends(): array
     {
@@ -92,6 +92,10 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
             $parsedLocale = $locale;
         }
 
+        if ($locale === null) {
+            $parsedLocale = [];
+        }
+
         $this->pimcoreCore->_loadPage('GET', $url, [], [], ['HTTP_ACCEPT_LANGUAGE' => implode(',', $parsedLocale)]);
     }
 
@@ -124,6 +128,10 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
             }
         } else {
             $parsedLocale = $locale;
+        }
+
+        if ($locale === null) {
+            $parsedLocale = [];
         }
 
         $this->pimcoreCore->_loadPage('POST', $url, [], [], ['HTTP_ACCEPT_LANGUAGE' => implode(',', $parsedLocale), 'HTTP_CLIENT_IP' => $countryIps[$country]]);
