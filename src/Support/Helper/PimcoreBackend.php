@@ -285,7 +285,7 @@ class PimcoreBackend extends Module
      */
     public function refreshObject(DataObject $object): DataObject
     {
-        $reloadedObject = DataObject::getById($object->getId(), true);
+        $reloadedObject = DataObject::getById($object->getId(), ['force' => true]);
 
         $this->assertEquals($reloadedObject->getId(), $object->getId());
 
@@ -369,7 +369,7 @@ class PimcoreBackend extends Module
 
         $object->delete();
 
-        $deletedObject = DataObject::getById($object->getId(), true);
+        $deletedObject = DataObject::getById($object->getId(), ['force' => true]);
 
         $this->assertNull($deletedObject);
 
@@ -383,7 +383,7 @@ class PimcoreBackend extends Module
     {
         $item->restore();
 
-        $restoredObject = DataObject::getById($object->getId(), true);
+        $restoredObject = DataObject::getById($object->getId(), ['force' => true]);
 
         $this->assertInstanceOf(DataObject::class, $restoredObject);
 
