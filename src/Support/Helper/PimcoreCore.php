@@ -129,11 +129,6 @@ class PimcoreCore extends Symfony
         // acceptance tests are using webdriver module which will load pimcore's default index.php => no custom kernel build available!
         KernelHelper::setLocalEnvVarsForRemoteKernel(['APP_DEBUG' => $debug ? '1' : '0', 'APP_TEST_KERNEL_CONFIG' => $configuration]);
 
-        if ($this->kernelInitialized === true) {
-            $this->kernel->shutdown();
-            \Pimcore::shutdown();
-        }
-
         $this->kernel = KernelHelper::buildTestKernel($debug, $configuration);
         $this->kernelInitialized = true;
 
