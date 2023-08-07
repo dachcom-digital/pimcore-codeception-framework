@@ -25,6 +25,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class PimcoreCore extends Symfony
 {
+    protected bool $kernelInitialized = false;
     protected bool $dbInitialized = false;
     protected ?string $currentContainerConfiguration = null;
 
@@ -122,10 +123,14 @@ class PimcoreCore extends Symfony
         KernelHelper::setLocalEnvVarsForRemoteKernel(['APP_DEBUG' => $debug ? '1' : '0', 'APP_TEST_KERNEL_CONFIG' => $configuration]);
 
         $this->kernel = KernelHelper::buildTestKernel($debug, $configuration);
+        $this->kernelInitialized = true;
+
+        $this->persistPermanentPimcoreServices();
 
         // config/debug may have changed during test (via actor), so we need to reset clients kernel too!
         if ($this->client instanceof SymfonyConnector) {
-            $this->client->rebootKernel();
+            $this->persistentServices = array_merge($this->persistentServices, $this->permanentServices);
+            $this->client = new SymfonyConnector($this->kernel, $this->persistentServices, $this->config['rebootable_client']);
         }
 
         if (array_key_exists('cache_router', $this->config) && $this->config['cache_router'] === true) {
@@ -136,6 +141,23 @@ class PimcoreCore extends Symfony
         $this->kernel->getContainer()->get('event_dispatcher')?->dispatch(new GenericEvent(), TestEvents::KERNEL_BOOTED);
 
         $this->setPimcoreCacheAvailability('disabled');
+    }
+
+    protected function persistPermanentPimcoreServices(): void
+    {
+        $permanentServices = [
+            // @see https://github.com/pimcore/pimcore/pull/10331
+            \Pimcore\Helper\LongRunningHelper::class
+        ];
+
+        foreach ($permanentServices as $serviceId) {
+
+            if (isset($this->permanentServices[$serviceId])) {
+                continue;
+            }
+
+            $this->permanentServices[$serviceId] = $this->grabService($serviceId);
+        }
     }
 
     protected function getTestBundleConfig(string $section): mixed
@@ -361,9 +383,7 @@ class PimcoreCore extends Symfony
             $kernelDebugState = $this->kernel->isDebug();
         }
 
-        if ($kernelDebugState !== $debug) {
-            $this->buildKernel($configuration, $debug, '_actor[haveABootedSymfonyConfiguration]');
-        } elseif ($this->currentContainerConfiguration !== $configuration) {
+        if ($kernelDebugState !== $debug || $this->currentContainerConfiguration !== $configuration) {
             $this->buildKernel($configuration, $debug, '_actor[haveABootedSymfonyConfiguration]');
         }
     }
@@ -376,6 +396,7 @@ class PimcoreCore extends Symfony
     public function haveAKernelWithoutDebugMode(): void
     {
         $this->assertNotNull($this->currentContainerConfiguration, 'current container configuration must not be null');
+
         $this->buildKernel($this->currentContainerConfiguration, false, '_actor[haveAKernelWithoutDebugMode]');
     }
 }

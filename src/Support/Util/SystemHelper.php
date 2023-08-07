@@ -64,11 +64,15 @@ class SystemHelper
             }
         }
 
-        if (self::pimcoreBundleIsInstalled('StaticRoutesBundle') === true) {
+        if (self::pimcoreBundleIsInstalled('PimcoreStaticRoutesBundle') === true) {
             $staticRoutes = new \Pimcore\Bundle\StaticRoutesBundle\Model\Staticroute\Listing();
             foreach ($staticRoutes->getRoutes() as $staticRoute) {
                 Debug::debug('[TEST BUNDLE] Deleting static route: ' . $staticRoute->getId());
-                $staticRoute->delete();
+                try {
+                    $staticRoute->delete();
+                } catch(\Throwable $e) {
+                    Debug::debug('[TEST BUNDLE] Error while trying to delete static route ' . $staticRoute->getId() . ': ' . $e->getMessage());
+                }
             }
         }
 

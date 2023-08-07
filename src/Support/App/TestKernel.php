@@ -27,7 +27,7 @@ class TestKernel extends Kernel
             $runtimeConfigFile = $_SERVER['APP_TEST_KERNEL_CONFIG'] ?? null;
         }
 
-        $this->kernelName = is_string($runtimeConfigFile) ? str_replace('.yaml', '', $runtimeConfigFile) : null;
+        $this->kernelName = is_string($runtimeConfigFile) ? str_replace('.yaml', '', $runtimeConfigFile) . ($debug ? '-debug' : '') : null;
         $this->runtimeConfigFile = $runtimeConfigFile;
 
         parent::__construct($environment, $debug);

@@ -4,11 +4,11 @@ namespace Dachcom\Codeception\Support\Util;
 
 use Pimcore\Config;
 use Symfony\Component\ErrorHandler\Debug;
-use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\HttpKernel\Kernel;
 
 class KernelHelper
 {
-    public static function buildTestKernel(bool $debug, string $configuration): KernelInterface
+    public static function buildTestKernel(bool $debug, string $configuration): Kernel
     {
         putenv('APP_DEBUG=' . $_SERVER['APP_DEBUG'] = $_ENV['APP_DEBUG'] = ($debug ? '1' : '0'));
 
@@ -25,7 +25,7 @@ class KernelHelper
         $config = $kernel->getContainer()->getParameter('pimcore.config');
         $adminConfig = $kernel->getContainer()->hasParameter('pimcore_admin.config') ? $kernel->getContainer()->getParameter('pimcore_admin.config') : [];
 
-        if (isset($conf['general']['timezone']) && !empty($conf['general']['timezone'])) {
+        if (!empty($conf['general']['timezone'])) {
             date_default_timezone_set($conf['general']['timezone']);
         }
 
