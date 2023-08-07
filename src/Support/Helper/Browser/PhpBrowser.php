@@ -79,7 +79,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     /**
      *  Actor Function to see a page with given locale
      */
-    public function amOnPageWithLocale(string $url, null|string|array $locale): void
+    public function amOnPageWithLocale(string $url, null|string|array $locale, array $cacheControl = []): void
     {
         $parsedLocale = [];
         if (is_string($locale)) {
@@ -96,13 +96,21 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
             $parsedLocale = [];
         }
 
-        $this->pimcoreCore->_loadPage('GET', $url, [], [], ['HTTP_ACCEPT_LANGUAGE' => implode(',', $parsedLocale)]);
+        $server = [
+            'HTTP_ACCEPT_LANGUAGE' => implode(',', $parsedLocale)
+        ];
+
+        if (count($cacheControl) > 0) {
+            $server['HTTP_CACHE_CONTROL'] = implode(', ', $cacheControl);
+        }
+
+        $this->pimcoreCore->_loadPage('GET', $url, [], [], $server);
     }
 
     /**
      *  Actor Function to see a page with given locale and country
      */
-    public function amOnPageWithLocaleAndCountry(string $url, ?string $locale, string $country): void
+    public function amOnPageWithLocaleAndCountry(string $url, ?string $locale, string $country, array $cacheControl = []): void
     {
         $countryIps = [
             'hongKong'    => '21 59.148.0.0',
@@ -134,7 +142,16 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
             $parsedLocale = [];
         }
 
-        $this->pimcoreCore->_loadPage('POST', $url, [], [], ['HTTP_ACCEPT_LANGUAGE' => implode(',', $parsedLocale), 'HTTP_CLIENT_IP' => $countryIps[$country]]);
+        $server = [
+            'HTTP_ACCEPT_LANGUAGE' => implode(',', $parsedLocale),
+            'HTTP_CLIENT_IP'       => $countryIps[$country]
+        ];
+
+        if (count($cacheControl) > 0) {
+            $server['HTTP_CACHE_CONTROL'] = implode(', ', $cacheControl);
+        }
+
+        $this->pimcoreCore->_loadPage('GET', $url, [], [], $server);
     }
 
     /**

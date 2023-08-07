@@ -81,6 +81,13 @@ class PimcoreCore extends Symfony
         $this->buildKernel($this->getDefaultSuiteContainerConfiguration(), $this->config['debug'], '_before');
     }
 
+    public function _after(TestInterface $test): void
+    {
+        \Pimcore\Db::close();
+
+        parent::_after($test);
+    }
+
     protected function checkDatabaseState(): void
     {
         if ($this->dbInitialized === true) {
@@ -122,19 +129,24 @@ class PimcoreCore extends Symfony
         // acceptance tests are using webdriver module which will load pimcore's default index.php => no custom kernel build available!
         KernelHelper::setLocalEnvVarsForRemoteKernel(['APP_DEBUG' => $debug ? '1' : '0', 'APP_TEST_KERNEL_CONFIG' => $configuration]);
 
+        if ($this->kernelInitialized === true) {
+            $this->kernel->shutdown();
+            \Pimcore::shutdown();
+        }
+
         $this->kernel = KernelHelper::buildTestKernel($debug, $configuration);
         $this->kernelInitialized = true;
 
-        $this->persistPermanentPimcoreServices();
+        $this->persistPimcoreServices();
+
+        if (array_key_exists('cache_router', $this->config) && $this->config['cache_router'] === true) {
+            $this->persistPermanentService('router');
+        }
 
         // config/debug may have changed during test (via actor), so we need to reset clients kernel too!
         if ($this->client instanceof SymfonyConnector) {
             $this->persistentServices = array_merge($this->persistentServices, $this->permanentServices);
             $this->client = new SymfonyConnector($this->kernel, $this->persistentServices, $this->config['rebootable_client']);
-        }
-
-        if (array_key_exists('cache_router', $this->config) && $this->config['cache_router'] === true) {
-            $this->persistService('router', true);
         }
 
         // dispatch kernel booted event - will be used from services which need to reset state between tests
@@ -143,7 +155,7 @@ class PimcoreCore extends Symfony
         $this->setPimcoreCacheAvailability('disabled');
     }
 
-    protected function persistPermanentPimcoreServices(): void
+    protected function persistPimcoreServices(): void
     {
         $permanentServices = [
             // @see https://github.com/pimcore/pimcore/pull/10331
@@ -151,12 +163,7 @@ class PimcoreCore extends Symfony
         ];
 
         foreach ($permanentServices as $serviceId) {
-
-            if (isset($this->permanentServices[$serviceId])) {
-                continue;
-            }
-
-            $this->permanentServices[$serviceId] = $this->grabService($serviceId);
+            $this->persistService($serviceId);
         }
     }
 
