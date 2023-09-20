@@ -16,9 +16,6 @@ use Pimcore\Model\Document\Email;
 use Pimcore\Model\User;
 use Pimcore\Session\Attribute\LockableAttributeBag;
 use Symfony\Bundle\FrameworkBundle\Test\TestBrowserToken;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\DataCollector\RequestDataCollector;
 use Symfony\Component\HttpKernel\Kernel;
@@ -28,11 +25,9 @@ use Symfony\Component\Mailer\DataCollector\MessageDataCollector;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Header\MailboxListHeader;
 use Symfony\Component\Mime\Header\UnstructuredHeader;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken;
+use Twig\Environment;
 
 class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 {
@@ -423,7 +418,13 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         $session->set(sprintf('_security_%s', 'pimcore_admin'), serialize($token));
         $session->save();
 
-        $this->csrfToken = $this->pimcoreCore->_getContainer()->get(CsrfProtectionHandler::class)->getCsrfToken($session);
+        $twigGlobals = $this->pimcoreCore->_getContainer()->get(Environment::class)->getGlobals();
+
+        if (array_key_exists('pimcore_csrf', $twigGlobals)) {
+            $this->csrfToken = $twigGlobals['pimcore_csrf'];
+        } else {
+            $this->csrfToken = $this->pimcoreCore->_getContainer()->get(CsrfProtectionHandler::class)->getCsrfToken($session);
+        }
 
         $this->pimcoreCore->client->getCookieJar()->clear();
         $this->pimcoreCore->client->getCookieJar()->set(new Cookie($session->getName(), $session->getId()));
