@@ -670,10 +670,8 @@ class PimcoreBackend extends Module
         $foundEmails = $this->getEmailsFromDocumentIds([$mail->getId()]);
         $this->assertGreaterThan(0, count($foundEmails));
 
-        $serializer = $this->getSerializer();
-
         foreach ($foundEmails as $email) {
-            $params = $serializer->decode($email->getParams(), 'json', ['json_decode_associative' => true]);
+            $params = $email->getParams();
             foreach ($properties as $propertyKey => $propertyValue) {
                 $key = array_search($propertyKey, array_column($params, 'key'), true);
                 if ($key === false) {
@@ -696,10 +694,8 @@ class PimcoreBackend extends Module
         $foundEmails = $this->getEmailsFromDocumentIds([$mail->getId()]);
         $this->assertGreaterThan(0, count($foundEmails));
 
-        $serializer = $this->getSerializer();
-
         foreach ($foundEmails as $email) {
-            $params = $serializer->decode($email->getParams(), 'json', ['json_decode_associative' => true]);
+            $params = $email->getParams();
             foreach ($properties as $propertyKey) {
                 $key = array_search($propertyKey, array_column($params, 'key'), true);
                 $this->assertNotSame(false, $key);
@@ -717,10 +713,8 @@ class PimcoreBackend extends Module
         $foundEmails = $this->getEmailsFromDocumentIds([$mail->getId()]);
         $this->assertGreaterThan(0, count($foundEmails));
 
-        $serializer = $this->getSerializer();
-
         foreach ($foundEmails as $email) {
-            $params = $serializer->decode($email->getParams(), 'json', ['json_decode_associative' => true]);
+            $params = $email->getParams();
             foreach ($properties as $propertyKey) {
                 $this->assertFalse(
                     array_search($propertyKey, array_column($params, 'key'), true),
