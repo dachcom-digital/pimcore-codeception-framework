@@ -17,7 +17,8 @@ class TestKernel extends Kernel
 
     public const PRELOAD_FILES = [
         'DependencyInjection/MakeServicesPublicPass.php',
-        'DependencyInjection/MonologChannelLoggerPass.php'
+        'DependencyInjection/MonologChannelLoggerPass.php',
+        'DependencyInjection/DisablePimcoreCsrfProtection.php'
     ];
 
     public function __construct(string $environment, bool $debug, ?string $runtimeConfigFile = null)
