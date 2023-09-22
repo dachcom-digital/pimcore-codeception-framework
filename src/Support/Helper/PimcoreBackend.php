@@ -843,7 +843,6 @@ class PimcoreBackend extends Module
         $phpBrowser = $this->getModule('\\' . PhpBrowser::class);
 
         $pimcoreCore->sendAjaxPostRequest('/admin/bundle/xliff/translation/xliff-export', [
-            'csrfToken' => $phpBrowser->csrfToken,
             'source'    => 'en',
             'target'    => 'de',
             'data'      => json_encode([
