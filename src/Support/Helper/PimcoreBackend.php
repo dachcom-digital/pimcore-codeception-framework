@@ -839,8 +839,6 @@ class PimcoreBackend extends Module
     {
         /** @var PimcoreCore $pimcoreCore */
         $pimcoreCore = $this->getModule('\\' . PimcoreCore::class);
-        /** @var PhpBrowser $phpBrowser */
-        $phpBrowser = $this->getModule('\\' . PhpBrowser::class);
 
         $pimcoreCore->sendAjaxPostRequest('/admin/bundle/xliff/translation/xliff-export', [
             'source'    => 'en',
