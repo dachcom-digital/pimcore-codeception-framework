@@ -17,6 +17,8 @@ It's also used by all pimcore Bundles created by [DACHCOM.DIGITAL](https://githu
 - Using rsync for `setup_files` so you need to adjust your `setup_files` stack accordingly (see example below)
 - You need to define PIMCORE `config_location` in your ci configuration (See section "Configuration Location" below)
 - You have to add additional PIMCORE Bundles to the `bundles` config section (see example below)
+- [SECURITY] `\Pimcore\Bundle\AdminBundle\EventListener\CsrfProtectionListener` is disabled while executing tests
+
 ***
 
 ## Configuration

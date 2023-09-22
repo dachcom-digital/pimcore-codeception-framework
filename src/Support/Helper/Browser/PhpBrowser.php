@@ -8,7 +8,6 @@ use Codeception\Exception\ModuleException;
 use Dachcom\Codeception\Support\Helper\PimcoreCore;
 use Dachcom\Codeception\Support\Helper\PimcoreUser;
 use Dachcom\Codeception\Support\Util\EditableHelper;
-use Pimcore\Bundle\AdminBundle\Security\CsrfProtectionHandler;
 use Pimcore\Config;
 use Pimcore\Mail;
 use Pimcore\Model\AbstractModel;
@@ -18,7 +17,6 @@ use Pimcore\Session\Attribute\LockableAttributeBag;
 use Symfony\Bundle\FrameworkBundle\Test\TestBrowserToken;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\DataCollector\RequestDataCollector;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\HttpKernel\Profiler\Profile;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Mailer\DataCollector\MessageDataCollector;
@@ -27,14 +25,11 @@ use Symfony\Component\Mime\Header\MailboxListHeader;
 use Symfony\Component\Mime\Header\UnstructuredHeader;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Twig\Environment;
 
 class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
 {
     protected array $sessionSnapShot;
     protected PimcoreCore $pimcoreCore;
-
-    public $csrfToken;
 
     public function _depends(): array
     {
@@ -158,8 +153,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         $response = $this->pimcoreCore->client->getInternalResponse();
         $headers = $response->getHeaders();
 
-        $symfonyVersion = Kernel::MAJOR_VERSION;
-        $contentDisposition = sprintf('attachment; filename=%s', ($symfonyVersion >= 4 ? $element->getKey() : sprintf('"%s"', $element->getKey())));
+        $contentDisposition = sprintf('attachment; filename=%s', $element->getKey());
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals($contentDisposition, $headers['content-disposition'][0]);
@@ -175,8 +169,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         $response = $this->pimcoreCore->client->getInternalResponse();
         $headers = $response->getHeaders();
 
-        $symfonyVersion = Kernel::MAJOR_VERSION;
-        $contentDisposition = sprintf('attachment; filename=%s', ($symfonyVersion >= 4 ? $fileName : sprintf('"%s"', $fileName)));
+        $contentDisposition = sprintf('attachment; filename=%s', $fileName);
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals($contentDisposition, $headers['content-disposition'][0]);
@@ -418,14 +411,6 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
         $session->set(sprintf('_security_%s', 'pimcore_admin'), serialize($token));
         $session->save();
 
-        $twigGlobals = $this->pimcoreCore->_getContainer()->get(Environment::class)->getGlobals();
-
-        if (array_key_exists('pimcore_csrf', $twigGlobals)) {
-            $this->csrfToken = $twigGlobals['pimcore_csrf'];
-        } else {
-            $this->csrfToken = $this->pimcoreCore->_getContainer()->get(CsrfProtectionHandler::class)->getCsrfToken($session);
-        }
-
         $this->pimcoreCore->client->getCookieJar()->clear();
         $this->pimcoreCore->client->getCookieJar()->set(new Cookie($session->getName(), $session->getId()));
     }
@@ -435,8 +420,6 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
      */
     public function sendTokenAjaxPostRequest(string $url, array $params = []): void
     {
-        $params['csrfToken'] = $this->csrfToken;
-
         $this->pimcoreCore->sendAjaxPostRequest($url, $params);
     }
 

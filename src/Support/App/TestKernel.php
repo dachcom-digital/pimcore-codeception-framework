@@ -81,8 +81,9 @@ class TestKernel extends Kernel
 
     protected function build(ContainerBuilder $container): void
     {
-       $this->preloadClasses();
+        $this->preloadClasses();
 
+        $container->addCompilerPass(new \Dachcom\Codeception\Support\DependencyInjection\DisablePimcoreCsrfProtection());
         $container->addCompilerPass(new \Dachcom\Codeception\Support\DependencyInjection\MakeServicesPublicPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, -100000);
         $container->addCompilerPass(new \Dachcom\Codeception\Support\DependencyInjection\MonologChannelLoggerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
     }
