@@ -5,6 +5,7 @@ namespace Dachcom\Codeception\Support\Util;
 use Codeception\Util\Debug;
 use Pimcore\Model\DataObject;
 use Pimcore\Model\Document;
+use Pimcore\Model\Site;
 use Pimcore\Tests\Support\Util\TestHelper;
 
 class SystemHelper
@@ -24,6 +25,13 @@ class SystemHelper
     {
         TestHelper::cleanUp();
         FileGeneratorHelper::cleanUp();
+
+        // we need to reset the current site by using a reflection class
+        // read more about it here: https://github.com/pimcore/pimcore/issues/16063
+        if (Site::isSiteRequest()) {
+            $reflectionClass = new \ReflectionClass(Site::class);
+            $reflectionClass->setStaticPropertyValue('currentSite', null);
+        }
 
         // also delete all sub objects
         $objectList = new DataObject\Listing();
