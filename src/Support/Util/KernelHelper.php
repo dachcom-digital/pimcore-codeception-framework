@@ -18,7 +18,9 @@ class KernelHelper
             @ini_set('display_errors', 'On');
         }
 
-        $kernel = new \TestKernel(Config::getEnvironment(), $debug, $configuration);
+        $kernelClass = getenv('TEST_KERNEL_CLASS') !== false ? getenv('TEST_KERNEL_CLASS') : \TestKernel::class;
+        $kernel = new $kernelClass(Config::getEnvironment(), $debug, $configuration);
+
         \Pimcore::setKernel($kernel);
         $kernel->boot();
 

@@ -17,6 +17,10 @@ SAVE_REQUIRE_DEV_DATA=$(printf "%s\n" "$REQUIRE_DEV_DATA" | sed -e 's/[]\/${}\n"
 ## add test-bundle composer.json to skeleton composer.json
 composer config repositories.local '{"type": "path", "url": "./lib/test-bundle", "options": {"symlink": true}}' --file composer.json
 
+## use pimcore source
+composer config 'preferred-install.pimcore/pimcore' 'source' --file composer.json
+composer config 'preferred-install.*' 'dist' --file composer.json
+
 # replace require-dev from bundle
 sed -i "/require-dev/{:a;N;/}/!ba;N;s/.*\n/$SAVE_REQUIRE_DEV_DATA,\n/}" composer.json
 
@@ -38,21 +42,4 @@ if [ ! -z "$PACKAGES" ]; then
 fi
 
 composer req pimcore/pimcore:$TEST_PIMCORE_VERSION $PACKAGES $PACKAGE_GITHUB_REPOSITORY:@dev --no-interaction --no-scripts --no-update
-composer update --no-progress --prefer-dist --no-scripts
-
-# install pimcore test infrastructure
-if [ ! -d "vendor/pimcore/pimcore/tests" ]; then
-
-  CURRENT_PIMCORE_VERSION=$(composer show pimcore/pimcore | grep 'version' | grep -o -E '\*\ .+' | cut -d' ' -f2 | cut -d',' -f1);
-  CURRENT_PIMCORE_HASH=$(composer show pimcore/pimcore | grep 'source' | grep -o -E '\git\ .+' | cut -d' ' -f2);
-
-  echo "Installing pimcore test data for version $CURRENT_PIMCORE_VERSION ($CURRENT_PIMCORE_HASH)"
-
-  git clone --depth 1 --filter=blob:none --no-checkout https://github.com/pimcore/pimcore
-  cd pimcore
-  git checkout $CURRENT_PIMCORE_HASH -- tests
-  cd ../
-  mv pimcore/tests vendor/pimcore/pimcore
-  rm -r pimcore
-
-fi
+composer update --no-progress --no-scripts

@@ -18,6 +18,8 @@ It's also used by all pimcore Bundles created by [DACHCOM.DIGITAL](https://githu
 - You need to define PIMCORE `config_location` in your ci configuration (See section "Configuration Location" below)
 - You have to add additional PIMCORE Bundles to the `bundles` config section (see example below)
 - [SECURITY] `\Pimcore\Bundle\AdminBundle\EventListener\CsrfProtectionListener` is disabled while executing tests
+- `Pimcore\Model\DataObject` namespace changed from `_output/var/classes/DataObject/DataObject` to `_output/var/classes/DataObject`
+- TestKernel Class can be defined via `TEST_KERNEL_CLASS` env var
 
 ***
 

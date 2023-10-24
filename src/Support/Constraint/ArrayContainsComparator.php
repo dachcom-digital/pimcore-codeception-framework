@@ -31,13 +31,6 @@ class ArrayContainsComparator
         return $needle == $this->arrayIntersectRecursive($needle, $this->haystack);
     }
 
-    /**
-     * @return array|bool
-     * @author tiger.seo@gmail.com
-     * @link https://www.php.net/manual/en/function.array-intersect-assoc.php#39822
-     *
-     * @author nleippe@integr8ted.com
-     */
     private function arrayIntersectRecursive(mixed $arr1, mixed $arr2): bool|array|null
     {
         if (!is_array($arr1) || !is_array($arr2)) {
@@ -50,9 +43,6 @@ class ArrayContainsComparator
         return $this->associativeArrayIntersect($arr1, $arr2);
     }
 
-    /**
-     * This array has sequential keys?
-     */
     private function arrayIsSequential(array $array): bool
     {
         return array_keys($array) === range(0, count($array) - 1);
@@ -88,9 +78,6 @@ class ArrayContainsComparator
         return $ret;
     }
 
-    /**
-     * @return array|bool|null
-     */
     private function associativeArrayIntersect(array $arr1, array $arr2): bool|array|null
     {
         $commonKeys = array_intersect(array_keys($arr1), array_keys($arr2));
