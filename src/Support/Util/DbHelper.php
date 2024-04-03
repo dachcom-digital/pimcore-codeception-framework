@@ -37,10 +37,18 @@ class DbHelper
 
         $installer = new Installer($logger, $eventDispatcher);
         $installer->setImportDatabaseDataDump(false);
-        $installer->setupDatabase([
+
+        $installerArguments = [];
+        if (VersionHelper::pimcoreVersionIsGreaterOrEqualThan('11.2.0')) {
+            $installerArguments[] = $connection;
+        }
+
+        $installerArguments[] = [
             'username' => 'admin',
             'password' => microtime(),
-        ]);
+        ];
+
+        $installer->setupDatabase(...$installerArguments);
 
         codecept_debug(sprintf('[DB] Initialized the test DB %s', $dbName));
 
