@@ -8,6 +8,7 @@ use Codeception\Exception\ModuleException;
 use Dachcom\Codeception\Support\Helper\PimcoreCore;
 use Dachcom\Codeception\Support\Helper\PimcoreUser;
 use Dachcom\Codeception\Support\Util\EditableHelper;
+use Dachcom\Codeception\Support\Util\ModuleHelper;
 use Pimcore\Config;
 use Pimcore\Mail;
 use Pimcore\Model\AbstractModel;
@@ -388,7 +389,7 @@ class PhpBrowser extends Module implements Lib\Interfaces\DependsOnModule
     {
         try {
             /** @var PimcoreUser $userModule */
-            $userModule = $this->getModule('\\' . PimcoreUser::class);
+            $userModule = $this->getModule(ModuleHelper::getModuleName('PIMCORE_USER', PimcoreUser::class));
         } catch (ModuleException $pimcoreModule) {
             $this->debug('[PIMCORE BUNDLE MODULE] could not load pimcore user module');
             return;

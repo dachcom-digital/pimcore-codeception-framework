@@ -21,7 +21,7 @@ class SystemHelper
         return true;
     }
 
-    public static function cleanUp(array $tablesToTruncate = []): void
+    public static function cleanUp(array $tablesToTruncate = [], bool $cleanUpStaticRoutes = true): void
     {
         TestHelper::cleanUp();
         FileGeneratorHelper::cleanUp();
@@ -72,7 +72,7 @@ class SystemHelper
             }
         }
 
-        if (self::pimcoreBundleIsInstalled('PimcoreStaticRoutesBundle') === true) {
+        if ($cleanUpStaticRoutes === true && self::pimcoreBundleIsInstalled('PimcoreStaticRoutesBundle') === true) {
             $staticRoutes = new \Pimcore\Bundle\StaticRoutesBundle\Model\Staticroute\Listing();
             foreach ($staticRoutes->getRoutes() as $staticRoute) {
                 Debug::debug('[TEST BUNDLE] Deleting static route: ' . $staticRoute->getId());

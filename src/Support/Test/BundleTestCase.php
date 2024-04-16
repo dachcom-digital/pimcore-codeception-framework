@@ -4,6 +4,7 @@ namespace Dachcom\Codeception\Support\Test;
 
 use Codeception\Exception\ModuleException;
 use Dachcom\Codeception\Support\Helper\PimcoreCore;
+use Dachcom\Codeception\Support\Util\ModuleHelper;
 use Dachcom\Codeception\Support\Util\SystemHelper;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\ExpectationFailedException;
@@ -14,7 +15,11 @@ abstract class BundleTestCase extends TestCase
 {
     protected function _after()
     {
-        SystemHelper::cleanUp();
+        /** @var PimcoreCore $pimcoreCore */
+        $pimcoreCore = $this->getModule(ModuleHelper::getModuleName('PIMCORE_CORE', PimcoreCore::class));
+        $config = $pimcoreCore->getConfig();
+
+        SystemHelper::cleanUp([], $config['purge_static_routes']);
 
         parent::_after();
     }
@@ -25,7 +30,10 @@ abstract class BundleTestCase extends TestCase
      */
     protected function getContainer()
     {
-        return $this->getModule('\\' . PimcoreCore::class)->_getContainer();
+        /** @var PimcoreCore $pimcoreCore */
+        $pimcoreCore = $this->getModule(ModuleHelper::getModuleName('PIMCORE_CORE', PimcoreCore::class));
+
+        return $pimcoreCore->_getContainer();
     }
 
     /**

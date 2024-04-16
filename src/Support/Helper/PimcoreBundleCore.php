@@ -4,6 +4,7 @@ namespace Dachcom\Codeception\Support\Helper;
 
 use Codeception\Lib\ModuleContainer;
 use Codeception\Module;
+use Dachcom\Codeception\Support\Util\ModuleHelper;
 
 class PimcoreBundleCore extends Module
 {
@@ -27,8 +28,8 @@ class PimcoreBundleCore extends Module
 
     protected function installBundle(): void
     {
-        /** @var PimcoreCore $pimcoreModule */
-        $pimcoreModule = $this->getModule('\\' . PimcoreCore::class);
+        /** @var PimcoreCore $pimcoreCore */
+        $pimcoreCore = $this->getModule(ModuleHelper::getModuleName('PIMCORE_CORE', PimcoreCore::class));
 
         $bundleName = getenv('TEST_BUNDLE_NAME');
         $installerClass = getenv('TEST_BUNDLE_INSTALLER_CLASS');
@@ -40,7 +41,7 @@ class PimcoreBundleCore extends Module
         $this->debug(sprintf('[%s] Running installer...', strtoupper($bundleName)));
 
         // install bundle
-        $installer = $pimcoreModule->_getContainer()->get($installerClass);
+        $installer = $pimcoreCore->_getContainer()->get($installerClass);
         $installer->install();
     }
 }

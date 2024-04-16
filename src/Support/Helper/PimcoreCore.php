@@ -40,6 +40,7 @@ class PimcoreCore extends Symfony
             'configuration_file'    => null,
             'debug'                 => true,
             'purge_class_directory' => true,
+            'purge_static_routes'   => true,
             'setup_objects'         => false,
         ]);
 
@@ -49,6 +50,11 @@ class PimcoreCore extends Symfony
     public function getKernel(): ?Kernel
     {
         return $this->kernel;
+    }
+
+    public function getConfig(): array
+    {
+        return $this->config;
     }
 
     public function _initialize(): void

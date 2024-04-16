@@ -6,9 +6,9 @@ use Codeception\Exception\ModuleException;
 use Codeception\Module;
 use Codeception\TestInterface;
 use Codeception\Util\Debug;
-use Dachcom\Codeception\Support\Helper\Browser\PhpBrowser;
 use Dachcom\Codeception\Support\Util\EditableHelper;
 use Dachcom\Codeception\Support\Util\FileGeneratorHelper;
+use Dachcom\Codeception\Support\Util\ModuleHelper;
 use Dachcom\Codeception\Support\Util\SystemHelper;
 use Pimcore\Bundle\SeoBundle\Model\Redirect;
 use Pimcore\Bundle\StaticRoutesBundle\Model\Staticroute;
@@ -38,7 +38,11 @@ class PimcoreBackend extends Module
 
     public function _after(TestInterface $test)
     {
-        SystemHelper::cleanUp();
+        /** @var PimcoreCore $pimcoreCore */
+        $pimcoreCore = $this->getModule(ModuleHelper::getModuleName('PIMCORE_CORE', PimcoreCore::class));
+        $config = $pimcoreCore->getConfig();
+
+        SystemHelper::cleanUp([], $config['purge_static_routes']);
         FileGeneratorHelper::cleanUp();
 
         parent::_after($test);
@@ -838,7 +842,7 @@ class PimcoreBackend extends Module
     public function submitDocumentToXliffExporter(Document $document): void
     {
         /** @var PimcoreCore $pimcoreCore */
-        $pimcoreCore = $this->getModule('\\' . PimcoreCore::class);
+        $pimcoreCore = $this->getModule(ModuleHelper::getModuleName('PIMCORE_CORE', PimcoreCore::class));
 
         $pimcoreCore->sendAjaxPostRequest('/admin/bundle/xliff/translation/xliff-export', [
             'source'    => 'en',
@@ -1199,13 +1203,16 @@ class PimcoreBackend extends Module
 
     protected function getContainer(): Container
     {
-        return $this->getModule('\\' . PimcoreCore::class)->_getContainer();
+        /** @var PimcoreCore $pimcoreCore */
+        $pimcoreCore = $this->getModule(ModuleHelper::getModuleName('PIMCORE_CORE', PimcoreCore::class));
+
+        return $pimcoreCore->_getContainer();
     }
 
     protected function getClassManager(): ClassManager
     {
         /** @var ClassManager $classManager */
-        $classManager = $this->getModule('\\' . ClassManager::class);
+        $classManager = $this->getModule(ModuleHelper::getModuleName('CLASS_MANAGER', ClassManager::class));
 
         return $classManager;
     }
