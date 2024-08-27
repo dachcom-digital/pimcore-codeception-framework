@@ -40,7 +40,8 @@ class PimcoreBundleCore extends Module
 
         $this->debug(sprintf('[%s] Running installer...', strtoupper($bundleName)));
 
-        // install bundle
+        $pimcoreCore->runCommand('doctrine:migrations:sync-metadata-storage', ['-q']);
+
         $installer = $pimcoreCore->_getContainer()->get($installerClass);
         $installer->install();
     }

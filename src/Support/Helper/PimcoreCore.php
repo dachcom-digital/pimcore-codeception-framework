@@ -94,6 +94,19 @@ class PimcoreCore extends Symfony
         parent::_after($test);
     }
 
+    public function runCommand(string $command, array $arguments): void
+    {
+        $this->debug(sprintf('[COMMAND] Executing %s', $command));
+
+        $process = new Process(array_merge([Console::getPhpCli(), 'bin/console', $command], $arguments));
+
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            throw new ProcessFailedException($process);
+        }
+    }
+
     protected function checkDatabaseState(): void
     {
         if ($this->dbInitialized === true) {
@@ -202,6 +215,9 @@ class PimcoreCore extends Symfony
         $testBundles = $this->getTestBundleConfig('bundles');
 
         if (is_array($testBundles)) {
+
+            $this->runCommand('doctrine:migrations:sync-metadata-storage', ['-q']);
+
             foreach ($testBundles as $testBundle) {
 
                 if (!array_key_exists('execute_installer', $testBundle) || $testBundle['execute_installer'] === false) {
@@ -212,19 +228,7 @@ class PimcoreCore extends Symfony
 
                 codecept_debug(sprintf('Installing Bundle "%s"...', $reflectBundleClass->getShortName()));
 
-                $process = new Process([
-                    Console::getPhpCli(),
-                    'bin/console',
-                    'pimcore:bundle:install',
-                    $reflectBundleClass->getShortName(),
-                    '--no-cache-clear'
-                ]);
-
-                $process->run();
-
-                if (!$process->isSuccessful()) {
-                    throw new ProcessFailedException($process);
-                }
+                $this->runCommand('pimcore:bundle:install', [$reflectBundleClass->getShortName(), '--no-cache-clear']);
             }
         }
     }
