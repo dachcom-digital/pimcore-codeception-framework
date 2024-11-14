@@ -5,6 +5,7 @@ use Pimcore\HttpKernel\BundleCollection\BundleCollection;
 use Symfony\Bundle\WebProfilerBundle\WebProfilerBundle;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\LoaderInterface;
+use Symfony\Component\Config\Resource\ClassExistenceResource;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
@@ -82,14 +83,14 @@ class TestKernel extends Kernel
 
     protected function build(ContainerBuilder $container): void
     {
-        $this->preloadClasses();
+        $this->preloadClasses($container);
 
         $container->addCompilerPass(new \Dachcom\Codeception\Support\DependencyInjection\DisablePimcoreCsrfProtection());
         $container->addCompilerPass(new \Dachcom\Codeception\Support\DependencyInjection\MakeServicesPublicPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, -100000);
         $container->addCompilerPass(new \Dachcom\Codeception\Support\DependencyInjection\MonologChannelLoggerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
     }
 
-    protected function preloadClasses(): void
+    protected function preloadClasses(ContainerBuilder $container): void
     {
         $fwDir = sprintf('%s/src', $_SERVER['PIMCORE_CODECEPTION_FRAMEWORK']);
         $bDir = sprintf('%s', $_SERVER['TEST_BUNDLE_TEST_DIR']);
@@ -100,6 +101,8 @@ class TestKernel extends Kernel
         if (is_array($preloadFiles)) {
             foreach ($preloadFiles as $preloadFile) {
                 $bundlesFiles[] = $preloadFile['path'];
+                $namespace = sprintf('DachcomBundle\Test\Support\%s', str_replace(['/', '.php'], ['\\', ''], $preloadFile['path']));
+                $container->addResource(new ClassExistenceResource($namespace));
             }
         }
 
