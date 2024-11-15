@@ -232,3 +232,11 @@ If you want to provide some classes to install, all the definitions need to stor
 | `$I->clearWebDriverCache()`                                                                                                 |             |
 | `$I->seeAEditableConfiguration(string $name, string $type, ?string $label, array $options, $data = null, $selector = null)` |             |
 | `$I->sendWebDriverCommand(array $body)`                                                                                     |             |
+
+
+## License
+**DACHCOM.DIGITAL AG**, Löwenhofstrasse 15, 9424 Rheineck, Schweiz  
+[dachcom.com](https://www.dachcom.com), dcdi@dachcom.ch  
+Copyright © 2024 DACHCOM.DIGITAL. All rights reserved.  
+
+For licensing details please visit [LICENSE.md](LICENSE.md)  
