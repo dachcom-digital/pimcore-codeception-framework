@@ -1,5 +1,16 @@
 <?php
 
+/*
+ * This source file is available under two different licenses:
+ *   - GNU General Public License version 3 (GPLv3)
+ *   - DACHCOM Commercial License (DCL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) DACHCOM.DIGITAL AG (https://www.dachcom-digital.com)
+ * @license    GPLv3 and DCL
+ */
+
 namespace Dachcom\Codeception\Support\Helper\Browser;
 
 use Codeception\Module;
@@ -10,7 +21,7 @@ use GuzzleHttp\Client;
 class WebDriver extends Module\WebDriver
 {
     /**
-     * Actor Function to see a page with enabled edit-mode
+     * Actor Function to see a page with enabled edit-mode.
      */
     public function amOnPageInEditMode(string $page): void
     {
@@ -18,7 +29,7 @@ class WebDriver extends Module\WebDriver
     }
 
     /**
-     * Actor Function to declare web driver download behaviour
+     * Actor Function to declare web driver download behaviour.
      */
     public function setDownloadPathForWebDriver($path = null): void
     {
@@ -38,7 +49,7 @@ class WebDriver extends Module\WebDriver
     }
 
     /**
-     * Actor Function to clear web driver cache
+     * Actor Function to clear web driver cache.
      */
     public function clearWebDriverCache(): void
     {
@@ -54,7 +65,7 @@ class WebDriver extends Module\WebDriver
     }
 
     /**
-     * Actor Function to see an editable on current page
+     * Actor Function to see an editable on current page.
      */
     public function seeAEditableConfiguration(string $name, string $type, ?string $label, array $options, $data = null, $selector = null): void
     {
@@ -62,7 +73,7 @@ class WebDriver extends Module\WebDriver
     }
 
     /**
-     * Actor Function to send command to a web driver
+     * Actor Function to send command to a web driver.
      */
     protected function sendWebDriverCommand(array $body): array
     {

@@ -1,5 +1,16 @@
 <?php
 
+/*
+ * This source file is available under two different licenses:
+ *   - GNU General Public License version 3 (GPLv3)
+ *   - DACHCOM Commercial License (DCL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) DACHCOM.DIGITAL AG (https://www.dachcom-digital.com)
+ * @license    GPLv3 and DCL
+ */
+
 namespace Dachcom\Codeception\Support\Helper;
 
 use Codeception\Lib\Interfaces\DependsOnModule;
@@ -22,7 +33,7 @@ class PimcoreAdminJson extends Module implements DependsOnModule
     }
 
     /**
-     * Actor Function to see response contains csv
+     * Actor Function to see response contains csv.
      */
     public function seeResponseContainsJson(array $json = []): void
     {
@@ -33,7 +44,7 @@ class PimcoreAdminJson extends Module implements DependsOnModule
     }
 
     /**
-     * Actor Function to see response is json
+     * Actor Function to see response is json.
      */
     public function seeResponseIsJson(): void
     {
@@ -46,7 +57,7 @@ class PimcoreAdminJson extends Module implements DependsOnModule
             JSON_ERROR_NONE,
             $errorCode,
             sprintf(
-                "Invalid json: %s. System message: %s.",
+                'Invalid json: %s. System message: %s.',
                 $responseContent,
                 $errorMessage
             )

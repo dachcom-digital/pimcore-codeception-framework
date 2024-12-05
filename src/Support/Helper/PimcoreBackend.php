@@ -1,5 +1,16 @@
 <?php
 
+/*
+ * This source file is available under two different licenses:
+ *   - GNU General Public License version 3 (GPLv3)
+ *   - DACHCOM Commercial License (DCL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) DACHCOM.DIGITAL AG (https://www.dachcom-digital.com)
+ * @license    GPLv3 and DCL
+ */
+
 namespace Dachcom\Codeception\Support\Helper;
 
 use Codeception\Exception\ModuleException;
@@ -14,16 +25,16 @@ use Pimcore\Bundle\SeoBundle\Model\Redirect;
 use Pimcore\Bundle\StaticRoutesBundle\Model\Staticroute;
 use Pimcore\Model\Asset;
 use Pimcore\Model\DataObject;
+use Pimcore\Model\Document;
 use Pimcore\Model\Element\ElementInterface;
 use Pimcore\Model\Element\Recyclebin\Item;
 use Pimcore\Model\Site;
 use Pimcore\Model\Tool\Email\Log;
 use Pimcore\Model\Translation;
+use Pimcore\Model\Version;
 use Pimcore\Tests\Support\Helper\ClassManager;
 use Pimcore\Tests\Support\Util\TestHelper;
-use Pimcore\Model\Document;
 use Pimcore\Translation\Translator;
-use Pimcore\Model\Version;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Serializer\Serializer;
 
@@ -49,7 +60,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a Page Document
+     * Actor Function to create a Page Document.
      */
     public function haveAPageDocument(string $key = 'bundle-page-test', array $params = [], ?string $locale = null): Document\Page
     {
@@ -67,7 +78,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a Child Page Document
+     * Actor Function to create a Child Page Document.
      */
     public function haveASubPageDocument(Document $parent, string $key = 'bundle-sub-page-test', array $params = [], ?string $locale = null): Document\Page
     {
@@ -86,7 +97,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a language connection
+     * Actor Function to create a language connection.
      */
     public function haveTwoConnectedDocuments(Document\Page $sourceDocument, Document\Page $targetDocument): void
     {
@@ -95,7 +106,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to disable a document
+     * Actor Function to disable a document.
      */
     public function haveAUnPublishedDocument(Document $document): Document
     {
@@ -115,7 +126,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to move a document
+     * Actor Function to move a document.
      */
     public function moveDocument(Document $document, Document $parentDocument): Document
     {
@@ -133,7 +144,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a Snippet
+     * Actor Function to create a Snippet.
      */
     public function haveASnippet(string $key = 'bundle-snippet-test', array $params = [], ?string $locale = null): Document\Snippet
     {
@@ -151,7 +162,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a mail document
+     * Actor Function to create a mail document.
      */
     public function haveAEmail(string $key = 'bundle-email-test', array $params = [], ?string $locale = null): Document\Email
     {
@@ -169,7 +180,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a link
+     * Actor Function to create a link.
      */
     public function haveALink(Document\Page $source, string $key = 'bundle-link-test', array $params = [], ?string $locale = null): Document\Link
     {
@@ -187,7 +198,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a link
+     * Actor Function to create a link.
      */
     public function haveASubLink(Document $parent, Document\Page $source, string $key = 'bundle-sub-link-test', array $params = [], ?string $locale = null): Document\Link
     {
@@ -206,7 +217,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a Hardlink
+     * Actor Function to create a Hardlink.
      */
     public function haveAHardLink(Document\Page $source, string $key = 'bundle-hardlink-test', array $params = [], ?string $locale = null): Document\Hardlink
     {
@@ -224,7 +235,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a child Hardlink
+     * Actor Function to create a child Hardlink.
      */
     public function haveASubHardLink(
         Document $parent,
@@ -248,7 +259,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a pimcore object
+     * Actor Function to create a pimcore object.
      */
     public function haveAPimcoreObject(string $objectType, string $key = 'bundle-object-test', array $params = []): DataObject\Concrete
     {
@@ -266,7 +277,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a child object
+     * Actor Function to create a child object.
      */
     public function haveASubPimcoreObject(DataObject $parent, string $objectType, string $key = 'bundle-sub-object-test', array $params = []): DataObject\Concrete
     {
@@ -285,7 +296,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to refresh an object
+     * Actor Function to refresh an object.
      */
     public function refreshObject(DataObject $object): DataObject
     {
@@ -297,7 +308,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to move an object
+     * Actor Function to move an object.
      */
     public function moveObject(DataObject $object, DataObject $parentObject): DataObject
     {
@@ -315,7 +326,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to copy object
+     * Actor Function to copy object.
      */
     public function copyObject(DataObject $object, DataObject $targetObject): DataObject
     {
@@ -329,7 +340,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create an object version only
+     * Actor Function to create an object version only.
      */
     public function createNewObjectVersion(DataObject\Concrete $object): Version
     {
@@ -339,7 +350,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to delete a object version
+     * Actor Function to delete a object version.
      */
     public function deleteObjectVersion(Version $version): void
     {
@@ -347,7 +358,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to publish an object version
+     * Actor Function to publish an object version.
      *
      * @return DataObject
      */
@@ -363,7 +374,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to move object to bin
+     * Actor Function to move object to bin.
      */
     public function moveObjectToRecycleBin(DataObject $object): Item
     {
@@ -381,7 +392,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to restore an object from bin
+     * Actor Function to restore an object from bin.
      */
     public function restoreObjectFromRecycleBin(DataObject $object, Item $item): DataObject
     {
@@ -395,7 +406,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a pimcore object folder
+     * Actor Function to create a pimcore object folder.
      */
     public function haveAPimcoreObjectFolder(string $key = 'bundle-object-folder-test', array $params = []): DataObject\Folder
     {
@@ -413,7 +424,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a pimcore asset
+     * Actor Function to create a pimcore asset.
      */
     public function haveAPimcoreAsset(string $key = 'bundle-asset-test', array $params = []): Asset
     {
@@ -431,7 +442,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a child asset
+     * Actor Function to create a child asset.
      */
     public function haveASubPimcoreAsset(Asset\Folder $parent, string $key = 'bundle-sub-asset-test', array $params = []): Asset
     {
@@ -450,7 +461,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a pimcore asset folder
+     * Actor Function to create a pimcore asset folder.
      */
     public function haveAPimcoreAssetFolder(string $key = 'bundle-asset-folder-test', array $params = []): Asset\Folder
     {
@@ -468,7 +479,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a pimcore asset sub folder
+     * Actor Function to create a pimcore asset sub folder.
      */
     public function haveASubPimcoreAssetFolder(Asset\Folder $parent, string $key = 'bundle-asset-sub-folder-test', array $params = []): Asset\Folder
     {
@@ -487,7 +498,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to move a asset
+     * Actor Function to move a asset.
      */
     public function moveAsset(Asset $asset, Asset $parentAsset): Asset
     {
@@ -505,7 +516,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor function to generate a dummy asset file
+     * Actor function to generate a dummy asset file.
      */
     public function haveADummyFile(string $fileName, int $fileSizeInMb = 1)
     {
@@ -513,7 +524,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a Site Document
+     * Actor Function to create a Site Document.
      */
     public function haveASite($siteKey, array $params = [], ?string $locale = null, bool $add3w = false, array $additionalDomains = [], array $errorDocuments = []): Site
     {
@@ -531,7 +542,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a Document for a Site
+     * Actor Function to create a Document for a Site.
      */
     public function haveAPageDocumentForSite(Site $site, string $key = 'document-test', array $params = [], ?string $locale = null): Document\Page
     {
@@ -550,7 +561,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to create a Hard Link for a Site
+     * Actor Function to create a Hard Link for a Site.
      */
     public function haveAHardlinkForSite(
         Site $site,
@@ -574,7 +585,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor function to see a generated dummy file in download directory
+     * Actor function to see a generated dummy file in download directory.
      */
     public function seeDownload(string $fileName): void
     {
@@ -585,7 +596,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor to place editables on document
+     * Actor to place editables on document.
      */
     public function seeEditablesPlacedOnDocument(Document $document, array $editables): void
     {
@@ -614,7 +625,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to place a area on a document
+     * Actor Function to place a area on a document.
      */
     public function seeAnAreaElementPlacedOnDocument(Document $document, string $areaName, array $editables = []): void
     {
@@ -643,7 +654,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to see if given email has been sent
+     * Actor Function to see if given email has been sent.
      */
     public function seeEmailIsSent(Document\Email $email): void
     {
@@ -654,7 +665,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to see if an email has been sent to admin
+     * Actor Function to see if an email has been sent to admin.
      */
     public function seeEmailIsNotSent(Document\Email $email): void
     {
@@ -665,7 +676,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to see if admin email contains given properties
+     * Actor Function to see if admin email contains given properties.
      */
     public function seePropertiesInEmail(Document\Email $mail, array $properties): void
     {
@@ -689,7 +700,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to see if admin email contains given properties
+     * Actor Function to see if admin email contains given properties.
      */
     public function seePropertyKeysInEmail(Document\Email $mail, array $properties): void
     {
@@ -708,7 +719,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to see if admin email not contains given properties
+     * Actor Function to see if admin email not contains given properties.
      */
     public function cantSeePropertyKeysInEmail(Document\Email $mail, array $properties): void
     {
@@ -729,7 +740,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to see rendered body text in given email
+     * Actor Function to see rendered body text in given email.
      */
     public function seeInRenderedEmailBody(Document\Email $mail, string $string): void
     {
@@ -745,7 +756,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to see if a key has been stored in admin translations
+     * Actor Function to see if a key has been stored in admin translations.
      */
     public function seeKeyInFrontendTranslations(string $key): void
     {
@@ -755,7 +766,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to generate a translation for website catalog
+     * Actor Function to generate a translation for website catalog.
      */
     public function haveAFrontendTranslatedKey(string $key, string $translation, string $language): ?Translation
     {
@@ -776,7 +787,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to generate a single static route
+     * Actor Function to generate a single static route.
      */
     public function haveAStaticRoute(string $name = 'test_route', array $params = []): Staticroute
     {
@@ -805,7 +816,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to generate a single pimcore redirect
+     * Actor Function to generate a single pimcore redirect.
      */
     public function haveAPimcoreRedirect(array $data): Redirect
     {
@@ -817,7 +828,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to generate a pimcore class from json definition file
+     * Actor Function to generate a pimcore class from json definition file.
      *
      * @throws ModuleException
      */
@@ -835,7 +846,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * Actor Function to submit document to xliff exporter
+     * Actor Function to submit document to xliff exporter.
      *
      * @throws \Exception
      */
@@ -865,7 +876,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * API Function to get sent email ids from given document ids
+     * API Function to get sent email ids from given document ids.
      *
      * @public to allow usage from other modules
      *
@@ -880,7 +891,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * API Function to get pimcore serializer
+     * API Function to get pimcore serializer.
      *
      * @public to allow usage from other modules
      */
@@ -900,11 +911,12 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * API Function to create a page document
+     * API Function to create a page document.
      */
     public function generatePageDocument(string $key = 'test-page', array $params = [], ?string $locale = null): Document\Page
     {
-        $controller = sprintf('%s::%s',
+        $controller = sprintf(
+            '%s::%s',
             $params['controller'] ?? 'App\Controller\DefaultController',
             $params['action'] ?? 'defaultAction',
         );
@@ -931,11 +943,12 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * API Function to create a Snippet
+     * API Function to create a Snippet.
      */
     public function generateSnippet(string $key = 'test-snippet', array $params = [], ?string $locale = null): Document\Snippet
     {
-        $controller = sprintf('%s::%s',
+        $controller = sprintf(
+            '%s::%s',
             $params['controller'] ?? 'App\Controller\SnippetController',
             $params['action'] ?? 'defaultAction',
         );
@@ -963,11 +976,12 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * API Function to create a email document
+     * API Function to create a email document.
      */
     public function generateEmailDocument(string $key = 'test-email', array $params = [], ?string $locale = null): Document\Email
     {
-        $controller = sprintf('%s::%s',
+        $controller = sprintf(
+            '%s::%s',
             $params['controller'] ?? 'App\Controller\EmailController',
             $params['action'] ?? 'defaultAction',
         );
@@ -1014,7 +1028,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * API Function to create a link document
+     * API Function to create a link document.
      */
     public function generateLink(Document\Page $source, string $key = 'test-link', array $params = [], ?string $locale = null): Document\Link
     {
@@ -1044,7 +1058,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * API Function to create a hardlink document
+     * API Function to create a hardlink document.
      */
     public function generateHardlink(Document\Page $source, string $key = 'test-hardlink', array $params = [], ?string $locale = null): Document\Hardlink
     {
@@ -1071,7 +1085,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * API Function to create a site document
+     * API Function to create a site document.
      */
     public function generateSiteDocument(
         string $domain,
@@ -1080,8 +1094,7 @@ class PimcoreBackend extends Module
         bool $add3w = false,
         array $additionalDomains = [],
         array $errorDocuments = []
-    ): Site
-    {
+    ): Site {
         $document = TestHelper::createEmptyDocumentPage($domain, false);
         $document->setProperty('navigation_title', 'text', $domain);
         $document->setProperty('navigation_name', 'text', $domain);
@@ -1138,7 +1151,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * API Function to create a asset element
+     * API Function to create a asset element.
      */
     public function generateAsset(string $key = 'test-asset', array $params = []): Asset
     {
@@ -1156,7 +1169,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * API Function to create a object
+     * API Function to create a object.
      */
     public function generateObject(string $objectType, string $key = 'test-object', array $params = []): DataObject\Concrete
     {
@@ -1177,7 +1190,7 @@ class PimcoreBackend extends Module
     }
 
     /**
-     * API Function to create a folder based on type
+     * API Function to create a folder based on type.
      */
     public function generateFolder(string $key = 'test-asset-folder', string $type = 'asset', array $params = []): Asset\Folder|Document\Folder|DataObject\Folder
     {

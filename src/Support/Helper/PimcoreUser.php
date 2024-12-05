@@ -1,5 +1,16 @@
 <?php
 
+/*
+ * This source file is available under two different licenses:
+ *   - GNU General Public License version 3 (GPLv3)
+ *   - DACHCOM Commercial License (DCL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) DACHCOM.DIGITAL AG (https://www.dachcom-digital.com)
+ * @license    GPLv3 and DCL
+ */
+
 namespace Dachcom\Codeception\Support\Helper;
 
 use Codeception\Module;
@@ -18,7 +29,7 @@ class PimcoreUser extends Module
     }
 
     /**
-     * Actor Function to create a User
+     * Actor Function to create a User.
      */
     public function haveAUser(string $username): User
     {
@@ -29,7 +40,7 @@ class PimcoreUser extends Module
     }
 
     /**
-     * Actor Function to create a Admin User
+     * Actor Function to create a Admin User.
      */
     public function haveAUserWithAdminRights(string $username): User
     {
@@ -40,7 +51,7 @@ class PimcoreUser extends Module
     }
 
     /**
-     * API Function to get a User
+     * API Function to get a User.
      */
     public function getUser(string $username): User
     {
@@ -52,12 +63,13 @@ class PimcoreUser extends Module
     }
 
     /**
-     * API Function to create a User
+     * API Function to create a User.
      */
     protected function createUser(string $username, bool $admin = true): ?User
     {
         if (!TestHelper::supportsDbTests()) {
             $this->debug(sprintf('[PIMCORE USER MODULE] Not initializing user %s as DB is not connected', $username));
+
             return null;
         }
 

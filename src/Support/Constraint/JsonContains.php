@@ -1,14 +1,25 @@
 <?php
 
+/*
+ * This source file is available under two different licenses:
+ *   - GNU General Public License version 3 (GPLv3)
+ *   - DACHCOM Commercial License (DCL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) DACHCOM.DIGITAL AG (https://www.dachcom-digital.com)
+ * @license    GPLv3 and DCL
+ */
+
 namespace Dachcom\Codeception\Support\Constraint;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Constraint\Constraint;
 use PHPUnit\Framework\ExpectationFailedException;
-use SebastianBergmann\Comparator\ComparisonFailure;
 use SebastianBergmann\Comparator\ArrayComparator;
+use SebastianBergmann\Comparator\ComparisonFailure;
 use SebastianBergmann\Comparator\Factory;
-use InvalidArgumentException;
 
 class JsonContains extends Constraint
 {
@@ -24,9 +35,9 @@ class JsonContains extends Constraint
      * Evaluates the constraint for parameter $other. Returns true if the
      * constraint is met, false otherwise.
      */
-    protected function matches(mixed $other) : bool
+    protected function matches(mixed $other): bool
     {
-         if (!is_string($other)) {
+        if (!is_string($other)) {
             throw new InvalidArgumentException('$jsonString param must be a string.');
         }
 
@@ -41,7 +52,7 @@ class JsonContains extends Constraint
         if (JSON_ERROR_NONE !== json_last_error()) {
             throw new InvalidArgumentException(
                 sprintf(
-                    "Invalid json: %s. System message: %s.",
+                    'Invalid json: %s. System message: %s.',
                     $other,
                     json_last_error_msg()
                 ),
@@ -58,7 +69,8 @@ class JsonContains extends Constraint
         }
 
         $comparator = new ArrayComparator();
-        $comparator->setFactory(new Factory);
+        $comparator->setFactory(new Factory());
+
         try {
             $comparator->assertEquals($this->expected, $this->jsonArray);
         } catch (ComparisonFailure $failure) {
@@ -76,12 +88,12 @@ class JsonContains extends Constraint
         return (new ArrayContainsComparator($this->jsonArray))->containsArray($needle);
     }
 
-    public function toString() : string
+    public function toString(): string
     {
         return '';
     }
 
-    protected function failureDescription($other) : string
+    protected function failureDescription($other): string
     {
         return '';
     }

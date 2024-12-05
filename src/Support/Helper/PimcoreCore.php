@@ -1,5 +1,16 @@
 <?php
 
+/*
+ * This source file is available under two different licenses:
+ *   - GNU General Public License version 3 (GPLv3)
+ *   - DACHCOM Commercial License (DCL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) DACHCOM.DIGITAL AG (https://www.dachcom-digital.com)
+ * @license    GPLv3 and DCL
+ */
+
 namespace Dachcom\Codeception\Support\Helper;
 
 use Codeception\Lib\Connector\Symfony as SymfonyConnector;
@@ -215,11 +226,9 @@ class PimcoreCore extends Symfony
         $testBundles = $this->getTestBundleConfig('bundles');
 
         if (is_array($testBundles)) {
-
             $this->runCommand('doctrine:migrations:sync-metadata-storage', ['-q']);
 
             foreach ($testBundles as $testBundle) {
-
                 if (!array_key_exists('execute_installer', $testBundle) || $testBundle['execute_installer'] === false) {
                     continue;
                 }
@@ -355,7 +364,7 @@ class PimcoreCore extends Symfony
     }
 
     /**
-     * Actor Function to see a specific exception
+     * Actor Function to see a specific exception.
      *
      * @part services
      */
@@ -364,11 +373,10 @@ class PimcoreCore extends Symfony
         $function = static function () use ($callback, $exception, $message) {
             try {
                 $callback();
+
                 return false;
             } catch (\Exception $e) {
-
                 if (get_class($e) === $exception || get_parent_class($e) === $exception) {
-
                     if (empty($message)) {
                         return true;
                     }
@@ -384,7 +392,7 @@ class PimcoreCore extends Symfony
     }
 
     /**
-     * Actor Function to boot symfony with a specific bundle configuration
+     * Actor Function to boot symfony with a specific bundle configuration.
      *
      * @part services
      */
@@ -401,7 +409,7 @@ class PimcoreCore extends Symfony
     }
 
     /**
-     * Actor Function to boot kernel without debug mode
+     * Actor Function to boot kernel without debug mode.
      *
      * @part services
      */
@@ -412,4 +420,3 @@ class PimcoreCore extends Symfony
         $this->buildKernel($this->currentContainerConfiguration, false, '_actor[haveAKernelWithoutDebugMode]');
     }
 }
-

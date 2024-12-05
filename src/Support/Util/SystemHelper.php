@@ -1,5 +1,16 @@
 <?php
 
+/*
+ * This source file is available under two different licenses:
+ *   - GNU General Public License version 3 (GPLv3)
+ *   - DACHCOM Commercial License (DCL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) DACHCOM.DIGITAL AG (https://www.dachcom-digital.com)
+ * @license    GPLv3 and DCL
+ */
+
 namespace Dachcom\Codeception\Support\Util;
 
 use Codeception\Util\Debug;
@@ -76,9 +87,10 @@ class SystemHelper
             $staticRoutes = new \Pimcore\Bundle\StaticRoutesBundle\Model\Staticroute\Listing();
             foreach ($staticRoutes->getRoutes() as $staticRoute) {
                 Debug::debug('[TEST BUNDLE] Deleting static route: ' . $staticRoute->getId());
+
                 try {
                     $staticRoute->delete();
-                } catch(\Throwable $e) {
+                } catch (\Throwable $e) {
                     Debug::debug('[TEST BUNDLE] Error while trying to delete static route ' . $staticRoute->getId() . ': ' . $e->getMessage());
                 }
             }
