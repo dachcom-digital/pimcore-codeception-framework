@@ -1,7 +1,10 @@
 {
     "name": "dachcom-digital/pimcore-codeception-framework",
     "type": "library",
-    "license": "GPL-3.0-or-later",
+    "license": [
+        "GPL-3.0-or-later",
+        "proprietary"
+    ],
     "description": "Pimcore Codeception Framework",
     "keywords": ["pimcore", "codeception", "framework"],
     "homepage": "https://github.com/dachcom-digital/pimcore-codeception-framework",
@@ -9,8 +12,11 @@
         {
             "name": "DACHCOM.DIGITAL Stefan Hagspiel",
             "email": "shagspiel@dachcom.ch",
-            "homepage": "http://www.dachcom.com/",
+            "homepage": "https://www.dachcom.com",
             "role": "Developer"
         }
-    ]
+    ],
+    "require-dev": {
+        "symplify/easy-coding-standard": "~12.2.0"
+    }
 }

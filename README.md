@@ -1,4 +1,7 @@
 # Pimcore Codeception Framework
+[![Software License](https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat-square)](LICENSE.md)
+[![Software License](https://img.shields.io/badge/license-DCL-white.svg?style=flat-square&color=%23ff5c5c)](LICENSE.md)
+
 This Package allows you to create fast and simple testing environments. 
 It's also used by all pimcore Bundles created by [DACHCOM.DIGITAL](https://github.com/dachcom-digital?q=pimcore-).
 
