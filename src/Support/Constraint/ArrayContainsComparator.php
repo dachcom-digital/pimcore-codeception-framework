@@ -2,6 +2,17 @@
 
 declare(strict_types=1);
 
+/*
+ * This source file is available under two different licenses:
+ *   - GNU General Public License version 3 (GPLv3)
+ *   - DACHCOM Commercial License (DCL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) DACHCOM.DIGITAL AG (https://www.dachcom-digital.com)
+ * @license    GPLv3 and DCL
+ */
+
 namespace Dachcom\Codeception\Support\Constraint;
 
 use function array_intersect;
@@ -40,6 +51,7 @@ class ArrayContainsComparator
         if ($this->arrayIsSequential($arr1) && $this->arrayIsSequential($arr2)) {
             return $this->sequentialArrayIntersect($arr1, $arr2);
         }
+
         return $this->associativeArrayIntersect($arr1, $arr2);
     }
 
@@ -64,12 +76,14 @@ class ArrayContainsComparator
                 if ($return !== false && $return == $value1) {
                     $ret[$key1] = $return;
                     $matchedKeys[$key2] = true;
+
                     break;
                 }
 
                 if ($this->isEqualValue($value1, $value2)) {
                     $ret[$key1] = $value1;
                     $matchedKeys[$key2] = true;
+
                     break;
                 }
             }
@@ -87,6 +101,7 @@ class ArrayContainsComparator
             $return = $this->arrayIntersectRecursive($arr1[$key], $arr2[$key]);
             if ($return !== false) {
                 $ret[$key] = $return;
+
                 continue;
             }
             if ($this->isEqualValue($arr1[$key], $arr2[$key])) {
@@ -113,11 +128,11 @@ class ArrayContainsComparator
     private function isEqualValue($val1, $val2): bool
     {
         if (is_numeric($val1)) {
-            $val1 = (string)$val1;
+            $val1 = (string) $val1;
         }
 
         if (is_numeric($val2)) {
-            $val2 = (string)$val2;
+            $val2 = (string) $val2;
         }
 
         return $val1 === $val2;

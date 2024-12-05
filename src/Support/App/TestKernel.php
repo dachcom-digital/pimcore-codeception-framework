@@ -1,7 +1,18 @@
 <?php
 
-use Pimcore\Kernel;
+/*
+ * This source file is available under two different licenses:
+ *   - GNU General Public License version 3 (GPLv3)
+ *   - DACHCOM Commercial License (DCL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) DACHCOM.DIGITAL AG (https://www.dachcom-digital.com)
+ * @license    GPLv3 and DCL
+ */
+
 use Pimcore\HttpKernel\BundleCollection\BundleCollection;
+use Pimcore\Kernel;
 use Symfony\Bundle\WebProfilerBundle\WebProfilerBundle;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -57,7 +68,7 @@ class TestKernel extends Kernel
 
         if (is_array($testBundles)) {
             foreach ($testBundles as $testBundle) {
-                $collection->addBundle(new $testBundle['namespace'], array_key_exists('priority', $testBundle) ? $testBundle['priority'] : -1000);
+                $collection->addBundle(new $testBundle['namespace'](), array_key_exists('priority', $testBundle) ? $testBundle['priority'] : -1000);
             }
         }
     }
@@ -71,13 +82,11 @@ class TestKernel extends Kernel
         }
 
         $loader->load(function (ContainerBuilder $container) {
-
             $runtimeConfigDir = sprintf('%s/_etc', $_SERVER['TEST_BUNDLE_TEST_DIR']);
             $runtimeConfigDir = sprintf('%s/config/bundle/', $runtimeConfigDir);
 
             $loader = new YamlFileLoader($container, new FileLocator([$runtimeConfigDir]));
             $loader->load($this->runtimeConfigFile);
-
         });
     }
 

@@ -1,5 +1,16 @@
 <?php
 
+/*
+ * This source file is available under two different licenses:
+ *   - GNU General Public License version 3 (GPLv3)
+ *   - DACHCOM Commercial License (DCL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) DACHCOM.DIGITAL AG (https://www.dachcom-digital.com)
+ * @license    GPLv3 and DCL
+ */
+
 namespace Dachcom\Codeception\Support\Helper;
 
 use Codeception\Lib\Interfaces\DependsOnModule;
@@ -21,7 +32,7 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
     }
 
     /**
-     * Actor Function to see values in csv response
+     * Actor Function to see values in csv response.
      */
     public function seeResponseCsvHeaderHasValues(array $headerValues): void
     {
@@ -38,7 +49,7 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
     }
 
     /**
-     * Actor Function to see values in specific csv row of csv response
+     * Actor Function to see values in specific csv row of csv response.
      */
     public function seeResponseCsvRowValues(int $index, array $values): void
     {
@@ -65,7 +76,7 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
     }
 
     /**
-     * Actor Function to see response csv length
+     * Actor Function to see response csv length.
      */
     public function seeResponseCsvLength(int $length): void
     {
@@ -80,7 +91,7 @@ class PimcoreAdminCsv extends Module implements DependsOnModule
     }
 
     /**
-     * Actor Function to see response is csv
+     * Actor Function to see response is csv.
      */
     public function seeResponseIsCsv(): void
     {
