@@ -41,5 +41,5 @@ if [ ! -z "$PACKAGES" ]; then
   echo "Installing pimcore $TEST_PIMCORE_VERSION with additional composer packages$PACKAGES"
 fi
 
-composer req pimcore/pimcore:$TEST_PIMCORE_VERSION $PACKAGES $PACKAGE_GITHUB_REPOSITORY:@dev --no-interaction --no-scripts --no-update
-composer update --no-progress --no-scripts
+composer req pimcore/pimcore:$TEST_PIMCORE_VERSION $PACKAGES $PACKAGE_GITHUB_REPOSITORY:@dev --no-interaction --no-scripts --no-update --no-blocking
+composer update --no-progress --no-scripts --no-blocking
